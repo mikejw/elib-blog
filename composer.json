@@ -1,7 +1,7 @@
 {
-    "name": "mikejw/elib-base",
+    "name": "mikejw/elib-blog",
     "type": "library",
-    "description": "Miscellaneous library for Empathy PHP Framework",
+    "description": "Blogginglibrary for Empathy PHP Framework",
     "keywords": [
         "lib"
     ],
