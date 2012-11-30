@@ -5,7 +5,6 @@ namespace Empathy\ELib\Storage;
 use Empathy\ELib\Model,
     Empathy\MVC\Entity;
 
-define('PUBLISHED', 2);
 
 class BlogItem extends Entity
 {
@@ -60,7 +59,7 @@ class BlogItem extends Entity
     {
         $entry = array();
         $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
-            .' WHERE status = '.PUBLISHED.' ORDER BY stamp DESC LIMIT 0, 5';
+            .' WHERE status = '.BlogItemStatus::PUBLISHED.' ORDER BY stamp DESC LIMIT 0, 5';
         $error = 'Could not get blog feed.';
         $result = $this->query($sql, $error);
         $i = 0;

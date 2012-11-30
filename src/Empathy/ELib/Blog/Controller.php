@@ -6,12 +6,11 @@ namespace Empathy\ELib\Blog;
 use Empathy\ELib\AdminController,
     Empathy\ELib\File\Image as ImageUpload,
     Empathy\ELib\Model,
-    Empathy\MVC\Session;
+    Empathy\MVC\Session,
+    Empathy\ELib\Storage\BlogItemStatus;
+
 
 define('REQUESTS_PER_PAGE', 12);
-define('DRAFT', 1);
-define('PUBLISHED', 2);
-define('DELETED', 3);
 
 
 class Controller extends AdminController
@@ -85,7 +84,7 @@ class Controller extends AdminController
 
 
 
-        $this->setTemplate('elib:/admin/blog_admin.tpl');
+        $this->setTemplate('elib:/admin/blog/blog_admin.tpl');
         $this->presenter->assign('blogs', $blogs);
     }
 
@@ -151,7 +150,7 @@ class Controller extends AdminController
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
         $b->load();
-        $b->status = 3;
+        $b->status = BlogItemStatus::DELETED;
         $b->save(Model::getTable('BlogItem'), array(), 2);
         $this->redirect('admin/blog/?page=1&status=2');
     }
@@ -161,7 +160,7 @@ class Controller extends AdminController
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
         $b->load();
-        $b->status = 1;
+        $b->status = BlogItemStatus::DRAFT;
         $b->save(Model::getTable('BlogItem'), array(), 2);
         $this->redirect('admin/blog/view/'.$b->id);
     }
@@ -174,7 +173,7 @@ class Controller extends AdminController
         if (isset($_GET['stamp']) && $_GET['stamp'] == 1) {
             $b->stamp = date('Y-m-d H:i:s', time());
         }
-        $b->status = 2;
+        $b->status = BlogItemStatus::PUBLISHED;
         $b->save(Model::getTable('BlogItem'), array(), 2);
         $this->redirect('admin/blog/?page=1&status=2');
     }
@@ -215,7 +214,7 @@ class Controller extends AdminController
         $tags = implode(', ', $tags_arr);
         $this->presenter->assign('blog_tags', $tags);
 
-        $this->setTemplate('elib:/admin/view_blog_item.tpl');
+        $this->setTemplate('elib:/admin/blog/view_blog_item.tpl');
     }
 
     public function create()
@@ -230,14 +229,14 @@ class Controller extends AdminController
 
         $this->presenter->assign('cats', $cats_arr);
 
-        $this->setTemplate('elib:/admin/create_blog.tpl');
+        $this->setTemplate('elib:/admin/blog/create_blog.tpl');
         if (isset($_POST['save'])) {
             $b = Model::load('BlogItem');
             $tags_arr = $b->buildTags(); // errors ?
 
             $b->heading = $_POST['heading'];
             $b->body = $_POST['body'];
-            $b->status = DRAFT;
+            $b->status = BlogItemStatus::DRAFT;
             $b->slug = $_POST['slug'];
 
             $b->checkForDuplicates($tags_arr);
@@ -347,7 +346,7 @@ class Controller extends AdminController
             $this->presenter->assign('blog_tags', $tags);
         }
 
-        $this->setTemplate('elib:/admin/edit_blog.tpl');
+        $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
     }
 
     public function processTags($b, $tags_arr)
@@ -385,7 +384,7 @@ class Controller extends AdminController
 
     public function category()
     {
-        $this->setTemplate('elib:/admin/blog_cat.tpl');
+        $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
         $ui_array = array('id');
         $this->loadUIVars('ui_blog_cats', $ui_array);
         if (!isset($_GET['id']) || $_GET['id'] == '') {
@@ -457,7 +456,7 @@ class Controller extends AdminController
             $b->load();
             $this->presenter->assign('blog_category', $b);
         }
-        $this->setTemplate('elib:/admin/blog_cat.tpl');
+        $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
         $this->assign('class', 'blog_cat');
         $this->assign('event', 'rename');
     }
