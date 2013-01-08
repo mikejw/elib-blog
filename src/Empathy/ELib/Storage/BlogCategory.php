@@ -105,4 +105,16 @@ class BlogCategory extends Entity
         return $cats;
     }
 
+    public function getIdByLabel($label)
+    {
+        $cat = 0;
+        $sql = 'SELECT id from '.Model::getTable('BlogCategory').' WHERE label like \'%'.$label.'%\'';
+        $error = 'Could not get current category id.';
+        $result = $this->query($sql, $error);
+        if ($result->rowCount() == 1) {
+            $row = $result->fetch();
+            $cat = $row['id'];
+        }
+        return $cat;
+    }
 }

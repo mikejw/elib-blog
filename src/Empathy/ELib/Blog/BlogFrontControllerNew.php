@@ -4,10 +4,19 @@ namespace Empathy\ELib\Blog;
 
 use Empathy\ELib\Model,
     Empathy\ELib\EController,
-    Empathy\ELib\User\CurrentUser;
+    Empathy\ELib\User\CurrentUser,
+    Empathy\MVC\Session;
 
 class BlogFrontControllerNew extends EController
 {
+
+
+    public function set_category()
+    {        
+        $c = Model::load('BlogCategory');        
+        Session::set('blog_category', $c->getIdByLabel($_GET['category']));
+        $this->redirect('');
+    }
 
     private function submitComment()
     {
@@ -42,7 +51,7 @@ class BlogFrontControllerNew extends EController
     }
 
     private function getTags()
-    {
+    {      
         return explode('+', urlencode($_GET['active_tags']));
     }
 
@@ -82,14 +91,16 @@ class BlogFrontControllerNew extends EController
     private function getCategories()
     {
         $c = Model::load('BlogCategory');
-        $cats = $c->getAllCustom(Model::getTable('BlogCategory'), '');
+        $cats = $c->getAllCustom(Model::getTable('BlogCategory'), ' order by id');
         $this->assign('categories', $cats);
     }
 
 
     private function getBlogs($b, $found_items)
     {
-        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES);
+        $bc = $this->stash->get('blog_category');
+        
+        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc);
 
         $t = Model::load('TagItem');
         foreach ($blogs as &$b_item) {
@@ -197,6 +208,8 @@ class BlogFrontControllerNew extends EController
         }
 
         $blogs = $this->getBlogs($b, $found_items);
+
+        //print_r($blogs[0]); exit();
 
         $this->assign('blogs', $blogs);
 
