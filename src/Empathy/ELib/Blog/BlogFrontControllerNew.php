@@ -322,16 +322,16 @@ class BlogFrontControllerNew extends EController
 
     private function getArchive($b)
     {
-        $this->assign('archive', $b->getArchive()); // looks like main query but isn't
+        $bc = $this->stash->get('blog_category');
+        $this->assign('archive', $b->getArchive($bc)); // looks like main query but isn't
     }
 
     private function getCategories()
     {
         $c = Model::load('BlogCategory');
         $cats = $c->getAllCustom(Model::getTable('BlogCategory'), ' order by id');
+        array_unshift($cats, array('id' => 0, 'label' => 'Any'));
         
-        $cats[] = array('id' => 0, 'label' => 'Any');
-
         $this->assign('categories', $cats);
     }
 

@@ -174,8 +174,25 @@ class BlogItem extends Entity
         return $blogs;
     }
 
-    public function getArchive()
+    public function getArchive($cat=null)
     {
+        $cat_blogs_string = '';
+        if($cat !== null && $cat != 0) {
+            $ids = array(0);
+            $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = '.$cat;
+            $error = 'Could not get blogs from cateogry.';
+            $result = $this->query($sql, $error);
+            if($result->rowCount() > 0) {
+                foreach($result as $row) {
+                    $ids[] = $row['blog_id'];
+                }
+            }
+            $cat_blogs_string = $this->buildUnionString($ids);
+        }
+
+
+
+
         $archive = array();
         /*
           $sql = 'SELECT MAX(UNIX_TIMESTAMP(stamp)) AS max,'
@@ -188,7 +205,15 @@ class BlogItem extends Entity
             .' DAY(stamp) AS day,'
             .' slug,'
             .' heading FROM '.Model::getTable('BlogItem')
-            .' WHERE status = 2 ORDER BY stamp DESC';
+            .' WHERE status = 2';
+
+        if($cat_blogs_string != '') {
+
+            $sql .= ' AND id IN'.$cat_blogs_string;
+        }
+
+        $sql .= ' ORDER BY stamp DESC';
+
         $error = 'Could not get blog archive.';
         $result = $this->query($sql, $error);
 
