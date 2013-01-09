@@ -11,12 +11,249 @@ class BlogFrontControllerNew extends EController
 {
 
 
+
+
+    public function default_event()
+    {
+        $b = Model::load('BlogItem');
+        $blogs = array();
+
+        $sql = '';
+
+        $active_tags = array();
+        $active_tags_string = '';
+
+        $found_items = '(0,)';
+
+        if (isset($_GET['active_tags'])) {
+            $found_items = $this->getActiveTags();
+        }
+
+        $blogs = $this->getBlogs($b, $found_items);
+
+        $this->assign('blogs', $blogs);
+
+        $this->getAvailableTags();
+        $this->getArchive($b);
+        $this->getCategories();
+
+        $this->assign('current_year', date('Y', time()));
+        $this->assign('current_month', date('F', time()));
+        if(defined('ELIB_BLOG_MODULE')) {
+            $this->assign('blog_module', ELIB_BLOG_MODULE);
+        } else {
+            $this->assign('blog_module', 'blog');
+        }
+    }
+
+
+
+
+    public function item()
+    {
+        if (isset($_POST['submit'])) {
+            $this->submitComment();
+        }
+
+        if (isset($_GET['id']) && $_GET['id'] == 0) {
+            $b = Model::load('BlogItem');
+            $_GET['id'] = $b->findByArchiveURL($this->convertMonth($_GET['month']), $_GET['year'], $_GET['day'], $_GET['slug']);
+        }
+
+        if (!$this->initID('id', -1, true)) {
+            $this->http_error(400);
+        }
+
+        $b = Model::load('BlogItem');
+        $b->id = $_GET['id'];
+        if (!$b->load()) {
+            $this->http_error(404);
+        }
+        $b->body = preg_replace('/mid_/', 'tn_', $b->body);
+
+        $u = Model::load('UserItem');
+        $u->id = $b->user_id;
+        $u->load();
+
+        $this->getComments($b->id);
+
+        $this->assign('author', $u->username);
+        $this->assign('blog', $b);
+        $this->assign('custom_title', $b->heading.' - '.TITLE);
+
+        $this->setTemplate('blog_item.tpl');
+
+        $this->getAvailableTags();
+        $this->getArchive($b);
+        $this->getCategories();
+    }
+
+
+
+    public function year()
+    {
+        if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+            $b = Model::load('BlogItem');
+            $months = $b->getYear($_GET['id']);
+            $this->presenter->assign('months', $months);
+            $this->presenter->assign('year', $_GET['id']);
+            $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
+        }
+        $this->setTemplate('blog_year.tpl');
+    }
+
+
+    public function month()
+    {
+        if(isset($_GET['month']) && $_GET['month'] != ''
+           && isset($_GET['year']) && is_numeric($_GET['year']))
+        {
+            $year = $_GET['year'];
+            $m = $this->convertMonth($_GET['month']);
+
+            $b = Model::load('BlogItem');
+            $blogs = $b->getMonth($m, $year);
+
+            foreach ($blogs as $index => $item) {
+                $blogs[$index]['month_slug'] = strtolower(substr(date("F", $item['stamp']), 0, 3));
+            }
+
+            $month = $b->getMonthName($m, $year);
+
+            $this->presenter->assign('month', $month);
+            $this->presenter->assign('month_slug', substr(strtolower($month), 0, 3));
+            $this->presenter->assign('year', $year);
+
+            $this->presenter->assign('custom_title', "Archive for $month $year - Mike Whiting's Blog");
+
+            $this->presenter->assign('blogs', $blogs);
+        }
+        $this->setTemplate('blog_month.tpl');
+    }
+
+
+
+    public function day()
+    {
+        if(isset($_GET['month']) && $_GET['month'] != ''
+           && isset($_GET['year']) && is_numeric($_GET['year'])
+           && isset($_GET['day']) && is_numeric($_GET['day']))
+        {
+            $year = $_GET['year'];
+            $m = $this->convertMonth($_GET['month']);
+            $day = $_GET['day'];
+
+            $b = Model::load('BlogItem');
+            $blogs = array();
+
+            if (!checkdate($m, $day, $year)) {
+                die('not valid date');
+            } else {
+                $blogs = $b->getDay($m, $year, $day);
+            }
+
+            // copied from default_event
+            foreach ($blogs as $index => $item) {
+                $body_arr = array();
+                $body_new = array();
+                $i = 0;
+
+                $body = $item['body'];
+                $body_arr = preg_split('/<\/p>\s+<p>/', $body);
+                if (sizeof($body_arr) > 2) {
+                    while ($i < 2) {
+                        array_push($body_new, $body_arr[$i]);
+                        $i++;
+                    }
+                    $blogs[$index]['body'] = implode($body_new, '</p><p>').'</p>';
+                    $blogs[$index]['truncated'] = 1;
+                } else {
+                    $blogs[$index]['truncated'] = 0;
+                }
+                $blogs[$index]['month_slug'] = strtolower(substr(date("F", $item['stamp']), 0, 3));
+            }
+
+            $month = $b->getMonthName($m, $year);
+            $this->presenter->assign('month', $month);
+            $this->presenter->assign('month_slug', substr(strtolower($month), 0, 3));
+            $this->presenter->assign('year', $year);
+            $this->presenter->assign('day', preg_replace('/^0+/', '', $day));
+
+            $date = mktime(0, 0, 0, $m, $day, $year);
+            $suffix = date("S", $date);
+            $day_name = date("l", $date);
+            $this->presenter->assign('suffix', $suffix);
+            $this->presenter->assign('day_name', $day_name);
+
+            $this->presenter->assign('custom_title', "Archive for $day_name, "
+                                     .preg_replace('/^0+/', '', $day)."$suffix $month $year");
+
+            $this->presenter->assign('blogs', $blogs);
+        }
+        $this->setTemplate('blog_day.tpl');
+    }
+
+
+
+
+
+
     public function set_category()
     {        
         $c = Model::load('BlogCategory');        
         Session::set('blog_category', $c->getIdByLabel($_GET['category']));
         $this->redirect('');
     }
+
+
+    public function tags()
+    {
+        if (!isset($_GET['active_tags'])) {
+            $this->redirect('');
+        }
+        $_GET['active_tags'] = $this->getTags();
+        $this->default_event();
+    }
+
+
+
+
+    public function feed()
+    {
+        header("Content-type: text/xml");
+        //$title = TITLE.' RSS Feed';
+        $title = TITLE;
+        $link = 'http://'.WEB_ROOT.PUBLIC_DIR;
+        $description = ELIB_BLOG_DESCRIPTION;
+        $language = 'en-us';
+
+        $content = "<rss version=\"2.0\">\n\t<channel>\n\t\t<title>$title</title>\n\t\t<link>$link</link>\n\t\t"
+            ."<description>$description</description>\n\t\t<language>$language</language>\n\t</channel>\n</rss>";
+
+        $xml = new \SimpleXMLElement($content);
+
+        $b = Model::load('BlogItem');
+        $blogs = $b->getFeed();
+
+        foreach ($blogs as $item) {
+            $child = $xml->channel->addChild('item');
+            $child->addChild('title', $item['heading']);
+            $child->addChild('link', 'http://'.WEB_ROOT.PUBLIC_DIR.'/blog/item/'.$item['id']);
+            $child->addChild('pubDate', date('r', $item['stamp']));
+            $utf_string = mb_convert_encoding($item['body'], 'UTF-8', 'HTML-ENTITIES');
+            $child->addChild('description', $this->truncate(strip_tags($utf_string), 250));
+        }
+
+        echo $xml->asXML();
+        exit();
+    }
+
+
+
+
+
+
+
 
     private function submitComment()
     {
@@ -184,125 +421,7 @@ class BlogFrontControllerNew extends EController
     }
 
 
-    public function tags()
-    {
-        if (!isset($_GET['active_tags'])) {
-            $this->redirect('');
-        }
-        $_GET['active_tags'] = $this->getTags();
-        $this->default_event();
-    }
 
-
-    public function default_event()
-    {
-        $b = Model::load('BlogItem');
-        $blogs = array();
-
-        $sql = '';
-
-        $active_tags = array();
-        $active_tags_string = '';
-
-        $found_items = '(0,)';
-
-        if (isset($_GET['active_tags'])) {
-            $found_items = $this->getActiveTags();
-        }
-
-        $blogs = $this->getBlogs($b, $found_items);
-
-        //print_r($blogs[0]); exit();
-
-        $this->assign('blogs', $blogs);
-
-        $this->getAvailableTags();
-        $this->getArchive($b);
-        $this->getCategories();
-
-        $this->assign('current_year', date('Y', time()));
-        $this->assign('current_month', date('F', time()));
-        if(defined('ELIB_BLOG_MODULE')) {
-            $this->assign('blog_module', ELIB_BLOG_MODULE);
-        } else {
-            $this->assign('blog_module', 'blog');
-        }
-    }
-
-
-
-
-    public function feed()
-    {
-        header("Content-type: text/xml");
-        //$title = TITLE.' RSS Feed';
-        $title = TITLE;
-        $link = 'http://'.WEB_ROOT.PUBLIC_DIR;
-        $description = ELIB_BLOG_DESCRIPTION;
-        $language = 'en-us';
-
-        $content = "<rss version=\"2.0\">\n\t<channel>\n\t\t<title>$title</title>\n\t\t<link>$link</link>\n\t\t"
-            ."<description>$description</description>\n\t\t<language>$language</language>\n\t</channel>\n</rss>";
-
-        $xml = new \SimpleXMLElement($content);
-
-        $b = Model::load('BlogItem');
-        $blogs = $b->getFeed();
-
-        foreach ($blogs as $item) {
-            $child = $xml->channel->addChild('item');
-            $child->addChild('title', $item['heading']);
-            $child->addChild('link', 'http://'.WEB_ROOT.PUBLIC_DIR.'/blog/item/'.$item['id']);
-            $child->addChild('pubDate', date('r', $item['stamp']));
-            $utf_string = mb_convert_encoding($item['body'], 'UTF-8', 'HTML-ENTITIES');
-            $child->addChild('description', $this->truncate(strip_tags($utf_string), 250));
-        }
-
-        echo $xml->asXML();
-        exit();
-    }
-
-
-
-
-    public function item()
-    {
-        if (isset($_POST['submit'])) {
-            $this->submitComment();
-        }
-
-        if (isset($_GET['id']) && $_GET['id'] == 0) {
-            $b = Model::load('BlogItem');
-            $_GET['id'] = $b->findByArchiveURL($this->convertMonth($_GET['month']), $_GET['year'], $_GET['day'], $_GET['slug']);
-        }
-
-        if (!$this->initID('id', -1, true)) {
-            $this->http_error(400);
-        }
-
-        $b = Model::load('BlogItem');
-        $b->id = $_GET['id'];
-        if (!$b->load()) {
-            $this->http_error(404);
-        }
-        $b->body = preg_replace('/mid_/', 'tn_', $b->body);
-
-        $u = Model::load('UserItem');
-        $u->id = $b->user_id;
-        $u->load();
-
-        $this->getComments($b->id);
-
-        $this->assign('author', $u->username);
-        $this->assign('blog', $b);
-        $this->assign('custom_title', $b->heading.' - '.TITLE);
-
-        $this->setTemplate('blog_item.tpl');
-
-        $this->getAvailableTags();
-        $this->getArchive($b);
-        $this->getCategories();
-    }
 
 
     public function truncate($desc, $max_length)
@@ -323,112 +442,6 @@ class BlogFrontControllerNew extends EController
 
         return $desc;
     }
-
-
-    public function year()
-    {
-        if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-            $b = Model::load('BlogItem');
-            $months = $b->getYear($_GET['id']);
-            $this->presenter->assign('months', $months);
-            $this->presenter->assign('year', $_GET['id']);
-            $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
-        }
-        $this->setTemplate('blog_year.tpl');
-    }
-
-
-    public function month()
-    {
-        if(isset($_GET['month']) && $_GET['month'] != ''
-           && isset($_GET['year']) && is_numeric($_GET['year']))
-        {
-            $year = $_GET['year'];
-            $m = $this->convertMonth($_GET['month']);
-
-            $b = Model::load('BlogItem');
-            $blogs = $b->getMonth($m, $year);
-
-            foreach ($blogs as $index => $item) {
-                $blogs[$index]['month_slug'] = strtolower(substr(date("F", $item['stamp']), 0, 3));
-            }
-
-            $month = $b->getMonthName($m, $year);
-
-            $this->presenter->assign('month', $month);
-            $this->presenter->assign('month_slug', substr(strtolower($month), 0, 3));
-            $this->presenter->assign('year', $year);
-
-            $this->presenter->assign('custom_title', "Archive for $month $year - Mike Whiting's Blog");
-
-            $this->presenter->assign('blogs', $blogs);
-        }
-        $this->setTemplate('blog_month.tpl');
-    }
-
-
-
-    public function day()
-    {
-        if(isset($_GET['month']) && $_GET['month'] != ''
-           && isset($_GET['year']) && is_numeric($_GET['year'])
-           && isset($_GET['day']) && is_numeric($_GET['day']))
-        {
-            $year = $_GET['year'];
-            $m = $this->convertMonth($_GET['month']);
-            $day = $_GET['day'];
-
-            $b = Model::load('BlogItem');
-            $blogs = array();
-
-            if (!checkdate($m, $day, $year)) {
-                die('not valid date');
-            } else {
-                $blogs = $b->getDay($m, $year, $day);
-            }
-
-            // copied from default_event
-            foreach ($blogs as $index => $item) {
-                $body_arr = array();
-                $body_new = array();
-                $i = 0;
-
-                $body = $item['body'];
-                $body_arr = preg_split('/<\/p>\s+<p>/', $body);
-                if (sizeof($body_arr) > 2) {
-                    while ($i < 2) {
-                        array_push($body_new, $body_arr[$i]);
-                        $i++;
-                    }
-                    $blogs[$index]['body'] = implode($body_new, '</p><p>').'</p>';
-                    $blogs[$index]['truncated'] = 1;
-                } else {
-                    $blogs[$index]['truncated'] = 0;
-                }
-                $blogs[$index]['month_slug'] = strtolower(substr(date("F", $item['stamp']), 0, 3));
-            }
-
-            $month = $b->getMonthName($m, $year);
-            $this->presenter->assign('month', $month);
-            $this->presenter->assign('month_slug', substr(strtolower($month), 0, 3));
-            $this->presenter->assign('year', $year);
-            $this->presenter->assign('day', preg_replace('/^0+/', '', $day));
-
-            $date = mktime(0, 0, 0, $m, $day, $year);
-            $suffix = date("S", $date);
-            $day_name = date("l", $date);
-            $this->presenter->assign('suffix', $suffix);
-            $this->presenter->assign('day_name', $day_name);
-
-            $this->presenter->assign('custom_title', "Archive for $day_name, "
-                                     .preg_replace('/^0+/', '', $day)."$suffix $month $year");
-
-            $this->presenter->assign('blogs', $blogs);
-        }
-        $this->setTemplate('blog_day.tpl');
-    }
-
-
 
 
 
