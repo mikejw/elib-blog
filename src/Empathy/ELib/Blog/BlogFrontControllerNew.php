@@ -92,6 +92,9 @@ class BlogFrontControllerNew extends EController
     {
         $c = Model::load('BlogCategory');
         $cats = $c->getAllCustom(Model::getTable('BlogCategory'), ' order by id');
+        
+        $cats[] = array('id' => 0, 'label' => 'Any');
+
         $this->assign('categories', $cats);
     }
 

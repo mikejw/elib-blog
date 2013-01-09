@@ -17,7 +17,7 @@ class BlogItem extends Entity
     public $body;
     public $slug;
 
-    public function getItems($found_items, $limit, $cat)
+    public function getItems($found_items, $limit, $cat=null)
     {
         if($cat !== null) {
             
