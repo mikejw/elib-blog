@@ -19,11 +19,20 @@ class BlogItem extends Entity
 
     public function getItems($found_items, $limit, $cat=null)
     {
-        if($cat !== null) {
-            
+        $cat_blogs_string = '';
+        if($cat !== null && $cat != 0) {
+            $ids = array(0);
+            $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = '.$cat;
+            $error = 'Could not get blogs from cateogry.';
+            $result = $this->query($sql, $error);
+            if($result->rowCount() > 0) {
+                foreach($result as $row) {
+                    $ids[] = $row['blog_id'];
+                }
+            }
+            $cat_blogs_string = $this->buildUnionString($ids);
         }
 
-        $limit = 10000;
         $blogs = array();
         $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug'
             .' FROM '.Model::getTable('BlogItem').' t1'
@@ -36,10 +45,17 @@ class BlogItem extends Entity
             $sql .= ' t1.id IN'.$found_items.' AND';
         }
         $sql .= ' t1.user_id = t2.id'
-            .' AND t1.status = 2'
-            .' GROUP BY t1.id'
+             .' AND t1.status = '.BlogItemStatus::PUBLISHED;
+
+        if($cat_blogs_string != '') {
+
+            $sql .= ' AND t1.id IN'.$cat_blogs_string;
+        }
+
+        $sql .= ' GROUP BY t1.id'
             .' ORDER BY t1.stamp DESC'
             .' LIMIT 0, '.$limit;
+
         $error = 'Could not get blog items.';
         $result = $this->query($sql, $error);
 
