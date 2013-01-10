@@ -256,7 +256,7 @@ class Controller extends AdminController
                 $bc = Model::load('BlogCategory');
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
-                $this->processTags($b, $tags_arr);
+                $this->processTags($b, $tags_arr, $cats_arr);
                 $this->redirect('admin/blog');
             }
         }
@@ -349,7 +349,7 @@ class Controller extends AdminController
         $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
     }
 
-    public function processTags($b, $tags_arr)
+    public function processTags($b, $tags_arr, $cats_arr)
     {
         // deal with tags
         $bt = Model::load('BlogTag');
@@ -368,6 +368,10 @@ class Controller extends AdminController
             }
         }
         $t->cleanup();
+
+
+        
+        
     }
 
     // blog category stuff

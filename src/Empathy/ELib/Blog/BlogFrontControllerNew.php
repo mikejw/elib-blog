@@ -11,7 +11,10 @@ class BlogFrontControllerNew extends EController
 {
 
 
-
+    public function testFunc()
+    {
+        return 'plopplop';
+    }
 
     public function default_event()
     {
@@ -330,7 +333,7 @@ class BlogFrontControllerNew extends EController
     {
         $c = Model::load('BlogCategory');
         $cats = $c->getAllCustom(Model::getTable('BlogCategory'), ' order by id');
-        array_unshift($cats, array('id' => 0, 'label' => 'Any'));
+        array_push($cats, array('id' => 0, 'label' => 'Any'));
         
         $this->assign('categories', $cats);
     }
