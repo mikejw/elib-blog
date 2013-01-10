@@ -17,7 +17,8 @@ class BlogItem extends Entity
     public $body;
     public $slug;
 
-    public function getItems($found_items, $limit, $cat=null)
+
+    private function getCategoryBlogs($cat)
     {
         $cat_blogs_string = '';
         if($cat !== null && $cat != 0) {
@@ -32,6 +33,12 @@ class BlogItem extends Entity
             }
             $cat_blogs_string = $this->buildUnionString($ids);
         }
+        return $cat_blogs_string;
+    }
+
+    public function getItems($found_items, $limit, $cat=null)
+    {
+        $cat_blogs_string = $this->getCategoryBlogs($cat);
 
         $blogs = array();
         $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug'
@@ -176,23 +183,8 @@ class BlogItem extends Entity
 
     public function getArchive($cat=null)
     {
-        $cat_blogs_string = '';
-        if($cat !== null && $cat != 0) {
-            $ids = array(0);
-            $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = '.$cat;
-            $error = 'Could not get blogs from cateogry.';
-            $result = $this->query($sql, $error);
-            if($result->rowCount() > 0) {
-                foreach($result as $row) {
-                    $ids[] = $row['blog_id'];
-                }
-            }
-            $cat_blogs_string = $this->buildUnionString($ids);
-        }
-
-
-
-
+        $cat_blogs_string = $this->getCategoryBlogs($cat);
+        
         $archive = array();
         /*
           $sql = 'SELECT MAX(UNIX_TIMESTAMP(stamp)) AS max,'
