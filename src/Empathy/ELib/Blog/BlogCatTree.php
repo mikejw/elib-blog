@@ -10,10 +10,17 @@ class BlogCatTree extends Tree
     private $data;
     private $blog_category_ancestors;
     
+
+    public function getData() {
+        return $this->data;
+    }
+
+
     public function __construct($blog_category, $current_is_dir, $collapsed)
     {
         $this->blog_category = $blog_category;
         $this->blog_category_ancestors = array(0);
+        $this->banner = new \stdClass(); // quick fix (code needs cleaning up)
         
         if ($current_is_dir) {
             $current_id = $this->blog_category->id;
@@ -36,6 +43,7 @@ class BlogCatTree extends Tree
         }
 
         $this->data = $this->buildTree(0, $this);
+
         $this->markup = $this->buildMarkup($this->data, 0, $current_id, 0, 0, $current_is_dir);
     }
 

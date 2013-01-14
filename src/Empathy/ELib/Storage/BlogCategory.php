@@ -57,7 +57,13 @@ class BlogCategory extends Entity
     {
         $i = 0;
         $nodes = array();
-        $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory').' WHERE blog_category_id = '.$current;
+
+        if($current == 0) {
+            $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory').' WHERE blog_category_id IS NULL';
+        } else {
+            $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory').' WHERE blog_category_id = '.$current;
+        }
+
         $error = 'Could not get child blog categories.';
         $result = $this->query($sql, $error);
         if ($result->rowCount() > 0) {

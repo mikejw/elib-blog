@@ -377,11 +377,19 @@ class Controller extends AdminController
     // blog category stuff
     public function add_cat()
     {
-        if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-            $b = Model::load('BlogCategory');
-            $b->blog_category_id = $_GET['id'];
-            $b->label = 'New Category';
-            $b->insert(Model::getTable('BlogCategory'), 1, array(), 0);
+        if (isset($_GET['id'])) {
+
+            if($_GET['id'] === '0') {
+                $_GET['id'] = null;
+            }
+
+            if(is_numeric($_GET['id']) || $_GET['id'] === null) {
+            
+                $b = Model::load('BlogCategory');
+                $b->blog_category_id = $_GET['id'];
+                $b->label = 'New Category';
+                $b->insert(Model::getTable('BlogCategory'), 1, array(), 0);
+            }
         }
         $this->redirect('admin/blog/category/'.$_GET['id']);
     }
