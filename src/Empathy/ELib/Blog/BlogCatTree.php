@@ -32,49 +32,55 @@ use Empathy\ELib\Tree;
 class BlogCatTree extends Tree
 {
     
-    private $blog_category;
-    private $data;
-    private $blog_category_ancestors;
+    private $_blogCategory;
+    private $_data;
+    private $_blogCategoryAncestors;
     
 
     public function getData() {
-        return $this->data;
+        return $this->_data;
     }
 
+
+    public function getBlogCategoryObject()
+    {
+
+        return $this->_blogCategory;
+    }
 
     public function __construct($blog_category)
     {
        
 
-        $this->blog_category = $blog_category;
-        $this->blog_category_ancestors = array(0);
+        $this->_blogCategory = $blog_category;
+        $this->_blogCategoryAncestors = array(0);
         $this->banner = new \stdClass(); // quick fix (code needs cleaning up)
         
       
-        $current_id = $this->blog_category->id;
-        array_push($this->blog_category_ancestors, $this->blog_category->id);
+        $current_id = $this->_blogCategory->id;
+        array_push($this->_blogCategoryAncestors, $this->_blogCategory->id);
 
         
         $ancestors = array();
        
-        if ($this->blog_category->id != 0) {
+        if ($this->_blogCategory->id != 0) {
 
-            $ancestors = $this->blog_category->getAncestorIDs($this->blog_category->id, $ancestors);
+            $ancestors = $this->_blogCategory->getAncestorIDs($this->_blogCategory->id, $ancestors);
         }
         if (sizeof($ancestors) > 0) {
 
-            $this->blog_category_ancestors = array_merge($this->blog_category_ancestors, $ancestors);
+            $this->_blogCategoryAncestors = array_merge($this->_blogCategoryAncestors, $ancestors);
         }
 
-        $this->data = $this->buildTree(0, $this);
+        $this->_data = $this->buildTree(0, $this);
 
-        $this->markup = $this->buildMarkup($this->data, 0, $current_id, 0, 0);
+        $this->markup = $this->buildMarkup($this->_data, 0, $current_id, 0, 0);
     }
 
     public function buildTree($id, $tree)
     {
         $nodes = array();
-        $nodes = $tree->blog_category->buildTree($id, $tree);
+        $nodes = $tree->getBlogCategoryObject()->buildTree($id, $tree);
         
         return $nodes;
     }
@@ -83,7 +89,7 @@ class BlogCatTree extends Tree
     {
         $markup = "\n<ul";
         
-        $ancestors = $this->blog_category_ancestors;
+        $ancestors = $this->_blogCategoryAncestors;
         
         if (!in_array($last_id, $ancestors)) {
             $markup .= " class=\"hidden_sections\"";

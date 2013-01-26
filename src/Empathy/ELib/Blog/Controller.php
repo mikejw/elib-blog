@@ -251,7 +251,7 @@ class Controller extends AdminController
                 $b->assignFromPost(array('user_id', 'id', 'stamp', 'tags', 'status'));
                 $b->user_id = Session::get('user_id');
                 $b->stamp = date('Y-m-d H:i:s', time());              
-                $b->id = $b->insert(Model::getTable('BlogItem'), 1, array(), 1);
+                $b->id = $b->insert(Model::getTable('BlogItem'), 1, array('body'), 1);
                
                 $bc = Model::load('BlogCategory');
                 $bc->createForBlogItem($_POST['category'], $b->id);
@@ -315,7 +315,7 @@ class Controller extends AdminController
                     }
                 }
 
-                $b->save(Model::getTable('BlogItem'), array(), 1);
+                $b->save(Model::getTable('BlogItem'), array('body'), 1);
 
                 $bc = Model::load('BlogCategory');
                 $bc->removeForBlogItem($b->id);
