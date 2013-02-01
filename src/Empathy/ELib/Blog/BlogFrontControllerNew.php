@@ -84,6 +84,7 @@ class BlogFrontControllerNew extends EController
         $this->assign('author', $u->username);
         $this->assign('blog', $b);
         $this->assign('custom_title', $b->heading.' - '.TITLE);
+        $this->assign('custom_description', $b->body);
 
         $this->setTemplate('blog_item.tpl');
 
