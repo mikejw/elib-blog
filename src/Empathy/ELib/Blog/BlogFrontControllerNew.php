@@ -5,7 +5,8 @@ namespace Empathy\ELib\Blog;
 use Empathy\ELib\Model,
     Empathy\ELib\EController,
     Empathy\ELib\User\CurrentUser,
-    Empathy\MVC\Session;
+    Empathy\MVC\Session,
+    Empathy\MVC\RequestException;
 
 class BlogFrontControllerNew extends EController
 {
@@ -412,7 +413,9 @@ class BlogFrontControllerNew extends EController
         $found_items = $bt->buildUnionString($bt->getBlogs($tags));
 
         if ($found_items == '(0,)' || sizeof($tags) != sizeof($active_tags)) {
-            $this->http_error(404);
+
+            throw new RequestException('Not found.', RequestException::NOT_FOUND);
+
         } else {
             $this->setTagsTitle();
         }
