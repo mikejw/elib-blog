@@ -65,13 +65,13 @@ class BlogFrontControllerNew extends EController
         }
 
         if (!$this->initID('id', -1, true)) {
-            $this->http_error(400);
+            throw new RequestException('No valid blog id', RequestException::BAD_REQUEST);
         }
 
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
         if (!$b->load()) {
-            $this->http_error(404);
+            throw new RequestException('No blog item found', RequestException::NOT_FOUND);
         }
         $b->body = preg_replace('/mid_/', 'tn_', $b->body);
 
@@ -152,7 +152,7 @@ class BlogFrontControllerNew extends EController
             $blogs = array();
 
             if (!checkdate($m, $day, $year)) {
-                die('not valid date');
+                throw new RequestException('Not a valid date', RequestException::BAD_REQUEST);
             } else {
                 $blogs = $b->getDay($m, $year, $day);
             }
