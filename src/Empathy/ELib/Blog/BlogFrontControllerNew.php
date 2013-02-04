@@ -83,7 +83,8 @@ class BlogFrontControllerNew extends EController
 
         $this->assign('author', $u->username);
         $this->assign('blog', $b);
-        $this->assign('custom_title', $b->heading.' - '.TITLE);
+        $info = $this->stash->get('site_info');
+        $this->assign('custom_title', $b->heading.' - '.$info->title);
         $this->assign('custom_description', $b->body);
 
         $this->setTemplate('blog_item.tpl');
@@ -227,7 +228,8 @@ class BlogFrontControllerNew extends EController
     {
         header("Content-type: text/xml");
         //$title = TITLE.' RSS Feed';
-        $title = TITLE;
+        $info = $this->stash->get('site_info');
+        $title = $info->title;
         $link = 'http://'.WEB_ROOT.PUBLIC_DIR;
         $description = ELIB_BLOG_DESCRIPTION;
         $language = 'en-us';
@@ -308,7 +310,8 @@ class BlogFrontControllerNew extends EController
             }
             $i++;
         }
-        $title .= 'in '.TITLE;
+        $info = $this->stash->get('site_info');
+        $title .= 'in '.$info->title;
         $this->assign('custom_title', $title);
     }
 
