@@ -296,10 +296,11 @@ class Controller extends AdminController
                 $this->presenter->assign('errors', $b->getValErrors());
             } else {
                 $bi = Model::load('BlogImage');
+
                 $images = $bi->getForIDs(array($b->id));
              
-                $tt_width = 700;
-                //$tt_height = 100;
+                $tt_width = ELIB_BLOG_IMAGE_MAX_WIDTH;
+                $tt_height = ELIB_BLOG_IMAGE_MAX_HEIGHT;
 
                 if (isset($images[$b->id])) {
                     // process blog images to create mid sized with id attributes - needs optimising?
@@ -314,6 +315,9 @@ class Controller extends AdminController
                             $b->body, 1);
                     }
                 }
+
+                
+                
 
                 $b->save(Model::getTable('BlogItem'), array(''), 1);
 

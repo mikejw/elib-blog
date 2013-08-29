@@ -23,7 +23,7 @@ class BlogPage
         }
 
         $this->page_title = $this->blog_item->heading.' - '.$site_info->title;
-        $this->blog_item->body = preg_replace('/mid_/', 'tn_', $this->blog_item->body);
+        //$this->blog_item->body = preg_replace('/mid_/', 'tn_', $this->blog_item->body);
         $this->blog_user = Model::load('UserItem');
         $this->blog_user->id = $this->blog_item->user_id;
         $this->blog_user->load();
