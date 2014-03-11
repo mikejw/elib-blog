@@ -411,6 +411,7 @@ class BlogFrontControllerNew extends EController
         $t = Model::load('TagItem');
         foreach ($blogs as &$b_item) {
             $b_item['tags'] = $t->getTagsForBlogItem($b_item['blog_id']);
+            $b_item['month_slug'] = strtolower(substr(date("F", $b_item['stamp']), 0, 3));
         }
 
         if(defined('ELIB_TRUNCATE_BLOG_ITEMS') &&
@@ -434,7 +435,6 @@ class BlogFrontControllerNew extends EController
                 } else {
                     $blogs[$index]['truncated'] = 0;
                 }
-                $blogs[$index]['month_slug'] = strtolower(substr(date("F", $item['stamp']), 0, 3));
             }
         }
 
