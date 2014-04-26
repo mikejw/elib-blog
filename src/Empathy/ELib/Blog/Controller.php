@@ -230,7 +230,10 @@ class Controller extends AdminController
         $this->presenter->assign('cats', $cats_arr);
 
         $this->setTemplate('elib:/admin/blog/create_blog.tpl');
-        if (isset($_POST['save'])) {
+
+        if (isset($_POST['cancel'])) {
+            $this->redirect('admin/blog');
+        } elseif (isset($_POST['save'])) {
             $b = Model::load('BlogItem');
             $tags_arr = $b->buildTags(); // errors ?
 

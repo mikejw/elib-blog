@@ -22,7 +22,6 @@ class BlogFrontControllerNew extends EController
 
     public function default_event()
     {
-
         $b = Model::load('BlogItem');
         $blogs = array();
 
@@ -494,6 +493,7 @@ class BlogFrontControllerNew extends EController
 
         $this->assign('active_tags', $active_tags);
         $this->assign('active_tags_string', $active_tags_string);
+        $this->assign('multi_tags', strpos($active_tags_string, '+') !== false);
 
         return $found_items;
     }
