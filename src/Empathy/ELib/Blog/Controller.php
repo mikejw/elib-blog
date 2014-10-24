@@ -274,6 +274,7 @@ class Controller extends AdminController
             $id = $item['id'];
             $cats_arr[$id] = $item['label'];
         }
+
         $this->presenter->assign('cats', $cats_arr);
 
         if (isset($_POST['cancel'])) {
@@ -356,7 +357,7 @@ class Controller extends AdminController
         $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
     }
 
-    public function processTags($b, $tags_arr, $cats_arr)
+    public function processTags($b, $tags_arr, $cats_arr=array())
     {
         // deal with tags
         $bt = Model::load('BlogTag');
@@ -374,11 +375,7 @@ class Controller extends AdminController
                 $bt->insert(Model::getTable('BlogTag'), 0, array(), 0);
             }
         }
-        $t->cleanup();
-
-
-        
-        
+        $t->cleanup();        
     }
 
     // blog category stuff
