@@ -162,6 +162,13 @@ class Controller extends AdminController
         $b->load();
         $b->status = BlogItemStatus::DRAFT;
         $b->save(Model::getTable('BlogItem'), array(), 2);
+
+        // clear cache
+        $cache = $this->stash->get('cache');
+        if (is_object($cache)) {
+            $cache->clear();
+        }
+
         $this->redirect('admin/blog/view/'.$b->id);
     }
 
@@ -175,6 +182,13 @@ class Controller extends AdminController
         }
         $b->status = BlogItemStatus::PUBLISHED;
         $b->save(Model::getTable('BlogItem'), array(), 2);
+
+        // clear cache
+        $cache = $this->stash->get('cache');
+        if (is_object($cache)) {
+            $cache->clear();
+        }
+        
         $this->redirect('admin/blog/?page=1&status=2');
     }
 
