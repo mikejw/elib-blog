@@ -16,7 +16,7 @@ class BlogItem extends Entity
     public $heading;
     public $body;
     public $slug;
-    private $pages;
+    private static $pages;
 
     private function getCategoryBlogs($cat)
     {
@@ -105,7 +105,7 @@ class BlogItem extends Entity
             }
             $struct_pages[$i+1] = $item;
         }
-        $this->pages = $struct_pages;
+        self::$pages = $struct_pages;
 
         foreach ($result as $row) {
             $blogs[] = $row;
@@ -116,7 +116,7 @@ class BlogItem extends Entity
 
     public function getPages()
     {
-        return $this->pages;
+        return self::$pages;
     }
 
 
