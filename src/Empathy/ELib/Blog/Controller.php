@@ -83,6 +83,8 @@ class Controller extends AdminController
         }
 
 
+      
+
 
         $this->setTemplate('elib:/admin/blog/blog_admin.tpl');
         $this->presenter->assign('blogs', $blogs);

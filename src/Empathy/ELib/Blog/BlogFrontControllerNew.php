@@ -38,11 +38,31 @@ class BlogFrontControllerNew extends EController
 
         $blogs = $this->getBlogs($b, $found_items);
 
-        $this->assign('blogs', $blogs);
-
         $this->getAvailableTags();
         $this->getArchive();
-        $this->getCategories();
+        $cats = $this->getCategories();
+
+        $cats_lookup = array();
+        foreach ($cats as $c) {
+
+            $cats_lookup[$c['id']] = $c['label'];
+        }
+
+        foreach ($blogs as &$b) {
+            $cats = $b['cats'];
+
+            $cat_names = array();
+            foreach ($cats as $c) {
+                $cat_names[] = $cats_lookup[$c];
+            }
+            $b['cats'] = $cat_names;
+        }
+
+        $this->assign('blogs', $blogs);
+
+        // header('Content-type: text/json');
+        // echo json_encode($blogs, JSON_PRETTY_PRINT);
+        // exit();
 
         $this->assign('current_year', date('Y', time()));
         $this->assign('current_month', date('F', time()));
@@ -51,7 +71,10 @@ class BlogFrontControllerNew extends EController
         } else {
             $this->assign('blog_module', 'blog');
         }
-    }
+
+
+
+    }   
 
 
     public function getBlogPageData($id)
@@ -398,6 +421,8 @@ class BlogFrontControllerNew extends EController
         $cats = $this->cache->cachedCallback('cats', array($c, 'getAllCustom'), array(Model::getTable('BlogCategory'), ' order by id'));
         array_push($cats, array('id' => 0, 'label' => 'Any'));        
         $this->assign('categories', $cats);
+
+        return $cats;
     }
 
 
@@ -408,9 +433,12 @@ class BlogFrontControllerNew extends EController
         $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc);
 
         $t = Model::load('TagItem');
+        $bc = Model::load('BlogCategory');
+
         foreach ($blogs as &$b_item) {
             $b_item['tags'] = $t->getTagsForBlogItem($b_item['blog_id']);
             $b_item['month_slug'] = strtolower(substr(date("F", $b_item['stamp']), 0, 3));
+            $b_item['cats'] = $bc->getCategoriesForBlogItem($b_item['blog_id']);
         }
 
         if(defined('ELIB_TRUNCATE_BLOG_ITEMS') &&
