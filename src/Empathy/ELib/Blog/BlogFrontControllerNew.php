@@ -36,7 +36,16 @@ class BlogFrontControllerNew extends EController
             $found_items = $this->getActiveTags();
         }
 
-        $blogs = $this->getBlogs($b, $found_items);
+        if (!isset($_GET['id'])) {
+            $_GET['id'] = 1;
+        }
+        $page = $_GET['id'];
+
+        $blogs = $this->getBlogs($b, $found_items, $page);
+
+        $this->assign('page', $page);
+        $this->assign('pages', $b->getPages());
+        $this->assign('total_pages', sizeof($b->getPages()));
 
         $this->getAvailableTags();
         $this->getArchive();
@@ -71,9 +80,6 @@ class BlogFrontControllerNew extends EController
         } else {
             $this->assign('blog_module', 'blog');
         }
-
-
-
     }   
 
 
@@ -426,11 +432,11 @@ class BlogFrontControllerNew extends EController
     }
 
 
-    private function getBlogs($b, $found_items)
+    private function getBlogs($b, $found_items, $page)
     {
         $bc = $this->stash->get('blog_category');
         
-        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc);
+        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc, $page);
 
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');

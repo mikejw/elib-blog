@@ -16,7 +16,7 @@ class BlogItem extends Entity
     public $heading;
     public $body;
     public $slug;
-
+    private $pages;
 
     private function getCategoryBlogs($cat)
     {
@@ -36,13 +36,17 @@ class BlogItem extends Entity
         return $cat_blogs_string;
     }
 
-    public function getItems($found_items, $limit, $cat=null)
-    {
-        $cat_blogs_string = $this->getCategoryBlogs($cat);
 
-        $blogs = array();
-        $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug'
-            .' FROM '.Model::getTable('BlogItem').' t1'
+    private function getItemsQuery($found_items, $cat_blogs_string, $preSelect=false, $limit=array())
+    {
+        $sql = 'SELECT ';
+        if (!$preSelect) {
+            $sql .= 't1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
+        } else {
+            $sql .= '*';
+        }
+
+        $sql .=' FROM '.Model::getTable('BlogItem').' t1'
             .' LEFT JOIN '.Model::getTable('BlogComment').' t3'
             .' ON t1.id = t3.blog_id'
 
@@ -58,20 +62,63 @@ class BlogItem extends Entity
 
             $sql .= ' AND t1.id IN'.$cat_blogs_string;
         }
-
         $sql .= ' GROUP BY t1.id'
-            .' ORDER BY t1.stamp DESC'
-            .' LIMIT 0, '.$limit;
+            .' ORDER BY t1.stamp DESC';
 
+        if (sizeof($limit)) {
+            $sql .= ' limit '.$limit[0].', '.$limit[1];
+        }
+
+        //echo $sql;
+        return $sql;
+    }
+
+
+    public function getItems($found_items, $limit, $cat=null, $page=1)
+    {       
+        $cat_blogs_string = $this->getCategoryBlogs($cat);
+
+        $blogs = array();
         $error = 'Could not get blog items.';
+        $sql = $this->getItemsQuery($found_items, $cat_blogs_string, true);
         $result = $this->query($sql, $error);
+        $rows = $result->rowCount();
+
+        $per_page = 2;
+        $pages = ceil($rows / $per_page);
+        
+        $start = ($page * $per_page) - $per_page;
+        $end = $per_page;
+
+        //echo "start: $start end: $end<br />";
+
+        $sql = $this->getItemsQuery($found_items, $cat_blogs_string, false, array($start, $end));
+        $result = $this->query($sql, $error);
+
+        $struct_pages = array();
+        for ($i = 0; $i < $pages; $i++) {
+            $item = array();
+            if ($page != $i+1) {
+                $item['current'] = false;                
+            } else {
+                $item['current'] = true;
+            }
+            $struct_pages[$i+1] = $item;
+        }
+        $this->pages = $struct_pages;
 
         foreach ($result as $row) {
             $blogs[] = $row;
         }
-
         return $blogs;
     }
+
+
+    public function getPages()
+    {
+        return $this->pages;
+    }
+
 
     public function validates()
     {
