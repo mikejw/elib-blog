@@ -129,12 +129,27 @@ class BlogFrontControllerNew extends EController
 
         $this->getAvailableTags();
         $this->getArchive();
-        $this->getCategories();
+        $cats = $this->getCategories();
         $this->setTemplate('blog_item.tpl');
+
+        $bi = Model::load('BlogImage');
+        $b_ids = array($id);
+        $blog_images = $bi->getForIDs($b_ids);
+        if (sizeof($blog_images)) {
+            $this->assign('primary_image', $blog_images[$id][0]['filename']);
+        }
+
+        $bc = Model::load('BlogCategory');
+        $blog_cats = $bc->getCategoriesForBlogItem($id);
+         
+        $cats_lookup = array();
+        foreach ($cats as $c) {
+            $cats_lookup[$c['id']] = $c['label'];
+        }
+        if (sizeof($blog_cats)) {
+            $this->assign('sample_category', $cats_lookup[$blog_cats[0]]);    
+        }
     }
-
-
-
 
 
 
@@ -427,7 +442,7 @@ class BlogFrontControllerNew extends EController
         $cats = $this->cache->cachedCallback('cats', array($c, 'getAllCustom'), array(Model::getTable('BlogCategory'), ' order by id'));
         array_push($cats, array('id' => 0, 'label' => 'Any'));        
         $this->assign('categories', $cats);
-
+        
         return $cats;
     }
 
