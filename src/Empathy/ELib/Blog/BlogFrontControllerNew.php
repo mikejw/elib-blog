@@ -36,7 +36,7 @@ class BlogFrontControllerNew extends EController
             $found_items = $this->getActiveTags();
         }
 
-        if (!isset($_GET['id'])) {
+        if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
             $_GET['id'] = 1;
         }
         $page = $_GET['id'];
@@ -386,7 +386,10 @@ class BlogFrontControllerNew extends EController
             $i++;
         }
         $info = $this->stash->get('site_info');
-        $title .= 'in '.$info->title;
+        if (is_object($info) && isset($info->title)) {
+            $title .= 'in '.$info->title;            
+        }
+
         $this->assign('custom_title', $title);
     }
 
