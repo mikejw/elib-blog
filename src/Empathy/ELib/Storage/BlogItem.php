@@ -8,6 +8,7 @@ use Empathy\ELib\Model,
 class BlogItem extends Entity
 {
     const TABLE = 'blog';
+    const DEF_BLOG_PER_PAGE = 2;
 
     public $id;
     public $status;
@@ -84,7 +85,7 @@ class BlogItem extends Entity
         $result = $this->query($sql, $error);
         $rows = $result->rowCount();
 
-        $per_page = 2;
+        $per_page = defined('ELIB_DEF_BLOG_PER_PAGE')? ELIB_DEF_BLOG_PER_PAGE: self::DEF_BLOG_PER_PAGE;
         $pages = ceil($rows / $per_page);
         
         $start = ($page * $per_page) - $per_page;
