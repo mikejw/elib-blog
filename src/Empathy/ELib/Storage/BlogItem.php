@@ -70,7 +70,6 @@ class BlogItem extends Entity
             $sql .= ' limit '.$limit[0].', '.$limit[1];
         }
 
-        //echo $sql;
         return $sql;
     }
 
@@ -401,7 +400,7 @@ class BlogItem extends Entity
         $finish_day = $day;
         $finish_month = $month;
         $finish_year = $year;
-        if ($month == 12 && $day = 31) {
+        if ($month == 12 && $day == 31) {
             $finish_month = 1;
             $finish_year = $year + 1;
             $finish_day = 0;
