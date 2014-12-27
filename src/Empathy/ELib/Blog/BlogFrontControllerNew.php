@@ -113,7 +113,7 @@ class BlogFrontControllerNew extends EController
         }
 
         if (!$this->initID('id', -1, true)) {
-            throw new RequestException('No valid blog id', RequestException::BAD_REQUEST);
+            throw new RequestException('No valid blog id', RequestException::NOT_FOUND);
         }
 
         $id = $_GET['id'];
