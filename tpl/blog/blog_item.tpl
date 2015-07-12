@@ -6,21 +6,21 @@
 
         <div class="col-sm-8 blog-main">
 
-		<div class="entry">
+
 		{if $internal_referrer}
 		<p>&laquo; <a class="back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}">Back</a></p>
 		{/if}
 
-		<h2>{$blog->heading}</h2>
-		<h3>{$blog->stamp|sdate:$def_date_format}</h3>
+		<h2 class="blog-post-title">{$blog->heading}</h2>
+		<p class="blog-post-meta">{$blog->stamp|sdate:$def_date_format}</p>
 
 		{$blog->body|replace:"</p>":"</p>\n"}
 
-		</div>
 
-		{include file="elib:/blog/comp_social_buttons.tpl"}
+		{*{include file="elib:/blog/comp_social_buttons.tpl"}*}
 
-		{include file="elib:/blog/comp_disqus.tpl"}
+		{*{include file="elib:/blog/comp_disqus.tpl"}*}
+
 
 		{if 0 and $connect}
 		<p>Sign in with twitter to leave comments.</p>
@@ -38,7 +38,7 @@
 		</div>
 		{/section}
 
-		{if $user_id > 0}
+		{if 0 and $user_id > 0}
 
 		{if sizeof($errors) > 0}
 		<ul id="error">
@@ -66,7 +66,8 @@
 		</fieldset>
 		</form>
 		{/if}
-
+                
+                {*
    
           <nav>
             <ul class="pager">
@@ -74,6 +75,7 @@
               <li><a href="#">Next</a></li>
             </ul>
           </nav>
+*}
 
         </div><!-- /.blog-main -->
 

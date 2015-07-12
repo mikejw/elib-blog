@@ -126,7 +126,7 @@ class BlogFrontControllerNew extends EController
         $this->assign('slug_arr', $slug_arr);
         $this->assign('author', $blog_page->getAuthor());
         $this->assign('blog', $blog_page->getBlogItem());
-        $this->assign('custom_title', $blog_page->getTitle());
+        //$this->assign('custom_title', $blog_page->getTitle());
         $this->assign('custom_description', $blog_page->getBody());
         //$this->assign('comments', $blog_page->getComments());
 
@@ -393,7 +393,7 @@ class BlogFrontControllerNew extends EController
             $title .= 'in '.$info->title;            
         }
 
-        $this->assign('custom_title', $title);
+        $this->assign('secondary_title', $title);
     }
 
 /*
