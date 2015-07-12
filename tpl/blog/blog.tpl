@@ -101,7 +101,7 @@
           {if $active_tags_string neq ''}
         <p style="text-align: center;">
           <a class="btn btn-default" href="http://{$WEB_ROOT}{$PUBLIC_DIR}">
-            Clear active tag{if $multi_tags}s{/if}</a>
+            Clear active tag{if $multi_tags}s{/if}
           </a>
         </p>
         {/if}

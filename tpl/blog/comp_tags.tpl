@@ -4,7 +4,7 @@
 
 
 <div id="categories">
-<h4>Category</strong></h4>
+<h4>Category</h4>
 
 <!-- @todo: put font-awesome icons in CMS -->
 
