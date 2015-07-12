@@ -2,12 +2,13 @@
 
 namespace Empathy\ELib\Blog;
 
-use Empathy\ELib\Model,
-    Empathy\ELib\EController,
-    Empathy\ELib\User\CurrentUser,
-    Empathy\MVC\Session,
-    Empathy\MVC\RequestException,
-    Empathy\ELib\Storage\BlogPage;
+use Empathy\ELib\Model;
+use Empathy\ELib\EController;
+use Empathy\ELib\User\CurrentUser;
+use Empathy\MVC\Session;
+use Empathy\MVC\RequestException;
+use Empathy\ELib\Storage\BlogPage;
+
 
 class BlogFrontControllerNew extends EController
 {
@@ -80,6 +81,7 @@ class BlogFrontControllerNew extends EController
         } else {
             $this->assign('blog_module', 'blog');
         }
+        $this->setTemplate('elib:blog/blog.tpl');
     }   
 
 
@@ -97,6 +99,7 @@ class BlogFrontControllerNew extends EController
 
     public function item()
     {
+        $this->setTemplate('elib:/blog/blog_item.tpl');
         if (isset($_POST['submit'])) {
             $this->submitComment();
         }
@@ -130,7 +133,7 @@ class BlogFrontControllerNew extends EController
         $this->getAvailableTags();
         $this->getArchive();
         $cats = $this->getCategories();
-        $this->setTemplate('blog_item.tpl');
+        $this->setTemplate('elib:/blog/blog_item.tpl');
 
         $bi = Model::load('BlogImage');
         $b_ids = array($id);

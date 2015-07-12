@@ -14,7 +14,7 @@ class BlogPage
     private $blog_comments;
     private $page_title;
 
-    public function __construct($id, $site_info)
+    public function __construct($id, $site_info = NULL)
     {
         $this->blog_item = Model::load('BlogItem');
         $this->blog_item->id = $id;
@@ -22,7 +22,12 @@ class BlogPage
             throw new RequestException('No blog item found', RequestException::NOT_FOUND);
         }
 
-        $this->page_title = $this->blog_item->heading.' - '.$site_info->title;
+        $this->page_title = $this->blog_item->heading;
+
+        if (is_object($site_info)) {
+            $this->page_title .= ' - '.$site_info->title;
+        }
+        
         //$this->blog_item->body = preg_replace('/mid_/', 'tn_', $this->blog_item->body);
         $this->blog_user = Model::load('UserItem');
         $this->blog_user->id = $this->blog_item->user_id;

@@ -1,0 +1,1 @@
+<meta name="keywords" content="{if $custom_keywords neq ''}{$custom_keywords|lower|truncate:"100":"..."}{else}{*mike michael whiting web developer programmer php lamp mysql javascript css perl linux*}{$site_info->keywords}{/if}" />
