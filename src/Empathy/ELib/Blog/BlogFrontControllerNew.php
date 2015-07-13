@@ -47,7 +47,7 @@ class BlogFrontControllerNew extends EController
         $this->assign('page', $page);
         $this->assign('pages', $b->getPages());
         $this->assign('total_pages', sizeof($b->getPages()));
-
+    
         $this->getAvailableTags();
         $this->getArchive();
         $cats = $this->getCategories();
@@ -63,7 +63,7 @@ class BlogFrontControllerNew extends EController
 
             $cat_names = array();
             foreach ($cats as $c) {
-                $cat_names[] = $cats_lookup[$c];
+                $cat_names[$c] = $cats_lookup[$c];
             }
             $b['cats'] = $cat_names;
         }

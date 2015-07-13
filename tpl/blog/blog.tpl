@@ -6,6 +6,7 @@
 
         <div class="col-sm-8 blog-main">
 
+
         {if $secondary_title neq ''}
         <h2>{$secondary_title}</h2>
         {/if}
@@ -45,33 +46,35 @@
             {/if}
           </p>
           {/if}
-        
+      
 
           <p class="entry_meta">
-          {*
+
           {if $blog_item.slug neq ''}
           <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$blog_item.stamp|date_format:"%Y"}/{$blog_item.month_slug}/{$blog_item.stamp|date_format:"%d"}/{$blog_item.slug}">Permalink</a>
           {else}
           <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$blog_item.blog_id}">Permalink</a>
           {/if}
-          &nbsp;&nbsp;|&nbsp;&nbsp;*}
+          <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
-          {*
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          Category: 
-          {counter start=1 print=false assign=i}
-          {foreach from=$blog_item.categories item=c}
-          <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/category/{$c|lower}">{$c}</a>
+          {if count($blog_item.cats)}
+          Categories: 
+          {foreach from=$blog_item.cats key=i item=c}
 
-          {if $i neq sizeof($blog_item.categories)}, {/if} 
-          {counter}
+          <span class="tag">
+            <span class="label label-{if $i eq $blog_category}warning{else}default{/if}">
+              <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c|lower}">
+                  {$c}
+              </a>
+            </span>
+          </span>
           {/foreach}
-          *}
+          <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+          {/if}
+
 
           {if count($blog_item.tags)}
-
           Tags: 
-          {counter start=1 print=false assign=i}
           {foreach from=$blog_item.tags item=t}
           <span class="tag">
             <span class="label label-{if count($active_tags) and in_array($t, $active_tags)}info{else}default{/if}">
@@ -81,15 +84,16 @@
             </span>
           </span>
           {*
-          {if $i neq sizeof($blog_item.tags)}, {/if} 
-          {counter}
+          <a class="button{if count($active_tags) and in_array($t, $active_tags)} active{/if}" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}"><span class="label label-default">{$t}</span></a>
           *}
           {/foreach}
           {/if}
+
           {*
           &nbsp;&nbsp;|&nbsp;&nbsp;
           {$blog_item.comments} comment{if $blog_item.comments neq 1}s{/if}
           *}
+
           </p>
         </div>
     
@@ -98,25 +102,9 @@
         <p style="text-align: center;">No posts found.</p>
         {/foreach}
 
-          {if $active_tags_string neq ''}
-        <p style="text-align: center;">
-          <a class="btn btn-default" href="http://{$WEB_ROOT}{$PUBLIC_DIR}">
-            Clear active tag{if $multi_tags}s{/if}
-          </a>
-        </p>
-        {/if}
-
-{*
-        <nav>
-          <ul class="pager">
-            <li><a href="#">Previous</a></li>
-            <li><a href="#">Next</a></li>
-          </ul>
-        </nav>
-*}
         
 
-
+        {include file="elib:/blog/comp_blog_pagi.tpl"}
 
          
 

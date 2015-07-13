@@ -8,7 +8,9 @@
 
 
 		{if $internal_referrer}
-		<p>&laquo; <a class="back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}">Back</a></p>
+		<ul class="pager">
+  			<li class="previous"><a class="back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">&larr; Back</a></li>
+		</ul>
 		{/if}
 
 		<h2 class="blog-post-title">{$blog->heading}</h2>
