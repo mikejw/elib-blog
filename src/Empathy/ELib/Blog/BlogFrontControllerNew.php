@@ -24,13 +24,8 @@ class BlogFrontControllerNew extends EController
     public function default_event()
     {
         $b = Model::load('BlogItem');
-        $blogs = array();
-
+        
         $sql = '';
-
-        $active_tags = array();
-        $active_tags_string = '';
-
         $found_items = '(0,)';
 
         if (isset($_GET['active_tags'])) {
@@ -54,7 +49,6 @@ class BlogFrontControllerNew extends EController
 
         $cats_lookup = array();
         foreach ($cats as $c) {
-
             $cats_lookup[$c['id']] = $c['label'];
         }
 
@@ -82,6 +76,7 @@ class BlogFrontControllerNew extends EController
             $this->assign('blog_module', 'blog');
         }
         $this->setTemplate('elib:blog/blog.tpl');
+        $this->socialLinks();
     }   
 
 
@@ -152,11 +147,16 @@ class BlogFrontControllerNew extends EController
         if (sizeof($blog_cats)) {
             $this->assign('sample_category', $cats_lookup[$blog_cats[0]]);    
         }
+        $this->socialLinks();
     }
 
 
-
-
+    private function socialLinks()
+    {
+        if (defined('ELIB_BLOG_SOCIAL_LINKS')) {            
+            $this->assign('social', json_decode(ELIB_BLOG_SOCIAL_LINKS, true));
+        }
+    }
 
 
     public function year()
@@ -278,21 +278,23 @@ class BlogFrontControllerNew extends EController
 
     public function category()
     {
-        $cat_id = $this->cache->cachedCallback('category_'.$_GET['category'],
-                                               array($this, 'fetchCategoryId'), array($_GET['category']));
-        Session::set('blog_category', $cat_id); // may not work without cookies but setting anyway
-        $this->stash->store('blog_category', $cat_id);
-        $this->assign('blog_category', $cat_id);
+        $this->doSetCategory($_GET['category']);
         $this->default_event();
-
     }
 
 
+    private function doSetCategory($cat)
+    {
+        $cat_id = $this->cache->cachedCallback('category_'.$cat,
+                     array($this, 'fetchCategoryId'), array($cat));
+        Session::set('blog_category', $cat_id);
+        $this->stash->store('blog_category', $cat_id);
+        $this->assign('blog_category', $cat_id);
+    }
+
     public function set_category()
     {        
-        Session::set('blog_category',
-                     $this->cache->cachedCallback('category_'.$_GET['category'],
-                     array($this, 'fetchCategoryId'), array($_GET['category'])));
+        $thi->doSetCategory($_GET['category']);
         $this->redirect('');
     }
 
@@ -301,6 +303,9 @@ class BlogFrontControllerNew extends EController
     {
         if (!isset($_GET['active_tags'])) {
             $this->redirect('');
+        }
+        if (Session::get('blog_category') > 0) {
+            $this->doSetCategory('any');
         }
         $_GET['active_tags'] = $this->getTags();
         $this->default_event();
@@ -446,17 +451,47 @@ class BlogFrontControllerNew extends EController
     {
         $c = Model::load('BlogCategory');
         $cats = $this->cache->cachedCallback('cats', array($c, 'getAllPublished'), array(Model::getTable('BlogCategory'), ' order by id'));
-        array_push($cats, array('id' => 0, 'label' => 'Any'));        
+        array_unshift($cats, array('id' => 0, 'label' => 'Any'));
+
+        foreach ($cats as &$c) {
+            switch ($c['label']) {
+                case 'Technology':
+                    $fa = 'gear';
+                    break;
+                case 'Music':
+                    $fa = 'music';
+                    break;
+                case 'Other':
+                    $fa = 'plug';
+                    break;
+                case 'Photography':
+                    $fa = 'picture-o';
+                    break;
+                case 'Any':
+                    $fa = 'random'; 
+                    break;
+                case 'Releases':
+                    $fa = 'gift';
+                    break;
+                case 'NewVibes':
+                    $fa = 'bolt';
+                    break;
+                default:
+                    $fa = NULL;
+                    break;
+            }
+            if ($fa !== NULL) {
+                $c['label_icon'] = '<i class="fa fa-'.$fa.'"></i> '.$c['label'];
+            }
+        }
         $this->assign('categories', $cats);
-        
         return $cats;
     }
 
 
     private function getBlogs($b, $found_items, $page)
     {
-        $bc = $this->stash->get('blog_category');
-        
+        $bc = $this->stash->get('blog_category');    
         $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc, $page);
 
         $t = Model::load('TagItem');
@@ -539,13 +574,11 @@ class BlogFrontControllerNew extends EController
         $found_items = $this->cache->cachedCallback('blogs_by_tag_'.$key, array($this, 'findBlogsByTags'), array($active_tags));
 
         if ($found_items == '(0,)' || $found_items == false) {
-
             throw new RequestException('Not found.', RequestException::NOT_FOUND);
-
-        } else {
-            $this->setTagsTitle();
         }
-
+        
+        $this->setTagsTitle();
+        
         $this->assign('active_tags', $active_tags);
         $this->assign('active_tags_string', $active_tags_string);
         $this->assign('multi_tags', strpos($active_tags_string, '+') !== false);

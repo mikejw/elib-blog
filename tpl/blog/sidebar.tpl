@@ -14,9 +14,9 @@
           <div class="sidebar-module">
             <h4>Elsewhere</h4>
             <ol class="list-unstyled">
-              <li><a href="http://github.com/mikejw">GitHub</a></li>
-              <li><a href="http://twitter.com/mikejw">Twitter</a></li>
-              <li><a href="http://www.facebook.com/mikewhiting">Facebook</a></li>
+             {foreach from=$social item=link key=name}
+            <li><a href="{$link}">{$name}</a></li>
+            {/foreach}
             </ol>
           </div>
         </div><!-- /.blog-sidebar -->

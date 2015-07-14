@@ -11,26 +11,12 @@
 <ul class="clear">
 {foreach from=$categories item=c}
 <li>
-{if $c.label eq 'Technology'}
-<i class="fa fa-gear"></i>
-
-{elseif $c.label eq 'Music'}
-<i class="fa fa-music"></i>
-{elseif $c.label eq 'Other'}
-<i class="fa fa-plug"></i>
-{elseif $c.label eq 'Photography'}
-<i class="fa fa-picture-o"></i>
-{elseif $c.label eq 'Any'}
-<i class="fa fa-random"></i>
-
-{/if}
-
 
 {if $c.id eq $blog_category}
-{$c.label}
+{if $c.label_icon}{$c.label_icon}{else}{$c.label}{/if}
 {else}
 
-<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">{$c.label}</a>
+<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">{if $c.label_icon}{$c.label_icon}{else}{$c.label}{/if}</a>
 
 {*<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/set_category/{$c.label|lower}/">{$c.label}</a>*}
 
