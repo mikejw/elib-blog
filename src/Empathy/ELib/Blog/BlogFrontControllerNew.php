@@ -445,7 +445,7 @@ class BlogFrontControllerNew extends EController
     private function getCategories()
     {
         $c = Model::load('BlogCategory');
-        $cats = $this->cache->cachedCallback('cats', array($c, 'getAllCustom'), array(Model::getTable('BlogCategory'), ' order by id'));
+        $cats = $this->cache->cachedCallback('cats', array($c, 'getAllPublished'), array(Model::getTable('BlogCategory'), ' order by id'));
         array_push($cats, array('id' => 0, 'label' => 'Any'));        
         $this->assign('categories', $cats);
         
