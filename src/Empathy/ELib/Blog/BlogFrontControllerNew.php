@@ -118,7 +118,10 @@ class BlogFrontControllerNew extends EController
         $blog_page = $this->cache->cachedCallback('blog_'.$id, array($this, 'getBlogPageData'), array($id));
 
 
-        $this->assign('slug_arr', $slug_arr);
+        if (isset($slug_arr)) {
+            $this->assign('slug_arr', $slug_arr);    
+        }
+        
         $this->assign('author', $blog_page->getAuthor());
         $this->assign('blog', $blog_page->getBlogItem());
         //$this->assign('custom_title', $blog_page->getTitle());
