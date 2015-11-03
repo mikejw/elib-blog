@@ -4,7 +4,7 @@
 namespace Empathy\ELib\Blog;
 
 use Empathy\ELib\Model;
-
+use Elasticsearch\ClientBuilder;
 
 class Service
 {
@@ -30,4 +30,107 @@ class Service
         $t->cleanup();        
     }
 
+
+    public static function search($query)
+    {
+        $params = [
+            'index' => 'elib_blog',
+            'type' => 'blog',
+            'body' => [
+                'query' => [
+                    'query_string' => [
+                        'query' => $query
+                    ]
+                ]
+            ]
+        ];
+
+        $client = ClientBuilder::create()->build();
+        $response = $client->search($params);
+        return $response;
+    }
+
+
+    public function addAllToIndex()
+    {
+        $b = \Empathy\ELib\Model::load('BlogItem');
+        $table = 
+        $all = $b->getAllCustom(Model::getTable('BlogItem'), ' where status = '.\Empathy\ELib\Storage\BlogItemStatus::PUBLISHED);
+        $ids = array();
+        foreach ($all as $item) {
+            array_push($ids, $item['id']);
+        }
+        foreach ($ids as $id) {
+            $b = \Empathy\ELib\Model::load('BlogItem');
+            $b->id = $id;
+            $b->load();
+            self::addToIndex($b);
+        }
+
+    }
+
+    public static function addToIndex($b) 
+    {
+        if (defined('ELIB_BLOG_ELASTIC') && ELIB_BLOG_ELASTIC) {
+
+            $bt = Model::load('BlogTag');
+            $bc = Model::load('BlogCategory');
+            $cats = $bc->getCategoriesForBlogItem($b->id);
+
+            $cats_arr = array();
+            foreach ($cats as $c) {
+                $item = Model::load('BlogCategory');
+                $item->id = $c;
+                $item->load();
+                array_push($cats_arr, $item->label);
+            }
+
+
+            $params = [
+                'index' => 'elib_blog',
+                'type' => 'blog',
+                'id' => $b->id,
+                'body' => [
+                    'heading' => $b->heading,
+                    'stamp' => $b->stamp,
+                    'tags' => $bt->getTags($b->id),
+                    'body' => strip_tags($b->body),
+                    'slug' => $b->slug,
+                    'categories' => $cats_arr
+                ]
+            ];
+
+            //header('Content-type: application/json');
+            //echo json_encode($params); exit();
+
+            $client = ClientBuilder::create()->build();
+            $response = $client->index($params);
+        }
+
+    }
+
+
+    public static function removeFromIndex($b)
+    {
+        if (defined('ELIB_BLOG_ELASTIC') && ELIB_BLOG_ELASTIC) {
+            $params = [
+                'index' => 'elib_blog',
+                'type' => 'blog',
+                'id' => $b->id
+            ];
+
+            $client = ClientBuilder::create()->build();
+            $response = $client->delete($params);
+        }
+    }
+
+
+    public static function getMonthSlug($stamp)
+    {
+        //echo ; exit();
+        return strtolower(substr(date('F', strtotime($stamp)), 0, 3));
+    }
+
 }
+
+

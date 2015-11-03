@@ -155,6 +155,9 @@ class Controller extends AdminController
         $b->load();
         $b->status = BlogItemStatus::DELETED;
         $b->save(Model::getTable('BlogItem'), array(), 2);
+
+        Service::removeFromIndex($b);
+
         $this->redirect('admin/blog/?page=1&status=2');
     }
 
@@ -171,6 +174,8 @@ class Controller extends AdminController
         if (is_object($cache)) {
             $cache->clear();
         }
+
+        Service::removeFromIndex($b);
 
         $this->redirect('admin/blog/view/'.$b->id);
     }
@@ -191,7 +196,9 @@ class Controller extends AdminController
         if (is_object($cache)) {
             $cache->clear();
         }
-        
+
+        Service::addToIndex($b);
+                
         $this->redirect('admin/blog/?page=1&status=2');
     }
 
