@@ -41,7 +41,8 @@ class Service
                     'query_string' => [
                         'query' => $query
                     ]
-                ]
+                ],
+                'size' => 250
             ]
         ];
 
