@@ -1,7 +1,7 @@
 {
     "name": "mikejw/elib-blog",
     "type": "library",
-    "description": "Miscellaneous library for Empathy PHP Framework",
+    "description": "Blogginglibrary for Empathy PHP Framework",
     "keywords": [
         "lib"
     ],
@@ -14,8 +14,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.2",
-        "mikejw/elib-base": "dev-develop"
+        "mikejw/elib-base": "0.9.4"
     },
     "autoload": {
         "psr-0": {
