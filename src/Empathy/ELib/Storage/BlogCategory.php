@@ -41,6 +41,41 @@ class BlogCategory extends Entity
 
 
     /**
+    * Get list of all categories that only
+    * have published blogs
+    *
+    * @param string $sql_string
+    *
+    * @return array
+    */
+    public function getAllPublished($table, $sql_string)
+    {
+        $all = array();
+        //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
+        $sql = "select c.id, c.label"
+        ." from %s b"
+        ." left join %s j on j.blog_id = b.id"
+        ." left join %s c on c.id = j.blog_category_id"
+        ." where b.status = 2"
+        ." group by j.blog_category_id".$sql_string;
+
+        $sql = sprintf($sql, Model::getTable('BlogItem'),
+            Model::getTable('BlogItemCategory'),
+            Model::getTable('BlogCategory'));
+        $error = 'Could not published categories.';
+        $result = $this->query($sql, $error);
+
+        $i = 0;
+        foreach ($result as $row) {
+            $all[$i] = $row;
+            $i++;
+        }
+
+        return $all;
+    }
+
+
+    /**
     * Get category ids associated with blog item
     *
     * @param integer $blog_id blog id

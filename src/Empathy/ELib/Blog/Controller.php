@@ -3,11 +3,12 @@
 namespace Empathy\ELib\Blog;
 
 
-use Empathy\ELib\AdminController,
-    Empathy\ELib\File\Image as ImageUpload,
-    Empathy\ELib\Model,
-    Empathy\MVC\Session,
-    Empathy\ELib\Storage\BlogItemStatus;
+use Empathy\ELib\AdminController;
+use Empathy\ELib\File\Image as ImageUpload;
+use Empathy\ELib\Model;
+use Empathy\MVC\Session;
+use Empathy\ELib\Storage\BlogItemStatus;
+
 
 
 define('REQUESTS_PER_PAGE', 12);
@@ -154,6 +155,9 @@ class Controller extends AdminController
         $b->load();
         $b->status = BlogItemStatus::DELETED;
         $b->save(Model::getTable('BlogItem'), array(), 2);
+
+        Service::removeFromIndex($b);
+
         $this->redirect('admin/blog/?page=1&status=2');
     }
 
@@ -170,6 +174,8 @@ class Controller extends AdminController
         if (is_object($cache)) {
             $cache->clear();
         }
+
+        Service::removeFromIndex($b);
 
         $this->redirect('admin/blog/view/'.$b->id);
     }
@@ -190,7 +196,9 @@ class Controller extends AdminController
         if (is_object($cache)) {
             $cache->clear();
         }
-        
+
+        Service::addToIndex($b);
+                
         $this->redirect('admin/blog/?page=1&status=2');
     }
 
@@ -275,7 +283,7 @@ class Controller extends AdminController
                 $bc = Model::load('BlogCategory');
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
-                $this->processTags($b, $tags_arr, $cats_arr);
+                Service::processTags($b, $tags_arr, $cats_arr);
                 $this->redirect('admin/blog');
             }
         }
@@ -345,7 +353,7 @@ class Controller extends AdminController
                 $bc->removeForBlogItem($b->id);
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
-                $this->processTags($b, $tags_arr);
+                Service::processTags($b, $tags_arr);
                 $this->redirect('admin/blog/view/'.$b->id);
             }
         } else {
@@ -373,26 +381,7 @@ class Controller extends AdminController
         $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
     }
 
-    public function processTags($b, $tags_arr, $cats_arr=array())
-    {
-        // deal with tags
-        $bt = Model::load('BlogTag');
-        $bt->removeAll($b->id);
 
-        $t = Model::load('TagItem');
-
-        if (strlen($_POST['tags']) > 0) {
-            $tag_ids = $t->getIds($tags_arr, false);
-
-            foreach ($tag_ids as $id) {
-                $bt = Model::load('BlogTag');
-                $bt->blog_id = $b->id;
-                $bt->tag_id = $id;
-                $bt->insert(Model::getTable('BlogTag'), 0, array(), 0);
-            }
-        }
-        $t->cleanup();        
-    }
 
     // blog category stuff
     public function add_cat()
