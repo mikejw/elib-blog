@@ -65,7 +65,7 @@
 <th>&nbsp;</th>
 </tr>
 {section name=blog_item loop=$blogs}
-<tr class="{cycle values="alt, }">
+<tr class="{cycle values="alt," }">
 <td class="id">{$blogs[blog_item].id}</td>
 <td><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/view/{$blogs[blog_item].id}">{$blogs[blog_item].heading}</a></td>
 <td>{$blogs[blog_item].body|strip_tags|truncate:30:"..."}</td>
