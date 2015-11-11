@@ -8,7 +8,7 @@ use Empathy\ELib\User\CurrentUser;
 use Empathy\MVC\Session;
 use Empathy\MVC\RequestException;
 use Empathy\ELib\Storage\BlogPage;
-
+use Empathy\MVC\Config;
 
 class BlogFrontControllerNew extends EController
 {
@@ -329,7 +329,7 @@ class BlogFrontControllerNew extends EController
         //$title = TITLE.' RSS Feed';
         $info = $this->stash->get('site_info');
         $title = $info->title;
-        $link = 'http://'.WEB_ROOT.PUBLIC_DIR;
+        $link = 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR');
         $description = ELIB_BLOG_DESCRIPTION;
         $language = 'en-us';
 
@@ -344,7 +344,7 @@ class BlogFrontControllerNew extends EController
         foreach ($blogs as $item) {
             $child = $xml->channel->addChild('item');
             $child->addChild('title', $item['heading']);
-            $child->addChild('link', 'http://'.WEB_ROOT.PUBLIC_DIR.'/blog/item/'.$item['id']);
+            $child->addChild('link', 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/blog/item/'.$item['id']);
             $child->addChild('pubDate', date('r', $item['stamp']));
             $utf_string = mb_convert_encoding($item['body'], 'UTF-8', 'HTML-ENTITIES');
             $child->addChild('description', $this->truncate(strip_tags($utf_string), 250));

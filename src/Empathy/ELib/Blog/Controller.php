@@ -8,7 +8,7 @@ use Empathy\ELib\File\Image as ImageUpload;
 use Empathy\ELib\Model;
 use Empathy\MVC\Session;
 use Empathy\ELib\Storage\BlogItemStatus;
-
+use Empathy\MVC\Config;
 
 
 define('REQUESTS_PER_PAGE', 12);
@@ -333,7 +333,7 @@ class Controller extends AdminController
                 if (isset($images[$b->id])) {
                     // process blog images to create mid sized with id attributes - needs optimising?
                     foreach ($images[$b->id] as $item) {
-                        $tt_image = '<img class="center img-responsive" src="http://'.WEB_ROOT.PUBLIC_DIR.'/tt/tt.php?src=http://'.WEB_ROOT.PUBLIC_DIR.'/uploads/'.$item['filename'].'&amp;w='.$tt_width.'&amp;h='.$tt_height.'" id="blog_image_'.$item['id'].'" alt="$2" />';
+                        $tt_image = '<img class="center img-responsive" src="http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/tt/tt.php?src=http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/uploads/'.$item['filename'].'&amp;w='.$tt_width.'&amp;h='.$tt_height.'" id="blog_image_'.$item['id'].'" alt="$2" />';
                         
                         $b->body = preg_replace(
                             //'!<img +src=""(?: +id="(.*?)")?(?: +alt="(.*?)")? */>!m',
