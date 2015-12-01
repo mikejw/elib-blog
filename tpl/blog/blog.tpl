@@ -55,9 +55,10 @@
           {else}
           <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$blog_item.blog_id}">Permalink</a>
           {/if}
-          <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+
 
           {if count($blog_item.cats)}
+	  <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>	
           Categories: 
           {foreach from=$blog_item.cats key=i item=c}
 
@@ -68,12 +69,12 @@
               </a>
             </span>
           </span>
-          {/foreach}
-          <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+          {/foreach}          
           {/if}
 
 
           {if count($blog_item.tags)}
+	  <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
           Tags: 
           {foreach from=$blog_item.tags item=t}
           <span class="tag">
