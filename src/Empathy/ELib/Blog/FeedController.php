@@ -2,7 +2,8 @@
 
 
 namespace Empathy\ELib\Blog;
-
+use Empathy\MVC\Config;
+use Empathy\ELib\Model;
 
 class FeedController
 {
@@ -18,7 +19,7 @@ class FeedController
         header('Content-type: application/xml');
         $title = 'Hooray For Sex';
         $link = 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR');
-        $description = DESC;
+        $description = defined('ELIB_POD_DESC')? ELIB_POD_DESC: '';
         $language = 'en-us';
         $category = 'Music';
         $image = 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/img/hfs_new.jpg';
