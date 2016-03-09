@@ -69,3 +69,10 @@ PRIMARY KEY(blog_id, blog_category_id));
 
 
 
+CREATE TABLE blog_attachment(
+id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
+blog_id                 INT(11)                 NOT NULL,
+filename                VARCHAR(128)            NULL,
+url                     VARCHAR(128)            NULL,
+FOREIGN KEY(blog_id) REFERENCES blog(id)) ENGINE=InnoDB;
+
