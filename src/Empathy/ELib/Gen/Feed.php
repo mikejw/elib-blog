@@ -2,7 +2,7 @@
 
 namespace Empathy\ELib\Gen;
 
-class Blog extends \Empathy\MVC\Util\ControllerGen
+class Feed extends \Empathy\MVC\Util\ControllerGen
 {
     protected $name = 'feed';
     protected $module = 'feed';
