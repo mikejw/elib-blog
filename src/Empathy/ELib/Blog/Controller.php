@@ -5,6 +5,7 @@ namespace Empathy\ELib\Blog;
 
 use Empathy\ELib\AdminController;
 use Empathy\ELib\File\Image as ImageUpload;
+use Empathy\ELib\File\Upload;
 use Empathy\ELib\Model;
 use Empathy\MVC\Session;
 use Empathy\ELib\Storage\BlogItemStatus;
@@ -206,7 +207,9 @@ class Controller extends AdminController
     {
         if (isset($_POST['upload_image'])) {
             $this->upload_image();
-        }
+        } elseif(isset($_POST['upload_attachment'])) {
+            $this->upload_attachment();
+        }   
 
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
@@ -231,6 +234,20 @@ class Controller extends AdminController
         */
 
         $this->presenter->assign('images', $images);
+
+        $ba = Model::load('BlogAttachment');
+        $sql = ' WHERE blog_id = '.$b->id;    
+        $attachments = $ba->getAllCustom(Model::getTable('BlogAttachment'), $sql);
+
+        /*
+          $image = array();
+          foreach($images as $item)
+          {
+          array_push($image, $item['filename']);
+          }
+        */
+        $this->presenter->assign('attachments', $attachments);
+
 
         // get tags
         $bt = Model::load('BlogTag');
@@ -479,5 +496,50 @@ class Controller extends AdminController
         $this->assign('class', 'blog_cat');
         $this->assign('event', 'rename');
     }
+
+
+
+    public function remove_attachment()
+    {
+        if (!isset($_GET['id']) || !is_numeric($_GET['id']))
+        {
+            $_GET['id'] = 0;
+        }
+
+        $a = Model::load('BlogAttachment');
+
+        $a->id = $_GET['id'];
+        $a->load(Model::getTable('BlogAttachment'));
+
+        $u = new Upload();
+        if($u->remove(array($a->filename)))
+        {
+            $a->delete(Model::getTable('BlogAttachment'));
+        }
+        $this->redirect('admin/blog/view/'.$a->blog_id);
+    }
+
+
+    public function upload_attachment()
+    {
+        $_GET['id'] = $_POST['id'];
+
+        $u = new Upload();
+        
+        if($u->getError() != '')
+        {
+
+            $this->presenter->assign('error', $u->error);
+        }
+        else
+        {
+            $ba = Model::load('BlogAttachment');
+            $ba->filename = $u->getFile();
+            $ba->blog_id = $_GET['id'];
+            $ba->insert(Model::getTable('BlogAttachment'), 1, array(), 0); 
+            //$this->redirect('admin/blog/view/'.$_GET['id']);
+        }    
+    }
+
 
 }

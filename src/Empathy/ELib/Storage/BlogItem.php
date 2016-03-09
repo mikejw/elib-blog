@@ -428,4 +428,23 @@ class BlogItem extends Entity
         return $id;
     }
 
+
+
+    public function getPodcast()
+    {
+        $podcast = array();
+        $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.self::TABLE.' b,'
+            .' '.Model::getTable('BlogAttachment').' a'
+            .' WHERE a.blog_id = b.id AND b.status = '.BlogItemStatus::PUBLISHED
+            .' ORDER BY b.stamp DESC';
+        $error = 'Could not get podcast.';
+        $result = $this->query($sql, $error);
+        foreach($result as $row)
+        {
+            $podcast[] = $row;
+        }
+        return $podcast;
+    }
+
+
 }
