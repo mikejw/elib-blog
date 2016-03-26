@@ -16,7 +16,6 @@ class BlogImage extends Entity
     public function getForIDs($ids)
     {
         $images = array();
-        $i= 0;
         foreach ($ids as $item) {
             $sql = 'SELECT * FROM '.Model::getTable('BlogImage').' WHERE blog_id = '.$item
                 .' ORDER BY id';
@@ -24,8 +23,7 @@ class BlogImage extends Entity
             $result = $this->query($sql, $error);
             if ($result->rowCount() > 0) {
                 foreach ($result as $row) {
-                    $images[$item][$i] = $row;
-                    $i++;
+                    $images[$item][] = $row;
                 }
             }
         }
