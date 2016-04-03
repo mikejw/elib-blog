@@ -122,7 +122,9 @@ class BlogItem extends Entity
 
     public function validates()
     {
-        if ($this->heading == '' || !ctype_alnum(str_replace(' ', '', $this->heading))) {
+	$allowed_chars = '/[\.\s\\\\\/]/';
+
+        if ($this->heading == '' || !ctype_alnum(preg_replace($allowed_chars, '', $this->heading))) {
             $this->addValError('Invalid heading');
         }
         if ($this->body == '') {
