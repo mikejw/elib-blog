@@ -142,9 +142,9 @@ class BlogCatTree extends Tree
             if ($children > 0) {
                 $markup .= $this->buildMarkup($value['children'], $level, $current_id, $value['id'], $value['banner']);
             }
-            $markup .= "</li>\n";
+            $markup .= "<span class=\"clear\"/></li>\n";
         }
-        $markup .= "</ul>\n";
+        $markup .= "</ul><div class=\"clear\">&nbsp;</div>\n";
 
         return $markup;
     }
