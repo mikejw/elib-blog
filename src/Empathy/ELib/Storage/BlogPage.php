@@ -11,6 +11,7 @@ class BlogPage
 {
     private $blog_item;
     private $blog_user;
+    private $blog_user_profile;
     private $blog_comments;
     private $page_title;
 
@@ -32,13 +33,21 @@ class BlogPage
         $this->blog_user = Model::load('UserItem');
         $this->blog_user->id = $this->blog_item->user_id;
         $this->blog_user->load();
+
+        $this->blog_user_profile = Model::load('UserProfile');
+        $this->blog_user_profile->id = $this->blog_user->user_profile_id;
+        $this->blog_user_profile->load();
+
+
+
         //$this->blog_comments = $this->getCommentsFetch($this->blog_item->id);
-        Model::disconnect(array($this->blog_item, $this->blog_user));
+        Model::disconnect(array($this->blog_item, $this->blog_user, $this->blog_user_profile));
     }
 
     public function getAuthor()
     {
-        return $this->blog_user->username;
+        //return $this->blog_user->username;
+        return $this->blog_user_profile->fullname;
 
     }
 
