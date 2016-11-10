@@ -56,17 +56,22 @@
 </table>
 {/if}
 
+
+
+
 {if sizeof($p_nav) > 1}
-<div id="p_nav">
-<p>
+<nav>
+  <ul class="pagination">
+
 {foreach from=$p_nav key=k item=v}
-{if $v eq 1}<span>{$k}</span>
+{if $v eq 1}
+<li><span>{$k}</span></li>
 {else}
-<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?page={$k}">{$k}</a>
+<li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?page={$k}">{$k}</a></li>
 {/if}
 {/foreach}
-</p>
-</div>
+  </ul>
+</nav>
 {else}
 <p>&nbsp;</p>
 {/if}
