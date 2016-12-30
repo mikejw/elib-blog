@@ -2,57 +2,31 @@
 
 
 
-<div id="operations">
-<div class="grey_top">
-<div class="top_right">
-<div class="top_left"></div>
-</div>
-</div>
-
-<div class="grey" style="padding:0.5em;">
 
 <form action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/category" method="get">
-<div><button type="submit" name="edit_categories" value="1">Edit Categories</button></div>
+<div><button class="btn btn-small btn-primary" type="submit" name="edit_categories" value="1">Edit Categories</button></div>
 </form>
 
-
-</div>
-<div class="grey_bottom">
-<div class="bottom_right">
-<div class="bottom_left"></div>
-</div>
-</div>
-</div>
 
 
 <p style="line-height: 0.5em;">&nbsp;</p>
 
 
-
-
-<div id="yuk_tabbed_nav">
-<ul>
-<li{if $status eq '1'} class="active"{/if}><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?status=1&amp;page=1">Drafts</a></li>
-<li{if $status eq '2'} class="active"{/if}><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?status=2&amp;page=1">Published</a></li>
-{if $super eq 1}<li{if $status eq '3'} class="active"{/if}><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?status=3&amp;page=1">Deleted</a></li>{/if}
+<ul class="nav nav-tabs">
+<li role="presentation" {if $status eq '1'} class="active"{/if}><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?status=1&amp;page=1">Drafts</a></li>
+<li role="presentation"{if $status eq '2'} class="active"{/if}><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?status=2&amp;page=1">Published</a></li>
+{if $super eq 1}
+<li role="presentation"{if $status eq '3'} class="active"{/if}><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/?status=3&amp;page=1">Deleted</a></li>{/if}
 </ul>
-</div>
+
+<p style="line-height: 0.5em;">&nbsp;</p>
 
 
-
-<!--
-<div class="grey_top">
-<div class="top_right">
-<div class="top_left"></div>
-</div>
-</div>-->
-
-<div class="grey" style="border-top: 0; -moz-border-radius-topleft: 0; -webkit-border-top-left-radius: 0; -moz-border-radius-topright: 0; -webkit-border-top-right-radius: 0;">
 
 {if sizeof($blogs) < 1}
 <p>Nothing to display.</p>
 {else}
-<table>
+<table class="table">
 <tr>
 <th>id</th>
 <th>Heading</th>
@@ -99,17 +73,10 @@
 
 
 
-</div>
-
-<div class="grey_bottom">
-<div class="bottom_right">
-<div class="bottom_left"></div>
-</div>
-</div>
 
 {if $status eq 1}
 <form action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/create" method="get">
-<p><button name="create" type="submit">Create New</button></p>
+<p><button class="btn btn-small btn-primary"  name="create" type="submit">Create New</button></p>
 </form>
 {/if}
 
