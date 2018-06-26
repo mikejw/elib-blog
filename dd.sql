@@ -6,7 +6,7 @@ CREATE TABLE blog(
 id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
 status                  INT(11)                 NOT NULL,
 user_id                 INT(11)                 NOT NULL,        
-stamp                   TIMESTAMP               NOT NULL,
+stamp                   TIMESTAMP               NULL DEFAULT NULL,
 heading                 VARCHAR(64)             NOT NULL,
 body                    TEXT,
 slug                    VARCHAR(64)             NULL,
