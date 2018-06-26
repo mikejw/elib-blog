@@ -54,11 +54,24 @@ class TagItem extends Entity
         return $ids;
     }
 
-    public function getAllTags()
+    public function getAllTags($category_id)
     {
+        $category_id = (int) $category_id;
         $total = 0;
         $sql = 'SELECT COUNT(b.blog_id) AS count FROM '.Model::getTable('BlogTag').' b,'
-            .Model::getTable('BlogItem').' c WHERE c.id = b.blog_id AND c.status = 2';
+            .Model::getTable('BlogItem').' c';
+
+        if ($category_id > 0) {
+            $sql .= ', '.Model::getTable('BlogItemCategory').' d';
+        }
+
+        $sql .= ' WHERE c.id = b.blog_id AND c.status = 2';
+
+        if ($category_id > 0) {
+            $sql .= ' AND d.blog_category_id = '.$category_id
+                .' AND d.blog_id = b.blog_id';
+        }
+
         $error = 'Could not get total number of tagging instances';
         $result = $this->query($sql, $error);
         $row = $result->fetch();
@@ -66,7 +79,20 @@ class TagItem extends Entity
 
         $tag = array();
         $sql = 'SELECT t.tag, COUNT(b.blog_id) AS count FROM '.Model::getTable('BlogItem').' c, '.Model::getTable('TagItem').' t LEFT JOIN '.Model::getTable('BlogTag')
-            .' b ON (b.tag_id = t.id) WHERE c.status = 2 AND b.blog_id = c.id GROUP BY t.id';
+            .' b ON (b.tag_id = t.id)';
+
+        if ($category_id > 0) {
+            $sql .= ', '.Model::getTable('BlogItemCategory').' d';
+        }
+        $sql .= ' WHERE c.status = 2 AND b.blog_id = c.id';
+
+        if ($category_id > 0) {
+            $sql .= ' AND d.blog_category_id = '.$category_id
+                .' AND d.blog_id = b.blog_id';
+        }
+
+        $sql .= ' GROUP BY t.id';
+
         $error = 'Could not get all active tags';
         $result = $this->query($sql, $error);
         $i = 0;

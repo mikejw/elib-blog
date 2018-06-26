@@ -424,7 +424,9 @@ class BlogFrontControllerNew extends EController
 
     private function getAvailableTags()
     {
-        $tags = $this->cache->cachedCallback('tags', array($this, 'getAvailableTagsFetch'));
+        $bc = $this->stash->get('blog_category');
+        $tags = $this->cache->cachedCallback('tags_'.$bc.'_', array($this, 'getAvailableTagsFetch'));
+        shuffle($tags);
         $this->assign('tags', $tags);
     }
 
@@ -432,13 +434,19 @@ class BlogFrontControllerNew extends EController
     public function getAvailableTagsFetch()
     {
         $t = Model::load('TagItem');
-        $tags = $t->getAllTags();
+        $bc = $this->stash->get('blog_category');
+        $tags = $t->getAllTags($bc);
 
         foreach ($tags as $index => $item) {
             $tags[$index]['tag_esc_1'] = '/\+'.$tags[$index]['tag'].'/';
             $tags[$index]['tag_esc_2'] = '/'.$tags[$index]['tag'].'\+/';
-            $tags[$index]['share'] = ($tags[$index]['share'] / 10) * 2.5;
+            $tags[$index]['share'] = ($tags[$index]['share'] / 4.5) * 1.5;
+            $tags[$index]['size'] = (($tags[$index]['share'] / count($tags) * 50) < 3)
+                ? ($tags[$index]['share'] / count($tags) * 50)
+                : 3;
+
         }
+
         return $tags;       
     }
 
@@ -468,7 +476,7 @@ class BlogFrontControllerNew extends EController
                     $fa = 'plug';
                     break;
                 case 'Photography':
-                    $fa = 'picture-o';
+                    $fa = 'camera';
                     break;
                 case 'Any':
                     $fa = 'random'; 
