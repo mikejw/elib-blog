@@ -75,7 +75,7 @@ class BlogFrontControllerNew extends EController
         } else {
             $this->assign('blog_module', 'blog');
         }
-        $this->setTemplate('elib:/blog/blog.tpl');
+        $this->setTemplate('elib:blog/blog.tpl');
         $this->socialLinks();
     }   
 
@@ -171,7 +171,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('year', $_GET['id']);
             $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
         }
-        $this->setTemplate('elib:/blog/blog_year.tpl');
+        $this->setTemplate('blog_year.tpl');
     }
 
 
@@ -200,7 +200,7 @@ class BlogFrontControllerNew extends EController
 
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('elib:/blog/blog_month.tpl');
+        $this->setTemplate('blog_month.tpl');
     }
 
 
@@ -262,7 +262,7 @@ class BlogFrontControllerNew extends EController
 
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('elib:/blog/blog_day.tpl');
+        $this->setTemplate('blog_day.tpl');
     }
 
 
@@ -459,7 +459,7 @@ class BlogFrontControllerNew extends EController
         foreach ($cats as &$c) {
             switch ($c['label']) {
                 case 'Technology':
-                    $fa = 'gear';
+                    $fa = 'cog';
                     break;
                 case 'Music':
                     $fa = 'music';
@@ -484,7 +484,7 @@ class BlogFrontControllerNew extends EController
                     break;
             }
             if ($fa !== NULL) {
-                $c['label_icon'] = '<i class="fa fa-'.$fa.'"></i> '.$c['label'];
+                $c['label_icon'] = '<i class="fa fa-'.$fa.'" aria-hidden="true"></i>&nbsp;&nbsp;';
             }
         }
         $this->assign('categories', $cats);
