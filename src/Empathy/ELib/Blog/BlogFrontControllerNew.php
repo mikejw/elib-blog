@@ -75,7 +75,7 @@ class BlogFrontControllerNew extends EController
         } else {
             $this->assign('blog_module', 'blog');
         }
-        $this->setTemplate('elib:blog/blog.tpl');
+        $this->setTemplate('elib:/blog/blog.tpl');
         $this->socialLinks();
     }   
 
@@ -171,7 +171,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('year', $_GET['id']);
             $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
         }
-        $this->setTemplate('blog_year.tpl');
+        $this->setTemplate('elib:/blog/blog_year.tpl');
     }
 
 
@@ -200,7 +200,7 @@ class BlogFrontControllerNew extends EController
 
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('blog_month.tpl');
+        $this->setTemplate('elib:/blog/blog_month.tpl');
     }
 
 
@@ -262,7 +262,7 @@ class BlogFrontControllerNew extends EController
 
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('blog_day.tpl');
+        $this->setTemplate('elib:/blog/blog_day.tpl');
     }
 
 
