@@ -130,4 +130,10 @@ class Service
     {
         return strtolower(substr(date('F', strtotime($stamp)), 0, 3));
     }
+
+    public static function getHealth()
+    {
+        $client = self::getClient();
+        return $response = $client->cat()->health();
+    }
 }
