@@ -10,6 +10,18 @@ use Empathy\MVC\RequestException;
 use Empathy\ELib\Storage\BlogPage;
 use Empathy\MVC\Config;
 
+
+// http://coffeerings.posterous.com/php-simplexml-and-cdata
+class SimpleXMLExtended extends \SimpleXMLElement {
+    public function addCData($cdata_text) {
+    	   $node = dom_import_simplexml($this);
+    	   $no   = $node->ownerDocument;
+    	   $node->appendChild($no->createCDATASection($cdata_text));
+    }
+}
+
+
+
 class BlogFrontControllerNew extends EController
 {
     private $cache;
@@ -86,7 +98,7 @@ class BlogFrontControllerNew extends EController
     }
 
 
-    public function getBlogIdBySlug($slug_arr)
+   public function getBlogIdBySlug($slug_arr)
     {
         $b = Model::load('BlogItem');
         return $b->findByArchiveURL($this->convertMonth($slug_arr['month']), $slug_arr['year'], $slug_arr['day'], $slug_arr['slug']);
@@ -336,7 +348,7 @@ class BlogFrontControllerNew extends EController
         $content = "<rss version=\"2.0\">\n\t<channel>\n\t\t<title>$title</title>\n\t\t<link>$link</link>\n\t\t"
             ."<description>$description</description>\n\t\t<language>$language</language>\n\t</channel>\n</rss>";
 
-        $xml = new \SimpleXMLElement($content);
+        $xml = new SimpleXMLExtended($content);
 
         $b = Model::load('BlogItem');
         $blogs = $b->getFeed();
@@ -347,7 +359,13 @@ class BlogFrontControllerNew extends EController
             $child->addChild('link', 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/blog/item/'.$item['id']);
             $child->addChild('pubDate', date('r', $item['stamp']));
             $utf_string = mb_convert_encoding($item['body'], 'UTF-8', 'HTML-ENTITIES');
-            $child->addChild('description', $this->truncate(strip_tags($utf_string), 250));
+	    
+            //$child->addChild('description', $this->truncate(strip_tags($utf_string), 250));
+	    //$child->addChild('description', '<![CDATA['.$utf_string.']]>');
+	    $child->description = null; // VERY IMPORTANT! We need a node where to append
+	    $child->description->addCData($utf_string);
+
+
         }
 
         return $xml->asXML();
