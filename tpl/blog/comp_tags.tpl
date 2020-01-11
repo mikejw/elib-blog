@@ -13,10 +13,10 @@
 <li>
 
 {if $c.id eq $blog_category}
-{if $c.label_icon}{$c.label_icon}{else}{$c.label}{/if}
+{if $c.label_icon}{$c.label_icon} {$c.label}{else}{$c.label}{/if}
 {else}
 
-<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">{if $c.label_icon}{$c.label_icon}{else}{$c.label}{/if}</a>
+<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">{if $c.label_icon}{$c.label_icon} {$c.label}{else}{$c.label}{/if}</a>
 
 {*<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/set_category/{$c.label|lower}/">{$c.label}</a>*}
 
