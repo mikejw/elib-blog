@@ -548,7 +548,7 @@ class BlogFrontControllerNew extends EController
                         array_push($body_new, $body_arr[$i]);
                         $i++;
                     }
-                    $blogs[$index]['body'] = implode($body_new, '<p>');
+                    $blogs[$index]['body'] = implode('<p>', $body_new);
                     $blogs[$index]['truncated'] = 1;
                 } else {
                     $blogs[$index]['truncated'] = 0;
