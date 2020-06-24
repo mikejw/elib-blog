@@ -350,7 +350,7 @@ class Controller extends AdminController
                 if (isset($images[$b->id])) {
                     // process blog images to create mid sized with id attributes - needs optimising?
                     foreach ($images[$b->id] as $item) {
-                        $tt_image = '<img class="center img-responsive" src="//tt/tt.php?src=//uploads/'
+                        $tt_image = '<img class="center img-responsive" src="/tt/tt.php?src=/uploads/'
                                   .$item['filename'].'&amp;w='
                                   .$tt_width.'&amp;h='
                                   .$tt_height.'" id="blog_image_'
