@@ -350,7 +350,11 @@ class Controller extends AdminController
                 if (isset($images[$b->id])) {
                     // process blog images to create mid sized with id attributes - needs optimising?
                     foreach ($images[$b->id] as $item) {
-                        $tt_image = '<img class="center img-responsive" src="http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/tt/tt.php?src=http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/uploads/'.$item['filename'].'&amp;w='.$tt_width.'&amp;h='.$tt_height.'" id="blog_image_'.$item['id'].'" alt="$2" />';
+                        $tt_image = '<img class="center img-responsive" src="//tt/tt.php?src=//uploads/'
+                                  .$item['filename'].'&amp;w='
+                                  .$tt_width.'&amp;h='
+                                  .$tt_height.'" id="blog_image_'
+                                  .$item['id'].'" alt="$2" />';
                         
                         $b->body = preg_replace(
                             //'!<img +src=""(?: +id="(.*?)")?(?: +alt="(.*?)")? */>!m',
@@ -360,12 +364,8 @@ class Controller extends AdminController
                             $b->body, 1);
                     }
                 }
-
-                
-                
-
+                         
                 $b->save(Model::getTable('BlogItem'), array(''), 1);
-
                 $bc = Model::load('BlogCategory');
                 $bc->removeForBlogItem($b->id);
                 $bc->createForBlogItem($_POST['category'], $b->id);
