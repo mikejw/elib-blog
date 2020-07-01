@@ -88,13 +88,16 @@ class BlogCatTree extends Tree
     
     private function buildMarkup($data, $level, $current_id, $last_id, $last_node_data)
     {
-        $markup = "\n<ul";
+        $markup = "\n<ul class=\"ui-sortable clearfix";
         
         $ancestors = $this->_blogCategoryAncestors;
         
         if (!in_array($last_id, $ancestors)) {
-            $markup .= " class=\"hidden_sections\"";
+            $markup .= " hidden_sections";
         }
+
+        $markup .= "\"";
+
         if ($level == 0) {
             $markup .= " id=\"tree\"";
             $level++;

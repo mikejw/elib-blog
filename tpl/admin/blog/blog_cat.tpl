@@ -10,14 +10,14 @@
 
 <div class="grey" style="padding:0.5em;">
 
-<form action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/add_cat/{$blog_cat_id}" method="get">
-<div><button type="submit" name="add_cat" value="1"{if $class neq 'blog_cat'}disabled="disabled"{/if}>Add Category</button></div>
+<form style="display: inline;" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/add_cat/{$blog_cat_id}" method="get">
+    <button class="btn btn-sm btn-primary" type="submit" name="add_cat" value="1"{if $class neq 'blog_cat'}disabled="disabled"{/if}>Add Category</button>
 </form>
-<form action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/rename_category/{$blog_cat_id}" method="get">
-<div><button type="submit" name="rename" value="1"{if $class neq 'blog_cat' || $event eq 'rename'}disabled="disabled"{/if}>Rename</button></div>
+<form style="display: inline;" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/rename_category/{$blog_cat_id}" method="get">
+    <button class="btn btn-sm btn-primary" type="submit" name="rename" value="1"{if $class neq 'blog_cat' || $event eq 'rename'}disabled="disabled"{/if}>Rename</button>
 </form>
-<form class="confirm" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/delete_category/{$blog_cat_id}" method="get">
-<div><button type="submit" name="delete" value="1"{if $blog_cat_id eq 0} disabled="disabled"{/if}>Delete</button></div>
+<form style="display: inline;" class="confirm" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/delete_category/{$blog_cat_id}" method="get">
+    <button class="btn btn-sm btn-primary" type="submit" name="delete" value="1"{if $blog_cat_id eq 0} disabled="disabled"{/if}>Delete</button>
 </form>
 
 
@@ -68,15 +68,6 @@
 
 
 
-
-<div class="grey_top">
-<div class="top_right">
-<div class="top_left"></div>
-</div>
-</div>
-
-<div class="grey clear">
-
 {if $blog_cat_id != 0 || !isset($blog_cat_id)}
 <p><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/category/0">Top Level</a></p>
 {/if}
@@ -88,14 +79,18 @@
 
 <div id="right">
 
-{if sizeof($errors) > 0}
-<ul id="error">
-{foreach from=$errors item=error}
-<li>{$error}</li>
-{/foreach}
-</ul>
-{/if}
-
+    {if isset($errors)}
+        <p>&nbsp;</p>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong>
+            {foreach from=$errors item=e}
+                <p>{$e}</p>
+            {/foreach}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {/if}
 
 {if $class eq 'blog_cat'}
 {if $event eq 'rename'}
@@ -103,24 +98,7 @@
 {/if}
 {/if}
 
-
 </div>
-
-
-
-</div>
-<div class="grey_bottom">
-<div class="bottom_right">
-<div class="bottom_left"></div>
-</div>
-</div>
-
-
-
-
-
-
-
 
 
 
