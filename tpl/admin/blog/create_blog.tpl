@@ -46,11 +46,11 @@
     <input type="hidden" name="id" value="{$blog->id}" />
     <button type="submit" name="save" class="btn btn-primary">Submit</button>
     <button type="submit" name="cancel" class="btn btn-primary">Cancel</button>
-  </div>
+    <p><br /><br />New items will be automatically saved to drafts.</p>
 </form>
 
 
-<p><br /><br />New items will be automatically saved to drafts.</p>
+
 
 
 
