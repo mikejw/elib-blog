@@ -32,7 +32,7 @@ class BlogPage
         $this->blog_user = Model::load('UserItem');
         $this->blog_user->id = $this->blog_item->user_id;
         $this->blog_user->load();
-        //$this->blog_comments = $this->getCommentsFetch($this->blog_item->id);
+        $this->blog_comments = $this->getCommentsFetch($this->blog_item->id);
         Model::disconnect(array($this->blog_item, $this->blog_user));
     }
 
@@ -67,7 +67,6 @@ class BlogPage
         return $this->blog_comments;
     }
 
-
     private function getCommentsFetch($id)
     {
         $bc = Model::load('BlogComment');
@@ -77,6 +76,4 @@ class BlogPage
         $sql .= ' ORDER BY t1.stamp';
         return $bc->getAllCustomPaginateSimpleJoin('*,t1.id AS id', Model::getTable('BlogComment'), Model::getTable('UserItem'), $sql, 1, 200);
     }
-
-
 }

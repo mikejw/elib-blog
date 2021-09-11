@@ -38,41 +38,31 @@ class BlogItem extends Entity
     }
 
 
-    private function getItemsQuery($found_items, $cat_blogs_string, $preSelect=false, $limit=array())
+    private function getItemsQuery($found_items, $cat_blogs_string, $limit=array())
     {
-        $sql = 'SELECT ';
-        if (!$preSelect) {
-            $sql .= 't1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
-        } else {
-            $sql .= '*';
-        }
-
-        $sql .=' FROM '.Model::getTable('BlogItem').' t1'
+        $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,'
+            .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
+        $sql .= ' FROM '.Model::getTable('UserItem').' t2,'
+            .Model::getTable('BlogItem').' t1'
             .' LEFT JOIN '.Model::getTable('BlogComment').' t3'
             .' ON t1.id = t3.blog_id'
+            .' WHERE t1.user_id = t2.id';
 
-            .', '.Model::getTable('UserItem').' t2'
-            .' WHERE';
         if ($found_items != '(0,)') {
-            $sql .= ' t1.id IN'.$found_items.' AND';
+            $sql .= ' AND t1.id IN'.$found_items;
         }
-        $sql .= ' t1.user_id = t2.id'
-             .' AND t1.status = '.BlogItemStatus::PUBLISHED;
+        $sql .= ' AND t1.status = '.BlogItemStatus::PUBLISHED;
 
         if($cat_blogs_string != '') {
-
             $sql .= ' AND t1.id IN'.$cat_blogs_string;
         }
         $sql .= ' GROUP BY t1.id'
             .' ORDER BY t1.stamp DESC';
-
         if (sizeof($limit)) {
             $sql .= ' limit '.$limit[0].', '.$limit[1];
         }
-
         return $sql;
     }
-
 
     public function getItems($found_items, $limit, $cat=null, $page=1)
     {       
@@ -80,7 +70,7 @@ class BlogItem extends Entity
 
         $blogs = array();
         $error = 'Could not get blog items.';
-        $sql = $this->getItemsQuery($found_items, $cat_blogs_string, true);
+        $sql = $this->getItemsQuery($found_items, $cat_blogs_string);
         $result = $this->query($sql, $error);
         $rows = $result->rowCount();
 
@@ -92,7 +82,7 @@ class BlogItem extends Entity
 
         //echo "start: $start end: $end<br />";
 
-        $sql = $this->getItemsQuery($found_items, $cat_blogs_string, false, array($start, $end));
+        $sql = $this->getItemsQuery($found_items, $cat_blogs_string, array($start, $end));
         $result = $this->query($sql, $error);
 
         $struct_pages = array();
@@ -122,8 +112,7 @@ class BlogItem extends Entity
 
     public function validates()
     {
-	$allowed_chars = '/[\.\s\\\\\/]/';
-
+	    $allowed_chars = '/[\.\s\\\\\/]/';
         if ($this->heading == '' || !ctype_alnum(preg_replace($allowed_chars, '', $this->heading))) {
             $this->addValError('Invalid heading');
         }

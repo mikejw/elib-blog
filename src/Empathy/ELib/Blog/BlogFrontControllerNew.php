@@ -32,7 +32,6 @@ class BlogFrontControllerNew extends EController
         $this->cache = $this->stash->get('cache');
     }
 
-
     public function default_event()
     {
         $b = Model::load('BlogItem');
@@ -50,7 +49,6 @@ class BlogFrontControllerNew extends EController
         $page = $_GET['id'];
 
         $blogs = $this->getBlogs($b, $found_items, $page);
-
         $this->assign('page', $page);
         $this->assign('pages', $b->getPages());
         $this->assign('total_pages', sizeof($b->getPages()));
@@ -106,13 +104,10 @@ class BlogFrontControllerNew extends EController
 
     public function item()
     {
+        $slug_arr = array();
         $this->setTemplate('elib:/blog/blog_item.tpl');
-        if (isset($_POST['submit'])) {
-            $this->submitComment();
-        }
 
         if (isset($_GET['id']) && $_GET['id'] == 0) {
-
             $slug_arr = array(
                 'month' => $_GET['month'],
                 'year' => $_GET['year'],
@@ -122,13 +117,24 @@ class BlogFrontControllerNew extends EController
             $_GET['id'] = $this->cache->cachedCallback($slug_key, array($this, 'getBlogIdBySlug'), array($slug_arr)); 
         }
 
+        if (isset($_POST['submit'])) {
+            if (sizeof($slug_arr)) {
+                $blog_route = $slug_arr['year']
+                .'/'.$slug_arr['month']
+                .'/'.$slug_arr['day']
+                .'/'.$slug_arr['slug'];
+            } else {
+                $blog_route = $_GET['id'];
+            }
+            $this->submitComment($blog_route);
+        }
+
         if (!$this->initID('id', -1, true)) {
             throw new RequestException('No valid blog id', RequestException::NOT_FOUND);
         }
 
         $id = $_GET['id'];
         $blog_page = $this->cache->cachedCallback('blog_'.$id, array($this, 'getBlogPageData'), array($id));
-
 
         if (isset($slug_arr)) {
             $this->assign('slug_arr', $slug_arr);    
@@ -138,7 +144,7 @@ class BlogFrontControllerNew extends EController
         $this->assign('blog', $blog_page->getBlogItem());
         //$this->assign('custom_title', $blog_page->getTitle());
         $this->assign('custom_description', $blog_page->getBody());
-        //$this->assign('comments', $blog_page->getComments());
+        $this->assign('comments', $blog_page->getComments());
 
         $this->getAvailableTags();
         $this->getArchive();
@@ -154,7 +160,6 @@ class BlogFrontControllerNew extends EController
 
         $bc = Model::load('BlogCategory');
         $blog_cats = $bc->getCategoriesForBlogItem($id);
-         
         $cats_lookup = array();
         foreach ($cats as $c) {
             $cats_lookup[$c['id']] = $c['label'];
@@ -165,14 +170,12 @@ class BlogFrontControllerNew extends EController
         $this->socialLinks();
     }
 
-
     private function socialLinks()
     {
         if (defined('ELIB_BLOG_SOCIAL_LINKS')) {            
             $this->assign('social', json_decode(ELIB_BLOG_SOCIAL_LINKS, true));
         }
     }
-
 
     public function year()
     {
@@ -185,7 +188,6 @@ class BlogFrontControllerNew extends EController
         }
         $this->setTemplate('blog_year.tpl');
     }
-
 
     public function month()
     {
@@ -203,19 +205,14 @@ class BlogFrontControllerNew extends EController
             }
 
             $month = $b->getMonthName($m, $year);
-
             $this->presenter->assign('month', $month);
             $this->presenter->assign('month_slug', substr(strtolower($month), 0, 3));
             $this->presenter->assign('year', $year);
-
             $this->presenter->assign('custom_title', "Archive for $month $year - Mike Whiting's Blog");
-
             $this->presenter->assign('blogs', $blogs);
         }
         $this->setTemplate('blog_month.tpl');
     }
-
-
 
     public function day()
     {
@@ -277,7 +274,6 @@ class BlogFrontControllerNew extends EController
         $this->setTemplate('blog_day.tpl');
     }
 
-
     public function fetchCategoryId($cat)
     {
         $id = 0;
@@ -290,13 +286,11 @@ class BlogFrontControllerNew extends EController
         return $id;
     }
 
-
     public function category()
     {
         $this->doSetCategory($_GET['category']);
         $this->default_event();
     }
-
 
     private function doSetCategory($cat)
     {
@@ -313,7 +307,6 @@ class BlogFrontControllerNew extends EController
         $this->redirect('');
     }
 
-
     public function tags()
     {
         if (!isset($_GET['active_tags'])) {
@@ -325,9 +318,6 @@ class BlogFrontControllerNew extends EController
         $_GET['active_tags'] = $this->getTags();
         $this->default_event();
     }
-
-
-
 
     public function feed()
     {
@@ -371,32 +361,28 @@ class BlogFrontControllerNew extends EController
         return $xml->asXML();
     }
 
-
-
-
-
-
-    private function submitComment()
+    private function submitComment($blog_route)
     {
         $bc = Model::load('BlogComment');
         $bc->blog_id = $_GET['id'];
         $bc->status = 1;
         $bc->body = $_POST['body'];
-        $bc->heading = '';
+        $bc->heading = $_POST['heading'];
         $bc->user_id = CurrentUser::getUserId();
         $bc->validates();
-
         if ($bc->hasValErrors()) {
             $this->presenter->assign('comment', $bc);
-            $this->presenter->assign('errors', $bc->val->errors);
+            $this->presenter->assign('errors', $bc->getValErrors());
         } else {
             $bc->stamp = date('Y-m-d H:i:s', time());
             $bc->insert(Model::getTable('BlogComment'), 1, array('body'), 1);
-            $this->redirect('blog/item/'.$bc->blog_id);
+            if (is_numeric($blog_route)) {
+                $this->redirect('blog/item/'.$bc->blog_id);
+            } else {
+                $this->redirect($blog_route);
+            }
         }
     }
-
-   
 
     private function getTags()
     {      
@@ -418,7 +404,6 @@ class BlogFrontControllerNew extends EController
         if (is_object($info) && isset($info->title)) {
             $title .= 'in '.$info->title;            
         }
-
         $this->assign('secondary_title', $title);
     }
 
@@ -439,7 +424,6 @@ class BlogFrontControllerNew extends EController
     }
     */
 
-
     private function getAvailableTags()
     {
         $bc = $this->stash->get('blog_category');
@@ -447,7 +431,6 @@ class BlogFrontControllerNew extends EController
         shuffle($tags);
         $this->assign('tags', $tags);
     }
-
 
     public function getAvailableTagsFetch()
     {
@@ -462,9 +445,7 @@ class BlogFrontControllerNew extends EController
             $tags[$index]['size'] = (($tags[$index]['share'] / count($tags) * 50) < 3)
                 ? ($tags[$index]['share'] / count($tags) * 50)
                 : 3;
-
         }
-
         return $tags;       
     }
 
@@ -516,7 +497,6 @@ class BlogFrontControllerNew extends EController
         $this->assign('categories', $cats);
         return $cats;
     }
-
 
     private function getBlogs($b, $found_items, $page)
     {
@@ -575,11 +555,8 @@ class BlogFrontControllerNew extends EController
             }
             $this->assign('blog_images', $blog_images);
         }
-
         return $blogs;
     }
-
-
 
     public function findBlogsByTags($active_tags)
     {
@@ -591,7 +568,6 @@ class BlogFrontControllerNew extends EController
         } else {
             return $bt->buildUnionString($bt->getBlogs($tags));
         }
-      
     }
 
     private function getActiveTags()
@@ -615,10 +591,6 @@ class BlogFrontControllerNew extends EController
         return $found_items;
     }
 
-
-
-
-
     public function truncate($desc, $max_length)
     {
         if (strlen($desc) > $max_length) {
@@ -637,9 +609,6 @@ class BlogFrontControllerNew extends EController
 
         return $desc;
     }
-
-
-
 
     public function convertMonth($month)
     {
@@ -684,8 +653,6 @@ class BlogFrontControllerNew extends EController
         default:
             break;
         }
-
         return $m;
     }
-
 }
