@@ -99,11 +99,6 @@ class TagItem extends Entity
         foreach ($result as $row) {
             $tag[$i] = $row;
             $share = ceil(100 / $total * $tag[$i]['count']);
-            if ($share < 10) {
-                $share = '0'.$share;
-            } elseif ($share > 99) {
-                $share = 99;
-            }
             $tag[$i]['share'] = $share;
             $i++;
         }

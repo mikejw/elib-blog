@@ -441,10 +441,11 @@ class BlogFrontControllerNew extends EController
         foreach ($tags as $index => $item) {
             $tags[$index]['tag_esc_1'] = '/\+'.$tags[$index]['tag'].'/';
             $tags[$index]['tag_esc_2'] = '/'.$tags[$index]['tag'].'\+/';
-            $tags[$index]['share'] = ($tags[$index]['share'] / 4) * 1.5;
-            $tags[$index]['size'] = (($tags[$index]['share'] / count($tags) * 50) < 3)
-                ? ($tags[$index]['share'] / count($tags) * 50)
-                : 3;
+            $oldMin = 0;
+            $newMax = 7;
+            $newMin = 0.8;
+            $oldMax = 100;
+            $tags[$index]['size'] = ((($tags[$index]['share'] - $oldMin) * ($newMax - $newMin)) / ($oldMax - $oldMin)) + $newMin;
         }
         return $tags;       
     }
