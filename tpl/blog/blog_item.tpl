@@ -16,7 +16,7 @@
 		<h2 class="blog-post-title">{$blog->heading}</h2>
 		<p class="blog-post-meta">{$blog->stamp|sdate:$def_date_format}</p>
 
-		{$blog->body|replace:"</p>":"</p>\n"}
+		{$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR"}
 
 
 		{*{include file="elib:/blog/comp_social_buttons.tpl"}*}

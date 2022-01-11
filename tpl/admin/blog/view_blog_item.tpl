@@ -3,7 +3,7 @@
 
 <div class="entry">
 <h2>{$blog->heading} <span>|</span> {$blog->stamp|date_format:"%A %e %B %Y"} <span>|</span> {$author}</h2>
-{$blog->body|replace:"</p>":"</p>\n"}
+{$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR}
 </div>
 
 {if $blog->status eq 1}

@@ -22,11 +22,7 @@
     </div>
     <div class="form-group">
         <label for="body">Body</label>
-        {*
-        <textarea rows="0" cols="0" name="body">{$blog->body|replace:'<br />':"\r\n"}</textarea>
-        *}
-        {*<textarea rows="0" cols="0" name="body">{$blog->body|replace:'</p><p>':"\r\n"|replace:'<p>':""|replace:'</p>':""}</textarea>*}
-        <textarea name="body" rows="0" cols="0" name="body">{$blog->body|escape}</textarea>
+        <textarea rows="30" cols="0" name="body">{$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR|escape}</textarea>
     </div>
     <div class="form-group">
         <label for="category">Category</label>

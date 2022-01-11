@@ -28,7 +28,7 @@
 
           {*<h3>{$blog_item.stamp|date_format:"%A %e %B, %Y"}</h3>*}
 
-          {$blog_item.body}
+          {$blog_item.body|blog_images:$WEB_ROOT:$PUBLIC_DIR}
           {if $blog_item.truncated eq 1}
           
           <p>
