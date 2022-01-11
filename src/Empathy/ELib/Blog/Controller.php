@@ -541,5 +541,13 @@ class Controller extends AdminController
         }    
     }
 
-
+    public function blog_images()
+    {
+        $id = $_GET['id'];
+        $image = Model::load('BlogImage');
+        $images = $image->getForIDs(array($id));
+        $this->assign('images', $images[$id]);
+        $this->setTemplate('elib://admin/blog/blog_images.tpl');
+        $this->assign('blog_id', $id);
+    }
 }

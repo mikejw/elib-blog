@@ -15,7 +15,7 @@
 {/if}
 
 
-<form action="" method="post">
+<form action="" method="post" data-id={$blog->id}>
     <div class="form-group">
         <label for="heading">Heading</label>
         <input name="heading" type="text" class="form-control" placeholder="Enter heading" value="{$blog->heading}">
