@@ -343,28 +343,19 @@ class Controller extends AdminController
                 $bi = Model::load('BlogImage');
 
                 $images = $bi->getForIDs(array($b->id));
-             
+
                 $tt_width = ELIB_BLOG_IMAGE_MAX_WIDTH;
                 $tt_height = ELIB_BLOG_IMAGE_MAX_HEIGHT;
 
-                if (isset($images[$b->id])) {
-                    // process blog images to create mid sized with id attributes - needs optimising?
-                    foreach ($images[$b->id] as $item) {
-                        $tt_image = '<img class="center img-responsive" src="/tt/tt.php?src=/uploads/'
-                                  .$item['filename'].'&amp;w='
-                                  .$tt_width.'&amp;h='
-                                  .$tt_height.'" id="blog_image_'
-                                  .$item['id'].'" alt="$2" />';
-                        
-                        $b->body = preg_replace(
-                            //'!<img +src=""(?: +id="(.*?)")?(?: +alt="(.*?)")? */>!m',
-                            '!<img(?: +src="")?(?: +id="(.*?)")?(?: +alt="(.*?)")? */>!m',
-                            //'<img src="http://'.WEB_ROOT.PUBLIC_DIR.'/uploads/mid_'.$item['filename'].'" id="blog_image_'.$item['id'].'" alt="$2" />',
-                            $tt_image,
-                            $b->body, 1);
-                    }
-                }
-                         
+                // replace images with placeholder
+                $b->body = preg_replace_callback(
+                    '!<img(?: +class="(.*?)")?(?: +src="(.*?)")?(?: +alt="(.*?)")?(?: +data-payload="(.*?)")? *\/>!m',
+                    function ($matches) {
+                      return '[blog-image:' . $matches[4] .']';
+                    },
+                    $b->body
+                );
+
                 $b->save(Model::getTable('BlogItem'), array(''), 1);
                 $bc = Model::load('BlogCategory');
                 $bc->removeForBlogItem($b->id);
