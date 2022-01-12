@@ -12,14 +12,21 @@
    *}
 
    {if $total_pages > 1}
-    <nav>
-    <ul class="pager">
-      <li class="{if $page+1 gt $total_pages}disabled{/if}"><a href="{if $page+1 gt $total_pages}#{else}http://{$WEB_ROOT}{$PUBLIC_DIR}/{if $active_tags_string neq ''}tags/{$active_tags_string}{else}blog{/if}/{$page+1}{/if}">Previous</a></li>
-      <li class="{if ($page-1) lt 1}disabled{/if}"><a href="{if ($page-1) lt 1}#{else}http://{$WEB_ROOT}{$PUBLIC_DIR}/{if $active_tags_string neq ''}tags/{$active_tags_string}{else}blog{/if}/{$page-1}{/if}">Next</a></li>
-    </ul>
-    </nav>
-    {/if}
-
+   <nav aria-label="Page navigation example">
+     <ul class="pagination justify-content-center">
+       <li class="page-item{if ($page-1) lt 1} disabled{/if}">
+        <a class="page-link" href="{if ($page-1) lt 1}#{else}http://{$WEB_ROOT}{$PUBLIC_DIR}/{if $active_tags_string neq ''}tags/{$active_tags_string}{else}blog{/if}/{$page-1}{/if}">
+          <i class="fa fa-angle-left" aria-hidden="true"></i> Newer
+        </a>
+       </li>
+       <li class="page-item{if $page+1 gt $total_pages} disabled{/if}">
+         <a class="page-link" href="{if $page+1 gt $total_pages}#{else}http://{$WEB_ROOT}{$PUBLIC_DIR}/{if $active_tags_string neq ''}tags/{$active_tags_string}{else}blog{/if}/{$page+1}{/if}">
+           Older <i class="fa fa-angle-right" aria-hidden="true"></i>
+         </a>
+       </li>
+     </ul>
+   </nav>
+   {/if}
 
     {if $active_tags_string neq ''}
     <p>&nbsp;</p>
