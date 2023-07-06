@@ -40,6 +40,7 @@ class BlogItem extends Entity
 
     private function getItemsQuery($found_items, $cat_blogs_string, $limit=array())
     {
+
         $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,'
             .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
         $sql .= ' FROM '.Model::getTable('UserItem').' t2,'
