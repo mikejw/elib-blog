@@ -44,7 +44,8 @@ class BlogItem extends Entity
         if (!$preSelect) {
             $sql .= 't1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
         } else {
-            $sql .= '*';
+            // previously used '*' but this led to group by error
+            $sql .= 't1.heading, t1.body,COUNT(t3.id) AS comments,UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
         }
 
         $sql .=' FROM '.Model::getTable('BlogItem').' t1'
