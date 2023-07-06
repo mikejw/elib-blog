@@ -186,7 +186,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('year', $_GET['id']);
             $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
         }
-        $this->setTemplate('blog_year.tpl');
+        $this->setTemplate('elib:/blog/blog_year.tpl');
     }
 
     public function month()
@@ -211,7 +211,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('custom_title', "Archive for $month $year - Mike Whiting's Blog");
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('blog_month.tpl');
+        $this->setTemplate('elib:/blog/blog_month.tpl');
     }
 
     public function day()
@@ -246,7 +246,7 @@ class BlogFrontControllerNew extends EController
                         array_push($body_new, $body_arr[$i]);
                         $i++;
                     }
-                    $blogs[$index]['body'] = implode($body_new, '</p><p>').'</p>';
+                    $blogs[$index]['body'] = implode('</p><p>', $body_new).'</p>';
                     $blogs[$index]['truncated'] = 1;
                 } else {
                     $blogs[$index]['truncated'] = 0;
@@ -271,7 +271,7 @@ class BlogFrontControllerNew extends EController
 
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('blog_day.tpl');
+        $this->setTemplate('elib:/blog/blog_day.tpl');
     }
 
     public function fetchCategoryId($cat)
