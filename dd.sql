@@ -33,6 +33,8 @@ CREATE TABLE blog_image(
 id                      INT(11)                  AUTO_INCREMENT PRIMARY KEY,
 blog_id                 INT(11)                  NOT NULL,
 filename                VARCHAR(64)              NOT NULL,
+image_width             VARCHAR(11)              NULL,
+image_height            VARCHAR(11)              NULL,
 FOREIGN KEY(blog_id) REFERENCES blog(id)) ENGINE=InnoDB;
 
 
