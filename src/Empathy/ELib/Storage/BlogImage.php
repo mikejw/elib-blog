@@ -12,6 +12,8 @@ class BlogImage extends Entity
     public $id;
     public $blog_id;
     public $filename;
+    public $image_width;
+    public $image_height;
 
     public function getForIDs($ids)
     {

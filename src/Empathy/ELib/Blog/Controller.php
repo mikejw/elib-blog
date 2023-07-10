@@ -106,6 +106,8 @@ class Controller extends AdminController
             $bi = Model::load('BlogImage');
             $bi->filename = $u->getFile();
             $bi->blog_id = $_GET['id'];
+            $bi->image_width = $u->getDimensions()[0];
+            $bi->image_height = $u->getDimensions()[1];
             $bi->insert(Model::getTable('BlogImage'), 1, array(), 0);
             $this->redirect('admin/blog/view/'.$_GET['id']);
         }
