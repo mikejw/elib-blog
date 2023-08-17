@@ -30,6 +30,7 @@ class BlogFrontControllerNew extends EController
     {
         parent::__construct($boot);
         $this->cache = $this->stash->get('cache');
+        $this->assign('BLOG_DESCRIPTION', ELIB_BLOG_DESCRIPTION);
     }
 
     public function default_event()
@@ -55,22 +56,6 @@ class BlogFrontControllerNew extends EController
     
         $this->getAvailableTags();
         $this->getArchive();
-        $cats = $this->getCategories();
-
-        $cats_lookup = array();
-        foreach ($cats as $c) {
-            $cats_lookup[$c['id']] = $c['label'];
-        }
-
-        foreach ($blogs as &$b) {
-            $cats = $b['cats'];
-
-            $cat_names = array();
-            foreach ($cats as $c) {
-                $cat_names[$c] = $cats_lookup[$c];
-            }
-            $b['cats'] = $cat_names;
-        }
 
         $this->assign('blogs', $blogs);
 
@@ -428,7 +413,7 @@ class BlogFrontControllerNew extends EController
     {
         $bc = $this->stash->get('blog_category');
         $tags = $this->cache->cachedCallback('tags_'.$bc.'_', array($this, 'getAvailableTagsFetch'));
-        shuffle($tags);
+        //shuffle($tags);
         $this->assign('tags', $tags);
     }
 
@@ -487,6 +472,9 @@ class BlogFrontControllerNew extends EController
                 case 'NewVibes':
                     $fa = 'bolt';
                     break;
+                case 'Experiments':
+                    $fa = 'flask';
+                    break;
                 default:
                     $fa = NULL;
                     break;
@@ -507,10 +495,24 @@ class BlogFrontControllerNew extends EController
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');
 
+        $cats = $this->getCategories();
+
+        $cats_lookup = array();
+        foreach ($cats as $c) {
+            $cats_lookup[$c['id']] = $c['label'];
+        }
+
         foreach ($blogs as &$b_item) {
             $b_item['tags'] = $t->getTagsForBlogItem($b_item['blog_id']);
             $b_item['month_slug'] = strtolower(substr(date("F", $b_item['stamp']), 0, 3));
             $b_item['cats'] = $bc->getCategoriesForBlogItem($b_item['blog_id']);
+
+            $cats = $b_item['cats'];
+            $cat_names = array();
+            foreach ($cats as $c) {
+                $cat_names[$c] = $cats_lookup[$c];
+            }
+            $b_item['cats'] = $cat_names;
         }
 
         if(defined('ELIB_TRUNCATE_BLOG_ITEMS') &&

@@ -22,6 +22,26 @@ class BlogPage
             throw new RequestException('No blog item found', RequestException::NOT_FOUND);
         }
 
+        $t = Model::load('TagItem');
+        $bc = Model::load('BlogCategory');
+
+        $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by id');
+
+        $cats_lookup = array();
+        foreach ($cats as $c) {
+            $cats_lookup[$c['id']] = $c['label'];
+        }
+
+        $this->blog_item->tags = $t->getTagsForBlogItem($this->blog_item->id);
+        $this->blog_item->cats = $bc->getCategoriesForBlogItem($this->blog_item->id);
+        $cats = $this->blog_item->cats;
+        $cat_names = array();
+        foreach ($cats as $c) {
+            $cat_names[$c] = $cats_lookup[$c];
+        }
+        $this->blog_item->cats = $cat_names;
+
+
         $this->page_title = $this->blog_item->heading;
 
         if (is_object($site_info)) {

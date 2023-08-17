@@ -28,14 +28,6 @@
    </nav>
    {/if}
 
-    {if $active_tags_string neq ''}
-    <p>&nbsp;</p>
-      <p style="text-align: center;">
-        <a class="btn btn-default" href="http://{$WEB_ROOT}{$PUBLIC_DIR}">
-          Clear active tag{if $multi_tags}s{/if}
-        </a>
-      </p>
-    {/if}
 
     {*
     {if $active_tags_string neq ''}
