@@ -33,11 +33,11 @@ class Controller extends AdminController
 
         $super = 0;
 
-
-
         // is superuser?
         $u = Model::load('UserItem');
         $u->id = Session::get('user_id');
+
+
         $u->load();
         if ($u->auth == 2) {
             $super = 1;

@@ -1,6 +1,6 @@
         
 
-         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+         <div class="col-sm-4 col-sm-offset-1 blog-sidebar">
           <div class="sidebar-module sidebar-module-inset">
             <h4>About</h4>
             {$about|truncate:300:"..."} <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/about">more</a></p>

@@ -1,7 +1,7 @@
 {include file="header.tpl"}
 
       <div class="row">
-        <div class="col-sm-8 blog-main">
+        <div class="col-sm-7 blog-main">
 
 
         {if $secondary_title neq ''}
