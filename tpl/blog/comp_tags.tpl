@@ -32,7 +32,7 @@
         <h4>Tags</h4>
         {section name=tag_item loop=$tags}
             <a style="font-size:{$tags[tag_item].size}rem;"
-               class="{if is_array($active_tags) && in_array($tags[tag_item].tag, $active_tags)}text-success active{/if}"
+               class="{if is_array($active_tags) && in_array($tags[tag_item].tag, $active_tags)}text-info active font-weight-bold{/if}"
                href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{if $active_tags_string eq ''}{$tags[tag_item].tag}{elseif in_array($tags[tag_item].tag, $active_tags)}{$active_tags_string|regex_replace:$tags[tag_item].tag_esc_1:''|regex_replace:$tags[tag_item].tag_esc_2:''|replace:$tags[tag_item].tag:''}{else}{$active_tags_string}+{$tags[tag_item].tag}{/if}">{$tags[tag_item].tag}</a>
         {/section}
 

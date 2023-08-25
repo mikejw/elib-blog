@@ -58,6 +58,10 @@
             <label class="form-check-label" for="centered">Enable Centered</label>
           </div>
         </div>
+        <div class="form-group">
+          <label for="caption">Caption</label>
+          <input name="caption" type="text" class="form-control" placeholder="Enter image caption" value="">
+        </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
     </div>
@@ -80,6 +84,7 @@
               data.size = $('form input[name=size]:checked').val();
               data.fluid = $('form input[name=fluid]:checked').val() || '';
               data.centered = $('form input[name=centered]:checked').val() || '';
+              data.caption = $('form input[name=caption]').val() || '';
               payload = btoa(JSON.stringify(data));
 
               var origin = "http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/edit_blog/{$blog_id}";
