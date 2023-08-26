@@ -15,6 +15,10 @@
         {include file="elib://blog/comp_blog_heading.tpl"}
 
 
+        <h2 class="blog-post-title">
+            {$blog->heading}
+        </h2>
+
         <p class="blog-post-meta">{$blog->stamp|sdate:$def_date_format}</p>
 
         <div class="content">

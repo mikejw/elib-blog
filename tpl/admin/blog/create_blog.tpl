@@ -25,7 +25,7 @@
 	{*
 	<textarea rows="0" cols="0" name="body">{$blog->body|replace:'<br />':"\r\n"}</textarea>
 	*}
-	<textarea rows="0" cols="0" name="body">{$blog->body|replace:'</p><p>':"\r\n"|replace:'<p>':""|replace:'</p>':""}</textarea>
+	<textarea rows="20" name="body">{$blog->body|replace:'</p><p>':"\r\n"|replace:'<p>':""|replace:'</p>':""}</textarea>
     </div>
     <div class="form-group">
         <label for="category">Category</label>

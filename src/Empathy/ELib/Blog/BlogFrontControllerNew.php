@@ -277,6 +277,16 @@ class BlogFrontControllerNew extends EController
         $this->default_event();
     }
 
+    public function page()
+    {
+        $this->doSetCategory($_GET['category']);
+        if (isset($_GET['active_tags'])) {
+            $_GET['active_tags'] = $this->getTags();
+        }
+
+        $this->default_event();
+    }
+
     private function doSetCategory($cat)
     {
         $cat_id = $this->cache->cachedCallback('category_'.$cat,
@@ -297,9 +307,9 @@ class BlogFrontControllerNew extends EController
         if (!isset($_GET['active_tags'])) {
             $this->redirect('');
         }
-        if (Session::get('blog_category') > 0) {
-            $this->doSetCategory('any');
-        }
+//        if (Session::get('blog_category') > 0) {
+//            $this->doSetCategory('any');
+//        }
         $_GET['active_tags'] = $this->getTags();
         $this->default_event();
     }
@@ -497,9 +507,14 @@ class BlogFrontControllerNew extends EController
 
         $cats = $this->getCategories();
 
+        $cat_id = Session::get('blog_category') ?? 0;
+
         $cats_lookup = array();
         foreach ($cats as $c) {
             $cats_lookup[$c['id']] = $c['label'];
+            if ($c['id'] === $cat_id) {
+                $this->assign('cat_string', preg_replace('/\\s/', '', strtolower($c['label'])));
+            }
         }
 
         foreach ($blogs as &$b_item) {
