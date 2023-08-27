@@ -24,9 +24,9 @@ class BlogItem extends Entity
         $cat_blogs_string = '';
         if($cat !== null && $cat != 0) {
             $ids = array(0);
-            $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = '.$cat;
+            $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = ?';
             $error = 'Could not get blogs from cateogry.';
-            $result = $this->query($sql, $error);
+            $result = $this->query($sql, $error, array($cat));
             if($result->rowCount() > 0) {
                 foreach($result as $row) {
                     $ids[] = $row['blog_id'];
@@ -40,7 +40,7 @@ class BlogItem extends Entity
 
     private function getItemsQuery($found_items, $cat_blogs_string, $limit=array())
     {
-
+        $queryParams = array();
         $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,'
             .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
         $sql .= ' FROM '.Model::getTable('UserItem').' t2,'
@@ -52,7 +52,8 @@ class BlogItem extends Entity
         if ($found_items != '(0,)') {
             $sql .= ' AND t1.id IN'.$found_items;
         }
-        $sql .= ' AND t1.status = '.BlogItemStatus::PUBLISHED;
+        $sql .= ' AND t1.status = ?';
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
 
         if($cat_blogs_string != '') {
             $sql .= ' AND t1.id IN'.$cat_blogs_string;
@@ -60,9 +61,9 @@ class BlogItem extends Entity
         $sql .= ' GROUP BY t1.id'
             .' ORDER BY t1.stamp DESC';
         if (sizeof($limit)) {
-            $sql .= ' limit '.$limit[0].', '.$limit[1];
+            $sql .= ' limit '. $limit[0] . ', ' . $limit[1];
         }
-        return $sql;
+        return array($sql, $queryParams);
     }
 
     public function getItems($found_items, $limit, $cat=null, $page=1)
@@ -71,8 +72,8 @@ class BlogItem extends Entity
 
         $blogs = array();
         $error = 'Could not get blog items.';
-        $sql = $this->getItemsQuery($found_items, $cat_blogs_string);
-        $result = $this->query($sql, $error);
+        list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string);
+        $result = $this->query($sql, $error, $params);
         $rows = $result->rowCount();
 
         $per_page = defined('ELIB_DEF_BLOG_PER_PAGE')? ELIB_DEF_BLOG_PER_PAGE: self::DEF_BLOG_PER_PAGE;
@@ -83,8 +84,8 @@ class BlogItem extends Entity
 
         //echo "start: $start end: $end<br />";
 
-        $sql = $this->getItemsQuery($found_items, $cat_blogs_string, array($start, $end));
-        $result = $this->query($sql, $error);
+        list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string, array($start, $end));
+        $result = $this->query($sql, $error, $params);
 
         $struct_pages = array();
         for ($i = 0; $i < $pages; $i++) {
@@ -177,9 +178,9 @@ class BlogItem extends Entity
     {
         $stamp = 0;
         $sql = 'SELECT UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
-            .' WHERE id = '.$this->id;
+            .' WHERE id = ?';
         $error = 'Could not get stamp.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($this->id));
         if ($result->rowCount() > 0) {
             $row = $result->fetch();
             $stamp = $row['stamp'];
@@ -192,7 +193,7 @@ class BlogItem extends Entity
     {
         $stamp = 0;
         $sql = 'SELECT UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
-            .' ORDER BY stamp DESC LIMIT 0,1';
+            .' ORDER BY stamp DESC LIMIT 0, 1';
         $error = 'Could not get recently modified blogs';
         $result = $this->query($sql, $error);
         if ($result->rowCount() > 0) {
@@ -207,9 +208,9 @@ class BlogItem extends Entity
     {
         $blogs = array();
         $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem').' b'
-            .' WHERE status = 2';
+            .' WHERE status = ?';
         $error = 'Could not get blogs for sitemap';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
         if ($result->rowCount() > 0) {
             foreach ($result as $row) {
                 //	    $row['slug'] = $this->urlSlug($row['name']);
@@ -222,6 +223,7 @@ class BlogItem extends Entity
 
     public function getArchive($cat=null)
     {
+        $queryParams = array();
         $cat_blogs_string = $this->getCategoryBlogs($cat);
         
         $archive = array();
@@ -236,7 +238,9 @@ class BlogItem extends Entity
             .' DAY(stamp) AS day,'
             .' slug,'
             .' heading FROM '.Model::getTable('BlogItem')
-            .' WHERE status = 2';
+            .' WHERE status = ?';
+
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
 
         if($cat_blogs_string != '') {
 
@@ -246,7 +250,7 @@ class BlogItem extends Entity
         $sql .= ' ORDER BY stamp DESC';
 
         $error = 'Could not get blog archive.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, $queryParams);
 
         foreach ($result as $row) {
             $year = $row['year'];
@@ -285,10 +289,10 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND status = '.BlogItemStatus::PUBLISHED
+            .' AND status = ?'
             .' ORDER BY stamp';
         $error = 'Could not get blogs for the year';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
 
         $months = array();
         $slug = '';
@@ -325,10 +329,10 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND status = '.BlogItemStatus::PUBLISHED
+            .' AND status = ?'
             .' ORDER BY stamp';
         $error = 'Could not get blogs for the month';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
 
         $blogs = array();
 
@@ -363,10 +367,10 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND status = '.BlogItemStatus::PUBLISHED
+            .' AND status = ?'
             .' ORDER BY stamp';
         $error = 'Could not get blogs for the month';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
 
         $blogs = array();
 
@@ -406,10 +410,10 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND slug = \''.$slug.'\''
-            .' AND status = '.BlogItemStatus::PUBLISHED;
+            .' AND slug = ?'
+            .' AND status = ?';
         $error = 'Could not get blog id by archive url';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($slug, BlogItemStatus::PUBLISHED));
 
         $id = 0;
         if ($result->rowCount() > 0) {
@@ -419,24 +423,20 @@ class BlogItem extends Entity
         
         return $id;
     }
-
-
-
+    
     public function getPodcast()
     {
         $podcast = array();
         $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.self::TABLE.' b,'
             .' '.Model::getTable('BlogAttachment').' a'
-            .' WHERE a.blog_id = b.id AND b.status = '.BlogItemStatus::PUBLISHED
+            .' WHERE a.blog_id = b.id AND b.status = ?'
             .' ORDER BY b.stamp DESC';
         $error = 'Could not get podcast.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
         foreach($result as $row)
         {
             $podcast[] = $row;
         }
         return $podcast;
     }
-
-
 }

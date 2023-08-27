@@ -19,10 +19,10 @@ class BlogImage extends Entity
     {
         $images = array();
         foreach ($ids as $item) {
-            $sql = 'SELECT * FROM '.Model::getTable('BlogImage').' WHERE blog_id = '.$item
+            $sql = 'SELECT * FROM '.Model::getTable('BlogImage').' WHERE blog_id = ?'
                 .' ORDER BY id';
             $error = 'Could not get blog images.';
-            $result = $this->query($sql, $error);
+            $result = $this->query($sql, $error, array($item));
             if ($result->rowCount() > 0) {
                 foreach ($result as $row) {
                     $images[$item][] = $row;

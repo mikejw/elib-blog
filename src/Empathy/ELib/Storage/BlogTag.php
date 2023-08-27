@@ -14,18 +14,18 @@ class BlogTag extends Entity
 
     public function removeAll($blog_id)
     {
-        $sql = 'DELETE FROM '.Model::getTable('BlogTag').' WHERE blog_id = '.$blog_id;
+        $sql = 'DELETE FROM '.Model::getTable('BlogTag').' WHERE blog_id = ?';
         $error = 'Could not clear existing tags for blog item.';
-        $this->query($sql, $error);
+        $this->query($sql, $error, array($blog_id));
     }
 
     public function getTags($blog_id)
     {
         $tags = array();
         $sql = 'SELECT t.tag FROM '.Model::getTable('TagItem').' t, '
-            .Model::getTable('BlogTag').' b WHERE t.id = b.tag_id AND b.blog_id = '.$blog_id;
+            .Model::getTable('BlogTag').' b WHERE t.id = b.tag_id AND b.blog_id = ?';
         $error = 'Could not get tags.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($blog_id));
         $i = 0;
         foreach ($result as $row) {
             $tags[$i] = $row['tag'];
@@ -37,12 +37,14 @@ class BlogTag extends Entity
 
     public function getBlogs($tags)
     {
+        $queryParams = array();
         $id = array();
         $sql = 'SELECT DISTINCT b.id FROM '.Model::getTable('BlogItem').' b';
         $i = 0;
         foreach ($tags as $tag) {
             $glue = 't'.($i + 1);
-            $sql .= ' LEFT JOIN '.Model::getTable('BlogTag').' '.$glue.' ON '.$glue.'.tag_id = '.$tag;
+            $sql .= ' LEFT JOIN '.Model::getTable('BlogTag').' '.$glue.' ON '.$glue.'.tag_id = ?';
+            array_push($queryParams, $tag);
             $i++;
         }
         $i = 0;
@@ -58,7 +60,7 @@ class BlogTag extends Entity
         }
 
         $error = 'Could not get active blog ids.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, $queryParams);
         $i = 0;
         foreach ($result as $row) {
             $id[$i] = $row['id'];
