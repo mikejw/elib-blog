@@ -7,6 +7,7 @@ use Empathy\ELib\AdminController;
 use Empathy\ELib\File\Image as ImageUpload;
 use Empathy\ELib\File\Upload;
 use Empathy\ELib\Model;
+use Empathy\MVC\RequestException;
 use Empathy\MVC\Session;
 use Empathy\ELib\Storage\BlogItemStatus;
 use Empathy\MVC\Config;
@@ -17,9 +18,56 @@ define('REQUESTS_PER_PAGE', 12);
 
 class Controller extends AdminController
 {
-    public function default_event()
-    {        
+    public function __construct($boot)
+    {
+        parent::__construct($boot);
 
+        $vendor = $this->stash->get('vendor');
+        if (!$vendor) {
+            throw new RequestException('No vendor found.', RequestException::NOT_FOUND);
+        } else {
+            $this->stash->store('authorId', $vendor['user_id']);
+        }
+    }
+
+    private function assertAdmin()
+    {
+        $admin = false;
+        $u = Model::load('UserItem');
+        $u->id = Session::get('user_id');
+        $u->load();
+        $ua = Model::load('UserAccess');
+        if (!($u->auth < $ua->getLevel('admin')) && is_null($this->stash->get('authorId'))) {
+            $admin = true;
+        }
+        if (!$admin) {
+            throw new RequestException('Denied', RequestException::NOT_AUTHORIZED);
+        }
+    }
+
+    private function assertAuthorBlog($id)
+    {
+        $authed = true;
+        $authorId = $this->stash->get('authorId');
+        if ($authorId) {
+            if ($authorId !== Session::get('user_id')) {
+                $authed = false;
+            } else {
+                $b = Model::load('BlogItem');
+                $sql = 'select id from ' . Model::getTable('BlogItem')
+                    . ' where user_id = ?'
+                    . ' and id = ?';
+                $result = $b->query($sql, '', array($authorId, $id));
+                $authed = $result->rowCount() === 1;
+            }
+        }
+        if (!$authed) {
+            throw new RequestException('Denied', RequestException::NOT_AUTHORIZED);
+        }
+    }
+
+    public function default_event()
+    {
         $ui_array = array('page', 'status');
         $this->loadUIVars('ui_blog', $ui_array);
         if (!isset($_GET['page']) || $_GET['page'] == '') {
@@ -31,18 +79,18 @@ class Controller extends AdminController
         $this->presenter->assign('page', $_GET['page']);
         $this->presenter->assign('status', $_GET['status']);
 
-        $super = 0;
+        $admin = false;
 
-        // is superuser?
+        // is admin user?
         $u = Model::load('UserItem');
         $u->id = Session::get('user_id');
 
-
         $u->load();
-        if ($u->auth == 2) {
-            $super = 1;
+        $ua = Model::load('UserAccess');
+        if ($u->auth >= $ua->getLevel('admin')) {
+            $admin = true;
         }
-        $this->presenter->assign('super', $super);
+        $this->presenter->assign('super', $admin);
 
         $c = Model::load('BlogCategory');
         $cats = $c->getAllCustom(Model::getTable('BlogCategory'), '');
@@ -60,8 +108,8 @@ class Controller extends AdminController
         $select = '*,t1.id AS id';
         $sql = ' WHERE status = '.$_GET['status'];
 
-        if (!$super) {
-            $sql .= ' AND user_id = '.Session::get('user_id');
+        if (!$admin) {
+            $sql .= ' AND user_id = '. $this->stash->get('authorId');
         }
 
         $sql .= ' AND t1.user_id = t2.id';
@@ -92,7 +140,7 @@ class Controller extends AdminController
         $this->presenter->assign('blogs', $blogs);
     }
 
-    public function upload_image()
+    private function uploadImage()
     {
         $_GET['id'] = $_POST['id'];
         $sizes = array(array('l_', 800, 600),
@@ -139,6 +187,7 @@ class Controller extends AdminController
         if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
             $_GET['id'] = 0;
         }
+        $this->assertAuthorBlog($_GET['id']);
         $i = Model::load('BlogImage');
         $i->id = $_GET['id'];
         $i->load();
@@ -155,6 +204,7 @@ class Controller extends AdminController
     {
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
+        $this->assertAuthorBlog($_GET['id']);
         $b->load();
         $b->status = BlogItemStatus::DELETED;
         $b->save(Model::getTable('BlogItem'), array(), 2);
@@ -168,6 +218,7 @@ class Controller extends AdminController
     {
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
+        $this->assertAuthorBlog($_GET['id']);
         $b->load();
         $b->status = BlogItemStatus::DRAFT;
         $b->save(Model::getTable('BlogItem'), array(), 2);
@@ -187,6 +238,7 @@ class Controller extends AdminController
     {
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
+        $this->assertAuthorBlog($_GET['id']);
         $b->load();
         if (isset($_GET['stamp']) && $_GET['stamp'] == 1) {
             $b->stamp = date('Y-m-d H:i:s', time());
@@ -207,10 +259,11 @@ class Controller extends AdminController
 
     public function view()
     {
+        $this->assertAuthorBlog($_GET['id']);
         if (isset($_POST['upload_image'])) {
-            $this->upload_image();
+            $this->uploadImage();
         } elseif(isset($_POST['upload_attachment'])) {
-            $this->upload_attachment();
+            $this->uploadAttachment();
         }   
 
         $b = Model::load('BlogItem');
@@ -325,6 +378,8 @@ class Controller extends AdminController
         } elseif (isset($_POST['save'])) {
             $b = Model::load('BlogItem');
             $b->id = $_POST['id'];
+            $this->assertAuthorBlog($_POST['id']);
+
             $tags_arr = $b->buildTags();
 
             $b->load(Model::getTable('BlogItem'));
@@ -369,6 +424,7 @@ class Controller extends AdminController
         } else {
             $b = Model::load('BlogItem');
             $b->id = $_GET['id'];
+            $this->assertAuthorBlog($_GET['id']);
             $b->load();
 
             //	$b->body = preg_replace('!<img src="http://'.WEB_ROOT.PUBLIC_DIR.'/uploads/(.*?)" alt="(.*?)" />!m', '<img src="" alt="$2" />', $b->body);
@@ -396,6 +452,7 @@ class Controller extends AdminController
     // blog category stuff
     public function add_cat()
     {
+        $this->assertAdmin();
         if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             
             if($_GET['id'] < 1) {
@@ -413,6 +470,7 @@ class Controller extends AdminController
 
     public function category()
     {
+        $this->assertAdmin();
         $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
         $ui_array = array('id');
         $this->loadUIVars('ui_blog_cats', $ui_array);
@@ -451,6 +509,7 @@ class Controller extends AdminController
 
     public function delete_category()
     {
+        $this->assertAdmin();
         $this->assertID();
         $b = Model::load('BlogCategory');
         $b->id = $_GET['id'];
@@ -465,6 +524,7 @@ class Controller extends AdminController
 
     public function rename_category()
     {
+        $this->assertAdmin();
         $this->buildNav();
         if (isset($_POST['save'])) {
             $b = Model::load('BlogCategory');
@@ -503,6 +563,7 @@ class Controller extends AdminController
 
         $a->id = $_GET['id'];
         $a->load(Model::getTable('BlogAttachment'));
+        $this->assertAuthorBlog($a->blog_id);
 
         $u = new Upload();
         if($u->remove(array($a->filename)))
@@ -513,7 +574,7 @@ class Controller extends AdminController
     }
 
 
-    public function upload_attachment()
+    private function uploadAttachment()
     {
         $_GET['id'] = $_POST['id'];
 
@@ -537,6 +598,7 @@ class Controller extends AdminController
     public function blog_images()
     {
         $id = $_GET['id'];
+        $this->assertAuthorBlog($id);
         $image = Model::load('BlogImage');
         $images = $image->getForIDs(array($id));
         $this->assign('images', $images[$id]);

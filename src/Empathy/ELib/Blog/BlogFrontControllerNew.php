@@ -32,6 +32,13 @@ class BlogFrontControllerNew extends EController
         parent::__construct($boot);
         $this->cache = $this->stash->get('cache');
         $this->assign('BLOG_DESCRIPTION', ELIB_BLOG_DESCRIPTION);
+
+        $vendor = $this->stash->get('vendor');
+        if (!$vendor) {
+            throw new RequestException('No vendor found.', RequestException::NOT_FOUND);
+        } else {
+            $this->stash->store('authorId', $vendor['user_id']);
+        }
     }
 
     public function default_event()
