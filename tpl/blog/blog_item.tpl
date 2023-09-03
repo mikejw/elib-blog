@@ -1,9 +1,13 @@
 {include file="header.tpl"}
 
 {if isset($blog) and $internal_referrer}
-    <p>pager</p>
-    <ul class="pager">
-        <li class="previous"><a class="back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">&larr; Back</a></li>
+    <ul class="pagination">
+        <li class="page-item">
+            <a class="page-link back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">
+                <i class="fa fa-angle-left" aria-hidden="true"></i>
+                Back
+            </a>
+        </li>
     </ul>
 
 {/if}

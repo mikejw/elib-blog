@@ -2,8 +2,9 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+use Empathy\ELib\Model;
+use Empathy\MVC\Entity;
+use Empathy\MVC\DI;
 
 
 class TagItem extends Entity
@@ -54,7 +55,7 @@ class TagItem extends Entity
         return $ids;
     }
 
-    public function getAllTags($category_id)
+    public function getAllTags($category_id, $authorId = null)
     {
         $queryParams = array();
         $category_id = (int) $category_id;
@@ -73,6 +74,11 @@ class TagItem extends Entity
             $sql .= ' AND d.blog_category_id = ?'
                 .' AND d.blog_id = b.blog_id';
             array_push($queryParams, $category_id);
+        }
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND c.user_id = ?';
+            array_push($queryParams, $authorId);
         }
 
         $error = 'Could not get total number of tagging instances';
@@ -95,6 +101,11 @@ class TagItem extends Entity
             $sql .= ' AND d.blog_category_id = ?'
                 .' AND d.blog_id = b.blog_id';
             array_push($queryParams, $category_id);
+        }
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND c.user_id = ?';
+            array_push($queryParams, $authorId);
         }
 
         $sql .= ' GROUP BY t.id';

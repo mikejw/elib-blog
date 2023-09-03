@@ -1,6 +1,6 @@
 {include file="header.tpl"}
 
-<div class="pager">&nbsp;</div>
+<div class="pagination">&nbsp;</div>
 
 <div class="row d-flex justify-content-between">
     <div class="col-sm-7 blog-main">

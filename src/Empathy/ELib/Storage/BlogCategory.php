@@ -48,22 +48,31 @@ class BlogCategory extends Entity
     *
     * @return array
     */
-    public function getAllPublished($table, $sql_string)
+    public function getAllPublished($table, $sql_string, $authorId = null)
     {
+        $queryParams = array();
         $all = array();
         //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
         $sql = "select c.id, c.label"
-        ." from %s b"
-        ." left join %s j on j.blog_id = b.id"
-        ." left join %s c on c.id = j.blog_category_id"
-        ." where b.status = ?"
-        ." group by j.blog_category_id".$sql_string;
+            ." from %s b"
+            ." left join %s j on j.blog_id = b.id"
+            ." left join %s c on c.id = j.blog_category_id"
+            ." where b.status = ?";
+
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND b.user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+        $sql .= " group by j.blog_category_id".$sql_string;
 
         $sql = sprintf($sql, Model::getTable('BlogItem'),
             Model::getTable('BlogItemCategory'),
             Model::getTable('BlogCategory'));
         $error = 'Could not published categories.';
-        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
+        $result = $this->query($sql, $error, $queryParams);
 
         $i = 0;
         foreach ($result as $row) {

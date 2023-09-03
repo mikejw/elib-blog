@@ -38,7 +38,7 @@ class BlogItem extends Entity
     }
 
 
-    private function getItemsQuery($found_items, $cat_blogs_string, $limit=array())
+    private function getItemsQuery($found_items, $cat_blogs_string, $limit=array(), $authorId = null)
     {
         $queryParams = array();
         $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,'
@@ -58,21 +58,28 @@ class BlogItem extends Entity
         if($cat_blogs_string != '') {
             $sql .= ' AND t1.id IN'.$cat_blogs_string;
         }
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND t1.user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
         $sql .= ' GROUP BY t1.id'
             .' ORDER BY t1.stamp DESC';
         if (sizeof($limit)) {
             $sql .= ' limit '. $limit[0] . ', ' . $limit[1];
         }
+
         return array($sql, $queryParams);
     }
 
-    public function getItems($found_items, $limit, $cat=null, $page=1)
+    public function getItems($found_items, $limit, $cat=null, $page=1, $authorId = null)
     {       
         $cat_blogs_string = $this->getCategoryBlogs($cat);
 
         $blogs = array();
         $error = 'Could not get blog items.';
-        list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string);
+        list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string, array(), $authorId);
         $result = $this->query($sql, $error, $params);
         $rows = $result->rowCount();
 
@@ -84,7 +91,7 @@ class BlogItem extends Entity
 
         //echo "start: $start end: $end<br />";
 
-        list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string, array($start, $end));
+        list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string, array($start, $end), $authorId);
         $result = $this->query($sql, $error, $params);
 
         $struct_pages = array();
@@ -221,7 +228,7 @@ class BlogItem extends Entity
         return $blogs;
     }
 
-    public function getArchive($cat=null)
+    public function getArchive($cat = null, $authorId = null)
     {
         $queryParams = array();
         $cat_blogs_string = $this->getCategoryBlogs($cat);
@@ -245,6 +252,11 @@ class BlogItem extends Entity
         if($cat_blogs_string != '') {
 
             $sql .= ' AND id IN'.$cat_blogs_string;
+        }
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND user_id = ?';
+            array_push($queryParams, $authorId);
         }
 
         $sql .= ' ORDER BY stamp DESC';
@@ -279,8 +291,9 @@ class BlogItem extends Entity
 
     }
 
-    public function getYear($year)
+    public function getYear($year, $authorId = null)
     {
+        $queryParams = array();
         $start = mktime(0, 0, 0, 1, 1, $year);
         $finish = mktime(0, 0, -1, 1, 1, $year+1);
 
@@ -289,10 +302,19 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND status = ?'
-            .' ORDER BY stamp';
+            .' AND status = ?';
+
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+
+        $sql .= ' ORDER BY stamp';
         $error = 'Could not get blogs for the year';
-        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
+        $result = $this->query($sql, $error, $queryParams);
 
         $months = array();
         $slug = '';
@@ -312,8 +334,9 @@ class BlogItem extends Entity
         return $months;
     }
 
-    public function getMonth($month, $year)
+    public function getMonth($month, $year, $authorId = null)
     {
+        $queryParams = array();
         $finish_month = $month;
         $finish_year = $year;
         if ($month == 12) {
@@ -329,10 +352,18 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND status = ?'
-            .' ORDER BY stamp';
+            .' AND status = ?';
+
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+        $sql .= ' ORDER BY stamp';
         $error = 'Could not get blogs for the month';
-        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
+        $result = $this->query($sql, $error, $queryParams);
 
         $blogs = array();
 
@@ -348,8 +379,9 @@ class BlogItem extends Entity
         return $blogs;
     }
 
-    public function getDay($month, $year, $day)
+    public function getDay($month, $year, $day, $authorId = null)
     {
+        $queryParams = array();
         $finish_day = $day;
         $finish_month = $month;
         $finish_year = $year;
@@ -367,10 +399,18 @@ class BlogItem extends Entity
             .' FROM '.self::TABLE
             .' WHERE UNIX_TIMESTAMP(stamp) >= '.$start
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
-            .' AND status = ?'
-            .' ORDER BY stamp';
+            .' AND status = ?';
+
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+        $sql .= ' ORDER BY stamp';
         $error = 'Could not get blogs for the month';
-        $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
+        $result = $this->query($sql, $error, $queryParams);
 
         $blogs = array();
 
@@ -380,7 +420,7 @@ class BlogItem extends Entity
                 array_push($blogs, $row);
             }
         }
-
+        
         return $blogs;
     }
 
@@ -391,8 +431,9 @@ class BlogItem extends Entity
         return date('F', $start);
     }
 
-    public function findByArchiveURL($month, $year, $day, $slug)
+    public function findByArchiveURL($month, $year, $day, $slug, $authorId = null)
     {
+        $queryParams = array();
         $finish_day = $day;
         $finish_month = $month;
         $finish_year = $year;
@@ -412,8 +453,17 @@ class BlogItem extends Entity
             .' AND UNIX_TIMESTAMP(stamp) <= '.$finish
             .' AND slug = ?'
             .' AND status = ?';
+
+        array_push($queryParams, $slug);
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
         $error = 'Could not get blog id by archive url';
-        $result = $this->query($sql, $error, array($slug, BlogItemStatus::PUBLISHED));
+        $result = $this->query($sql, $error, $queryParams);
 
         $id = 0;
         if ($result->rowCount() > 0) {

@@ -5,6 +5,7 @@ namespace Empathy\ELib\Blog;
 use Empathy\ELib\Model;
 use Empathy\ELib\EController;
 use Empathy\ELib\User\CurrentUser;
+use Empathy\MVC\DI;
 use Empathy\MVC\Session;
 use Empathy\MVC\RequestException;
 use Empathy\ELib\Storage\BlogPage;
@@ -35,6 +36,7 @@ class BlogFrontControllerNew extends EController
 
     public function default_event()
     {
+        $authorId = $this->stash->get('authorId');
         $b = Model::load('BlogItem');
         
         $sql = '';
@@ -83,8 +85,15 @@ class BlogFrontControllerNew extends EController
 
    public function getBlogIdBySlug($slug_arr)
     {
+        $authorId = $this->stash->get('authorId');
         $b = Model::load('BlogItem');
-        return $b->findByArchiveURL($this->convertMonth($slug_arr['month']), $slug_arr['year'], $slug_arr['day'], $slug_arr['slug']);
+        return $b->findByArchiveURL(
+            $this->convertMonth($slug_arr['month']), 
+            $slug_arr['year'],
+            $slug_arr['day'], 
+            $slug_arr['slug'],
+            $authorId
+        );
     }
 
     public function item()
@@ -165,8 +174,9 @@ class BlogFrontControllerNew extends EController
     public function year()
     {
         if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+            $authorId = $this->stash->get('authorId');
             $b = Model::load('BlogItem');
-            $months = $b->getYear($_GET['id']);
+            $months = $b->getYear($_GET['id'], $authorId);
             $this->presenter->assign('months', $months);
             $this->presenter->assign('year', $_GET['id']);
             $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
@@ -179,11 +189,12 @@ class BlogFrontControllerNew extends EController
         if(isset($_GET['month']) && $_GET['month'] != ''
            && isset($_GET['year']) && is_numeric($_GET['year']))
         {
+            $authorId = $this->stash->get('authorId');
             $year = $_GET['year'];
             $m = $this->convertMonth($_GET['month']);
 
             $b = Model::load('BlogItem');
-            $blogs = $b->getMonth($m, $year);
+            $blogs = $b->getMonth($m, $year, $authorId);
 
             foreach ($blogs as $index => $item) {
                 $blogs[$index]['month_slug'] = strtolower(substr(date("F", $item['stamp']), 0, 3));
@@ -205,6 +216,7 @@ class BlogFrontControllerNew extends EController
            && isset($_GET['year']) && is_numeric($_GET['year'])
            && isset($_GET['day']) && is_numeric($_GET['day']))
         {
+            $authorId = $this->stash->get('authorId');
             $year = $_GET['year'];
             $m = $this->convertMonth($_GET['month']);
             $day = $_GET['day'];
@@ -215,7 +227,7 @@ class BlogFrontControllerNew extends EController
             if (!checkdate($m, $day, $year)) {
                 throw new RequestException('Not a valid date', RequestException::BAD_REQUEST);
             } else {
-                $blogs = $b->getDay($m, $year, $day);
+                $blogs = $b->getDay($m, $year, $day, $authorId);
             }
 
             // copied from default_event
@@ -431,7 +443,10 @@ class BlogFrontControllerNew extends EController
     {
         $t = Model::load('TagItem');
         $bc = $this->stash->get('blog_category');
-        $tags = $t->getAllTags($bc);
+        
+        $authorId = $this->stash->get('authorId');
+        
+        $tags = $t->getAllTags($bc, $authorId);
 
         foreach ($tags as $index => $item) {
             $tags[$index]['tag_esc_1'] = '/\+'.$tags[$index]['tag'].'/';
@@ -447,16 +462,22 @@ class BlogFrontControllerNew extends EController
 
     private function getArchive()
     {
+        $authorId = $this->stash->get('authorId');
         $b = Model::load('BlogItem');
         $bc = $this->stash->get('blog_category');
-        $archive = $this->cache->cachedCallback('archive_'.$bc, array($b, 'getArchive'), array($bc));
+        $archive = $this->cache->cachedCallback('archive_'.$bc, array($b, 'getArchive'), array($bc, $authorId));
         $this->assign('archive', $archive); 
     }
 
     private function getCategories()
     {
+        $authorId = $this->stash->get('authorId');
         $c = Model::load('BlogCategory');
-        $cats = $this->cache->cachedCallback('cats', array($c, 'getAllPublished'), array(Model::getTable('BlogCategory'), ' order by id'));
+        $cats = $this->cache->cachedCallback(
+            'cats',
+            array($c, 'getAllPublished'),
+            array(Model::getTable('BlogCategory'), ' order by id', $authorId)
+        );
         array_unshift($cats, array('id' => 0, 'label' => 'Any'));
 
         foreach ($cats as &$c) {
@@ -499,8 +520,9 @@ class BlogFrontControllerNew extends EController
 
     private function getBlogs($b, $found_items, $page)
     {
-        $bc = $this->stash->get('blog_category');    
-        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc, $page);
+        $authorId = $this->stash->get('authorId');
+        $bc = $this->stash->get('blog_category');
+        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc, $page, $authorId);
 
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');
