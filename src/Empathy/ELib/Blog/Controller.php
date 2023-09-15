@@ -7,6 +7,7 @@ use Empathy\ELib\AdminController;
 use Empathy\ELib\File\Image as ImageUpload;
 use Empathy\ELib\File\Upload;
 use Empathy\ELib\Model;
+use Empathy\MVC\DI;
 use Empathy\MVC\RequestException;
 use Empathy\MVC\Session;
 use Empathy\ELib\Storage\BlogItemStatus;
@@ -22,10 +23,11 @@ class Controller extends AdminController
     {
         parent::__construct($boot);
 
+        $u = DI::getContainer()->get('CurrentUser')->getUser();
         $vendor = $this->stash->get('vendor');
         if (!$vendor) {
             throw new RequestException('No vendor found.', RequestException::NOT_FOUND);
-        } else {
+        } elseif ($u->id === $vendor['user_id']) {
             $this->stash->store('authorId', $vendor['user_id']);
         }
     }
@@ -33,9 +35,7 @@ class Controller extends AdminController
     private function assertAdmin()
     {
         $admin = false;
-        $u = Model::load('UserItem');
-        $u->id = Session::get('user_id');
-        $u->load();
+        $u = DI::getContainer()->get('CurrentUser')->getUser();
         $ua = Model::load('UserAccess');
         if (!($u->auth < $ua->getLevel('admin')) && is_null($this->stash->get('authorId'))) {
             $admin = true;
@@ -49,17 +49,20 @@ class Controller extends AdminController
     {
         $authed = true;
         $authorId = $this->stash->get('authorId');
+
+        $u = DI::getContainer()->get('CurrentUser')->getUser();
+        $ua = Model::load('UserAccess');
+        if (!($u->auth < $ua->getLevel('admin')) && is_null($authorId)) {
+            return;
+        }
+
         if ($authorId) {
-            if ($authorId !== Session::get('user_id')) {
-                $authed = false;
-            } else {
-                $b = Model::load('BlogItem');
-                $sql = 'select id from ' . Model::getTable('BlogItem')
-                    . ' where user_id = ?'
-                    . ' and id = ?';
-                $result = $b->query($sql, '', array($authorId, $id));
-                $authed = $result->rowCount() === 1;
-            }
+            $b = Model::load('BlogItem');
+            $sql = 'select id from ' . Model::getTable('BlogItem')
+                . ' where user_id = ?'
+                . ' and id = ?';
+            $result = $b->query($sql, '', array($authorId, $id));
+            $authed = $result->rowCount() === 1;
         }
         if (!$authed) {
             throw new RequestException('Denied', RequestException::NOT_AUTHORIZED);

@@ -16,7 +16,7 @@
         <h4>Elsewhere</h4>
         <ol class="list-unstyled">
             {foreach from=$social item=link key=name}
-                <li><a href="{$link}">{$name}</a></li>
+                <li><a rel="nofollow" target="_blank" href="{$link}">{$name}</a></li>
             {/foreach}
         </ol>
     </div>

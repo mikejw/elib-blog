@@ -43,7 +43,6 @@ class BlogFrontControllerNew extends EController
 
     public function default_event()
     {
-        $authorId = $this->stash->get('authorId');
         $b = Model::load('BlogItem');
         
         $sql = '';

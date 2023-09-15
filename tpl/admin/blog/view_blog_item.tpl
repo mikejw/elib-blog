@@ -1,41 +1,39 @@
 {include file="elib:/admin/admin_header.tpl"}
 
+<div class="form-group cms-actions">
+
+        {if $blog->status eq 2 || $blog->status eq 3}
+            <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/redraft/{$blog->id}" class="confirm btn btn-sm btn-primary">
+               Redraft
+            </a>
+        {/if}
+        {if $blog->status eq 2}
+            <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/delete/{$blog->id}" class="confirm btn btn-sm btn-primary">
+                Delete
+            </a>
+        {/if}
+
+        {if $blog->status eq 1}
+            <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/edit_blog/{$blog->id}" class="btn btn-sm btn-primary">
+                Edit
+            </a>
+            <form class="confirm d-inline" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/publish/{$blog->id}" method="get">
+                <button class="btn btn-sm btn-primary" type="submit" name="edit">Publish</button>
+                <div class="form-check d-inline">
+                    <input class="form-check-input" type="checkbox" name="stamp" value="1" />
+                    <label class="form-check-label" for="stamp">
+                        Update Timestamp?
+                    </label>
+                </div>
+            </form>
+        {/if}
+</div>
+
 
 <div class="entry">
 <h2>{$blog->heading} <span>|</span> {$blog->stamp|date_format:"%A %e %B %Y"} <span>|</span> {$author}</h2>
 {$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR}
 </div>
-
-{if $blog->status eq 1}
-<form action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/edit_blog/{$blog->id}" method="get">
-    <p><button class="btn btn-sm btn-primary" type="submit" name="edit">Edit</button></p>
-</form>
-
-<form class="confirm" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/publish/{$blog->id}" method="get">
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="stamp" value="1" />
-        <label class="form-check-label" for="stamp">
-            Update Timestamp?
-        </label>
-    </div>
-    <p>&nbsp;</p>
-    <p>
-        <button class="btn btn-sm btn-primary" type="submit" name="edit">Publish</button>
-    </p>
-</form>
-
-{else}
-{if $blog->status eq 2 || $blog->status eq 3}
-<form class="confirm" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/redraft/{$blog->id}" method="get">
-    <p><button class="btn btn-sm btn-primary" type="submit" name="edit">Redraft</button></p>
-</form>
-{/if}
-{if $blog->status eq 2}
-<form class="confirm" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/delete/{$blog->id}" method="get">
-    <p><button class="btn btn-sm btn-primary" name="delete[]" type="submit">Delete</button></p>
-</form>
-{/if}
-{/if}
 
 
 
@@ -54,29 +52,25 @@
         </div>
     {/if}
 
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group custom-file">
+            <input type="file" class="custom-file-input" id="file" name="file">
+            <label class="custom-file-label" for="file">Choose file</label>
+        </div>
+        <input type="hidden" name="id" value="{$blog->id}" />
+        <button type="submit" class="btn mb-4 btn-primary" name="upload_image" value="1">Upload</button>
+    </form>
 
-<form action="" method="post" enctype="multipart/form-data">
-<p><label for="file">File</label>
-<input class="form-control-file" type="file" id="file" name="file" /></p>
-<p>
-<input type="hidden" name="id" value="{$blog->id}" />
-<button  class="btn btn-sm btn-primary" type="submit" name="upload_image" value="1">Upload</button>
-</p>
-</form>
 {/if}
 
 {if sizeof($images) > 0}
-{foreach from=$images item=image}
-<p><img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/uploads/tn_{$image.filename}" alt="" /></p>
-<p><a class="confirm" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/remove_image/{$image.id}">Delete</a></p>
-{/foreach}
+    {foreach from=$images item=image}
+        <p><img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/uploads/tn_{$image.filename}" alt="" /></p>
+        <p><a class="confirm" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/remove_image/{$image.id}">Delete</a></p>
+    {/foreach}
 {/if}
 
-
-
-<p>&nbsp;</p>
-
-
+{*
 <h2>Attachments</h2>
 
 {if $blog->status eq 1}
@@ -107,6 +101,6 @@
 </ul>
 {/if}
 
-
+*}
 
 {include file="elib:/admin/admin_footer.tpl"}

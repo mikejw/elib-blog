@@ -35,7 +35,7 @@
     </div>
 
     <div class="form-group">
-        <label for="tags">Tags</label>
+        <label for="tags">Tags (Comma separated.)</label>
         <input name="tags" type="text" class="form-control" placeholder="Enter tags" value="{$blog_tags}">
     </div>
     <div class="form-group">
