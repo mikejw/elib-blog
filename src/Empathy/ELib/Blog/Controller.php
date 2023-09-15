@@ -23,25 +23,11 @@ class Controller extends AdminController
     {
         parent::__construct($boot);
 
-        $u = DI::getContainer()->get('CurrentUser')->getUser();
         $vendor = $this->stash->get('vendor');
         if (!$vendor) {
             throw new RequestException('No vendor found.', RequestException::NOT_FOUND);
-        } elseif ($u->id === $vendor['user_id']) {
+        } elseif (isset($vendor['currentUser']) && $vendor['currentUser']) {
             $this->stash->store('authorId', $vendor['user_id']);
-        }
-    }
-
-    private function assertAdmin()
-    {
-        $admin = false;
-        $u = DI::getContainer()->get('CurrentUser')->getUser();
-        $ua = Model::load('UserAccess');
-        if (!($u->auth < $ua->getLevel('admin')) && is_null($this->stash->get('authorId'))) {
-            $admin = true;
-        }
-        if (!$admin) {
-            throw new RequestException('Denied', RequestException::NOT_AUTHORIZED);
         }
     }
 
@@ -455,7 +441,7 @@ class Controller extends AdminController
     // blog category stuff
     public function add_cat()
     {
-        $this->assertAdmin();
+        DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             
             if($_GET['id'] < 1) {
@@ -473,7 +459,7 @@ class Controller extends AdminController
 
     public function category()
     {
-        $this->assertAdmin();
+        DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
         $ui_array = array('id');
         $this->loadUIVars('ui_blog_cats', $ui_array);
@@ -512,7 +498,7 @@ class Controller extends AdminController
 
     public function delete_category()
     {
-        $this->assertAdmin();
+        DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->assertID();
         $b = Model::load('BlogCategory');
         $b->id = $_GET['id'];
@@ -527,7 +513,7 @@ class Controller extends AdminController
 
     public function rename_category()
     {
-        $this->assertAdmin();
+        DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->buildNav();
         if (isset($_POST['save'])) {
             $b = Model::load('BlogCategory');
