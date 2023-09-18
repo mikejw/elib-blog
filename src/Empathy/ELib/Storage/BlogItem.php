@@ -135,13 +135,23 @@ class BlogItem extends Entity
         }
     }
 
-    public function getFeed()
+    public function getFeed($authorId = null)
     {
+        $queryParams = array();
         $entry = array();
         $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
-            .' WHERE status = '.BlogItemStatus::PUBLISHED.' ORDER BY stamp DESC LIMIT 0, 5';
+            .' WHERE status = ?';
+
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+        $sql .= ' ORDER BY stamp DESC LIMIT 0, 5';
         $error = 'Could not get blog feed.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, $queryParams);
         $i = 0;
         foreach ($result as $row) {
             $entry[$i] = $row;

@@ -10,6 +10,7 @@ use Empathy\MVC\Session;
 use Empathy\MVC\RequestException;
 use Empathy\ELib\Storage\BlogPage;
 use Empathy\MVC\Config;
+use Empathy\ELib\Blog\Util;
 
 
 // http://coffeerings.posterous.com/php-simplexml-and-cdata
@@ -151,12 +152,9 @@ class BlogFrontControllerNew extends EController
         $cats = $this->getCategories();
         $this->setTemplate('elib:/blog/blog_item.tpl');
 
-        $bi = Model::load('BlogImage');
-        $b_ids = array($id);
-        $blog_images = $bi->getForIDs($b_ids);
-        if (sizeof($blog_images)) {
-            $this->assign('primary_image', $blog_images[$id][0]['filename']);
-        }
+        $util = DI::getContainer()->get('BlogUtil');
+        $util->parseBlogImages($blog_page->getBody());
+        $this->assign('primary_image', $util->getFirstImage());
 
         $bc = Model::load('BlogCategory');
         $blog_cats = $bc->getCategoriesForBlogItem($id);
@@ -341,9 +339,8 @@ class BlogFrontControllerNew extends EController
 
     public function getBlogFeed()
     {
-        //$title = TITLE.' RSS Feed';
-        $info = $this->stash->get('site_info');
-        $title = $info->title;
+        $authorId = $this->stash->get('authorId');
+        $title = ELIB_BLOG_TITLE;
         $link = 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR');
         $description = ELIB_BLOG_DESCRIPTION;
         $language = 'en-us';
@@ -354,14 +351,15 @@ class BlogFrontControllerNew extends EController
         $xml = new SimpleXMLExtended($content);
 
         $b = Model::load('BlogItem');
-        $blogs = $b->getFeed();
+        $blogs = $b->getFeed($authorId);
 
         foreach ($blogs as $item) {
             $child = $xml->channel->addChild('item');
             $child->addChild('title', $item['heading']);
             $child->addChild('link', 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/blog/item/'.$item['id']);
             $child->addChild('pubDate', date('r', $item['stamp']));
-            $utf_string = mb_convert_encoding($item['body'], 'UTF-8', 'HTML-ENTITIES');
+            $bodyWithImages = DI::getContainer()->get('BlogUtil')->parseBlogImages($item['body']);
+            $utf_string = mb_convert_encoding($bodyWithImages, 'UTF-8', 'HTML-ENTITIES');
 	    
             //$child->addChild('description', $this->truncate(strip_tags($utf_string), 250));
 	    //$child->addChild('description', '<![CDATA['.$utf_string.']]>');
