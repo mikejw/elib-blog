@@ -393,14 +393,9 @@ class Controller extends AdminController
                 $tt_width = ELIB_BLOG_IMAGE_MAX_WIDTH;
                 $tt_height = ELIB_BLOG_IMAGE_MAX_HEIGHT;
 
-                // replace images with placeholder
-                $b->body = preg_replace_callback(
-                    '!<img(?: +class="(.*?)")?(?: +src="(.*?)")?(?: +alt="(.*?)")?(?: +data-payload="(.*?)")? *\/>!m',
-                    function ($matches) {
-                      return '[blog-image:' . $matches[4] .']';
-                    },
-                    $b->body
-                );
+                $b->body = DI::getContainer()
+                    ->get('BlogUtil')
+                    ->reverseParseBlogImages($b->body);
 
                 $b->save(Model::getTable('BlogItem'), array(''), 1);
                 $bc = Model::load('BlogCategory');

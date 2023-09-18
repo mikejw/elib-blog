@@ -21,6 +21,16 @@ class Util
         return $this->firstImage;
     }
 
+    public function reverseParseBlogImages($input)
+    {
+        return preg_replace_callback(
+            '!<img(?: +class="(.*?)")?(?: +src="(.*?)")?(?: +alt="(.*?)")?(?: +data-payload="(.*?)")?(?: +data-title="(.*?)")? *\/>!m',
+            function ($matches) {
+                return '[blog-image:' . $matches[4] .']';
+            },
+            $input
+        );
+    }
 
     /**
      * @param $input string
