@@ -32,6 +32,8 @@ class BlogFrontControllerNew extends EController
     {
         parent::__construct($boot);
         $this->assign('BLOG_DESCRIPTION', ELIB_BLOG_DESCRIPTION);
+        $this->assign('BLOG_TITLE', ELIB_BLOG_TITLE);
+
 
         $this->cache = $this->stash->get('cache');
         $vendor = $this->stash->get('vendor');

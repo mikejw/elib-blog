@@ -1,5 +1,12 @@
 <div class="col-sm-4 col-sm-offset-1 blog-sidebar">
 
+    <div class="sidebar-module text-center">
+        <span class="rss">
+            <a rel="nofollow" target="_blank" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/feed">
+                <i class="fa-solid fa-rss"></i>
+            </a>
+        </span>
+    </div>
 
     {if isset($about)}
     <div class="sidebar-module sidebar-module-inset">
