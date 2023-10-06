@@ -28,12 +28,31 @@ class BlogFrontControllerNew extends EController
 {
     private $cache;
 
+    private function getTitle()
+    {
+        $siteInfo = $this->stash->get('site_info');
+        return isset($siteInfo->blogtitle) && $siteInfo->blogtitle !== ''
+            ? $siteInfo->blogtitle
+            : ELIB_BLOG_TITLE;
+    }
+
+    private function getSubtitle()
+    {
+        $siteInfo = $this->stash->get('site_info');
+        return isset($siteInfo->blogsubtitle) && $siteInfo->blogsubtitle !== ''
+            ? $siteInfo->blogsubtitle
+            : ELIB_BLOG_DESCRIPTION;
+    }
+
     public function __construct($boot)
     {
         parent::__construct($boot);
-        $this->assign('BLOG_DESCRIPTION', ELIB_BLOG_DESCRIPTION);
-        $this->assign('BLOG_TITLE', ELIB_BLOG_TITLE);
-
+        $this->assign('BLOG_TITLE',
+           $this->getTitle()
+        );
+        $this->assign('BLOG_DESCRIPTION',
+           $this->getSubtitle()
+        );
 
         $this->cache = $this->stash->get('cache');
         $vendor = $this->stash->get('vendor');
@@ -172,9 +191,21 @@ class BlogFrontControllerNew extends EController
 
     private function socialLinks()
     {
-        if (defined('ELIB_BLOG_SOCIAL_LINKS')) {            
-            $this->assign('social', json_decode(ELIB_BLOG_SOCIAL_LINKS, true));
+        $links = array();
+        $siteInfo = $this->stash->get('site_info');
+        if (isset($siteInfo->link1name) && isset($siteInfo->link1url)) {
+            $links[$siteInfo->link1name] = $siteInfo->link1url;
         }
+        if (isset($siteInfo->link2name) && isset($siteInfo->link2url)) {
+            $links[$siteInfo->link2name] = $siteInfo->link2url;
+        }
+        if (isset($siteInfo->link3name) && isset($siteInfo->link3url)) {
+            $links[$siteInfo->link3name] = $siteInfo->link3url;
+        }
+        if (!sizeof($links) && defined('ELIB_BLOG_SOCIAL_LINKS')) {
+            $links = json_decode(ELIB_BLOG_SOCIAL_LINKS, true);
+        }
+        $this->assign('social', $links);
     }
 
     public function year()
@@ -351,8 +382,8 @@ class BlogFrontControllerNew extends EController
             $proto = 'http';
         }
         $authorId = $this->stash->get('authorId');
-        $title = ELIB_BLOG_TITLE;
-        $description = ELIB_BLOG_DESCRIPTION;
+        $title = $this->getTitle();
+        $description = $this->getSubtitle();
         $language = 'en-us';
 
         $content = "<rss version=\"2.0\">\n\t<channel>\n\t\t<title>$title</title>\n\t\t<link>$link</link>\n\t\t"
