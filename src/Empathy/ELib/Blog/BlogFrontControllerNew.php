@@ -341,9 +341,17 @@ class BlogFrontControllerNew extends EController
 
     public function getBlogFeed()
     {
+        $proto = '';
+        try {
+            $sslPlugin = DI::getContainer()->get('SmartySSL');
+            if ($sslPlugin->isSecure()) {
+                $proto = 'https';
+            }
+        } catch (\Exception $e) {
+            $proto = 'http';
+        }
         $authorId = $this->stash->get('authorId');
         $title = ELIB_BLOG_TITLE;
-        $link = 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR');
         $description = ELIB_BLOG_DESCRIPTION;
         $language = 'en-us';
 
@@ -356,9 +364,21 @@ class BlogFrontControllerNew extends EController
         $blogs = $b->getFeed($authorId);
 
         foreach ($blogs as $item) {
+            $link = $proto . '://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR');
+            $monthSlug = strtolower(substr(date("F", $item['stamp']), 0, 3));
+            if ($item['slug'] != '') {
+                $link .= '/'
+                    . date('Y', $item['stamp'])
+                    . '/' . $monthSlug . '/'
+                    . date("d", $item['stamp'])
+                    . '/' . $item['slug'];
+            } else {
+                $link .= '/blog/item/'.$item['id'];
+            }
+
             $child = $xml->channel->addChild('item');
             $child->addChild('title', $item['heading']);
-            $child->addChild('link', 'http://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/blog/item/'.$item['id']);
+            $child->addChild('link', $link);
             $child->addChild('pubDate', date('r', $item['stamp']));
             $bodyWithImages = DI::getContainer()->get('BlogUtil')->parseBlogImages($item['body']);
             $utf_string = mb_convert_encoding($bodyWithImages, 'UTF-8', 'HTML-ENTITIES');
