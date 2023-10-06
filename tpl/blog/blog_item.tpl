@@ -1,16 +1,15 @@
 {include file="header.tpl"}
 
+<ul class="pagination">
 {if isset($blog) and $internal_referrer}
-    <ul class="pagination">
-        <li class="page-item">
-            <a class="page-link back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">
-                <i class="fa fa-angle-left" aria-hidden="true"></i>
-                Back
-            </a>
-        </li>
-    </ul>
-
+    <li class="page-item">
+        <a class="page-link back" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+            Back
+        </a>
+    </li>
 {/if}
+</ul>
 
 <div class="row d-flex justify-content-between">
 
