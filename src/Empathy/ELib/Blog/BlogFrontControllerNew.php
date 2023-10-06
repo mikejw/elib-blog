@@ -532,6 +532,10 @@ class BlogFrontControllerNew extends EController
                 case 'Experiments':
                     $fa = 'flask';
                     break;
+                case 'Misc':
+                case 'Miscellaneous':
+                    $fa = 'pen-fancy';
+                    break;
                 default:
                     $fa = NULL;
                     break;

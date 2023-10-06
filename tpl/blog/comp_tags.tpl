@@ -40,7 +40,7 @@
             <p>&nbsp;</p>
             <p style="text-align: center;">
                 <a class="btn btn-default" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">
-                    Clear active tag{if $multi_tags}s{/if}
+                    [ Clear active tag{if $multi_tags}s{/if} ]
                 </a>
             </p>
         {/if}
