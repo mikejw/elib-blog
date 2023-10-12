@@ -30,7 +30,7 @@
 
         {*{include file="elib:/blog/comp_social_buttons.tpl"}*}
 
-        {*{include file="elib:/blog/comp_disqus.tpl"}*}
+        {include file="elib:/blog/comp_disqus.tpl" disqusUsername=$disqusUsername}
 
         <p class="entry_meta">
             {if count($blog->cats)}

@@ -47,9 +47,9 @@
 
                 <p class="entry_meta">
                     {if $blog_item.slug neq ''}
-                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$blog_item.stamp|date_format:"%Y"}/{$blog_item.month_slug}/{$blog_item.stamp|date_format:"%d"}/{$blog_item.slug}">Permalink</a>
+                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$blog_item.stamp|date_format:"%Y"}/{$blog_item.month_slug}/{$blog_item.stamp|date_format:"%d"}/{$blog_item.slug}#disqus_thread">Permalink</a>
                     {else}
-                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$blog_item.blog_id}">Permalink</a>
+                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$blog_item.blog_id}#disqus_thread">Permalink</a>
                     {/if}
 
                     {if count($blog_item.cats)}
