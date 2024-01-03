@@ -10,7 +10,7 @@ stamp                   TIMESTAMP               NULL DEFAULT NULL,
 heading                 VARCHAR(64)             NOT NULL,
 body                    TEXT,
 slug                    VARCHAR(64)             NULL,
-FOREIGN KEY (user_id) REFERENCES e_user(id)) ENGINE=InnoDB;
+FOREIGN KEY (user_id) REFERENCES user(id)) ENGINE=InnoDB;
 
 
 
@@ -49,7 +49,7 @@ stamp                   TIMESTAMP               NOT NULL,
 heading                 VARCHAR(64)             NULL,
 body                    TEXT,
 FOREIGN KEY(blog_id) REFERENCES blog(id),
-FOREIGN KEY(user_id) REFERENCES e_user(id)) ENGINE=InnoDB;
+FOREIGN KEY(user_id) REFERENCES user(id)) ENGINE=InnoDB;
 
 
 
