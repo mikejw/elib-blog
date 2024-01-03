@@ -24,9 +24,7 @@ class Controller extends AdminController
         parent::__construct($boot);
 
         $vendor = $this->stash->get('vendor');
-        if (!$vendor) {
-            throw new RequestException('No vendor found.', RequestException::NOT_FOUND);
-        } elseif (isset($vendor['currentUser']) && $vendor['currentUser']) {
+        if ($vendor && isset($vendor['currentUser']) && $vendor['currentUser']) {
             $this->stash->store('authorId', $vendor['user_id']);
         }
     }
