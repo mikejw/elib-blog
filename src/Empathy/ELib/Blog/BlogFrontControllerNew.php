@@ -56,9 +56,7 @@ class BlogFrontControllerNew extends EController
 
         $this->cache = $this->stash->get('cache');
         $vendor = $this->stash->get('vendor');
-        if (!$vendor) {
-            throw new RequestException('No vendor found.', RequestException::NOT_FOUND);
-        } else {
+        if ($vendor) {
             $this->stash->store('authorId', $vendor['user_id']);
         }
     }

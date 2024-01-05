@@ -52,7 +52,7 @@
                         <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$blog_item.blog_id}#disqus_thread">Permalink</a>
                     {/if}
 
-                    {if count($blog_item.cats)}
+                    {if isset($blog_item.cats) && sizeof($blog_item.cats)}
                         <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                         Categories:
                         {foreach from=$blog_item.cats key=i item=c}
@@ -66,19 +66,19 @@
                         {/foreach}
                     {/if}
 
-                    {if count($blog_item.tags)}
+                    {if isset($blog_item.tags) and sizeof($blog_item.tags)}
                         <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                         Tags:
                         {foreach from=$blog_item.tags item=t}
                             <span class="tag">
-                                <span class="badge badge-{if count($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
+                                <span class="badge badge-{if isset($active_tags) and sizeof($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
                                     <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}">
                                         {$t}
                                     </a>
                                 </span>
                             </span>
                             {*
-                            <a class="button{if count($active_tags) and in_array($t, $active_tags)} active{/if}" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}"><span class="label label-default">{$t}</span></a>
+                            <a class="button{if isset($active_tags) and isset($$active_tgas) and sizeof($active_tags) and in_array($t, $active_tags)} active{/if}" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}"><span class="label label-default">{$t}</span></a>
                             *}
                         {/foreach}
                     {/if}

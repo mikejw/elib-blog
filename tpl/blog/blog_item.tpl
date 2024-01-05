@@ -33,7 +33,7 @@
         {include file="elib:/blog/comp_disqus.tpl" disqusUsername=$disqusUsername}
 
         <p class="entry_meta">
-            {if count($blog->cats)}
+            {if isset($blog->cats) and sizeof($blog->cats)}
                 Categories:
                 {foreach from=$blog->cats key=i item=c}
                     <span class="tag">
@@ -47,11 +47,11 @@
                 <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
             {/if}
 
-            {if count($blog->tags)}
+            {if isset($blog->tags) and sizeof($blog->tags)}
                 Tags:
                 {foreach from=$blog->tags item=t}
                     <span class="tag">
-                        <span class="badge badge-{if count($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
+                        <span class="badge badge-{if isset($active_tags) and sizeof($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
                             <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}">
                                 {$t}
                             </a>
@@ -80,7 +80,7 @@
 
         {if 0 and $user_id > 0}
 
-            {if sizeof($errors) > 0}
+            {if isset($errors) and sizeof($errors) > 0}
                 <ul id="error">
                     {foreach from=$errors item=error}
                         <li>{$error}</li>
