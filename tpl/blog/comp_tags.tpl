@@ -2,8 +2,7 @@
 
 {*<p><a href="http://instagram.com/mikeyjw"><img id="me" src="http://{$WEB_ROOT}{$PUBLIC_DIR}/img/mikewhiting.jpg" alt="" /></a></p>*}
 
-
-<div id="categories">
+<div id="categories" class="sidebar-module">
     <h4>Category</h4>
 
     <!-- @todo: put font-awesome icons in CMS -->
@@ -27,7 +26,7 @@
 
 
 
-<div class="tags">
+<div class="tags sidebar-module">
     <div id="tags_collapsible" class="clear">
         <h4>Tags</h4>
         {section name=tag_item loop=$tags}
@@ -49,7 +48,7 @@
 
 
 {if isset($archive)}
-    <div id="archive">
+    <div id="archive" class="sidebar-module">
 
         <h4>Archive</h4>
 
@@ -96,36 +95,6 @@
     </div>
 {/if}
 
-<p>
-    {*<a href="#">&nbsp;<span>Show</span> Tags</a>*}
-
-</p>
-
-
-{*
-<div class="tags">
-<div class="clear">
-<span>Links:</span> 
-<span><a href="http://twitter.com/mikejw">twitter.com/mikejw</a></span>
-<span><a href="http://uk.linkedin.com/in/mikejw">uk.linkedin.com/in/mikejw</a></span>
-<span><a href="http://www.facebook.com/mikewhiting">facebook.com/mikewhiting</a></span>
-</div>
-</div>
-
-<div class="tags">
-<div class="clear">
-<span>Contact:</span> 
-<span>mail@mikejw.co.uk</span>
-</div>
-</div>
-*}
-
-
-
-{*
-<p>&nbsp;</p>
-<img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/img/mikejw_caricature.png" alt="" />
-*}
 
 
 

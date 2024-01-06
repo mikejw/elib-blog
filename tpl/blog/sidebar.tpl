@@ -15,10 +15,10 @@
     </div>
     {/if}
 
-    <div class="sidebar-module">
-        {include file="elib:/blog/comp_tags.tpl"}
 
-    </div>
+    {include file="elib:/blog/comp_tags.tpl"}
+
+
     <div class="sidebar-module">
         <h4>Elsewhere</h4>
         <ol class="list-unstyled">
