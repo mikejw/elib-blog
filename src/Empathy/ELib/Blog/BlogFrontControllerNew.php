@@ -581,7 +581,7 @@ class BlogFrontControllerNew extends EController
     {
         $authorId = $this->stash->get('authorId');
         $bc = $this->stash->get('blog_category');
-        $blogs = $b->getItems($found_items, ELIB_BLOG_ENTRIES, $bc, $page, $authorId);
+        $blogs = $b->getItems($found_items, $bc, $page, $authorId);
 
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');

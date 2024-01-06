@@ -73,7 +73,7 @@ class BlogItem extends Entity
         return array($sql, $queryParams);
     }
 
-    public function getItems($found_items, $limit, $cat=null, $page=1, $authorId = null)
+    public function getItems($found_items, $cat=null, $page=1, $authorId = null)
     {       
         $cat_blogs_string = $this->getCategoryBlogs($cat);
 

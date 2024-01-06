@@ -387,10 +387,7 @@ class Controller extends AdminController
                 $bi = Model::load('BlogImage');
 
                 $images = $bi->getForIDs(array($b->id));
-
-                $tt_width = ELIB_BLOG_IMAGE_MAX_WIDTH;
-                $tt_height = ELIB_BLOG_IMAGE_MAX_HEIGHT;
-
+                
                 $b->body = DI::getContainer()
                     ->get('BlogUtil')
                     ->reverseParseBlogImages($b->body);
