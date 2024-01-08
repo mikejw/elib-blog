@@ -383,8 +383,9 @@ class BlogFrontControllerNew extends EController
         $title = $this->getTitle();
         $description = $this->getSubtitle();
         $language = 'en-us';
+        $siteLink = $proto . '://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR');
 
-        $content = "<rss version=\"2.0\">\n\t<channel>\n\t\t<title>$title</title>\n\t\t<link>$link</link>\n\t\t"
+        $content = "<rss version=\"2.0\">\n\t<channel>\n\t\t<title>$title</title>\n\t\t<link>$siteLink</link>\n\t\t"
             ."<description>$description</description>\n\t\t<language>$language</language>\n\t</channel>\n</rss>";
 
         $xml = new SimpleXMLExtended($content);
