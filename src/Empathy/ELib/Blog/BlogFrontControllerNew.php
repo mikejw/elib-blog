@@ -590,13 +590,20 @@ class BlogFrontControllerNew extends EController
 
         $cat_id = Session::get('blog_category') ?? 0;
 
+        $catString = '';
+        if (!$cat_id) {
+            $catString = 'any';
+        }
+
         $cats_lookup = array();
         foreach ($cats as $c) {
             $cats_lookup[$c['id']] = $c['label'];
-            if ($c['id'] === $cat_id) {
-                $this->assign('cat_string', preg_replace('/\\s/', '', strtolower($c['label'])));
+            if ($cat_id && $c['id'] === $cat_id) {
+                $catString = preg_replace('/\\s/', '', strtolower($c['label']));
             }
         }
+
+        $this->assign('cat_string', $catString);
 
         foreach ($blogs as &$b_item) {
             $b_item['tags'] = $t->getTagsForBlogItem($b_item['blog_id']);
