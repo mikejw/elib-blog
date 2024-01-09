@@ -14,6 +14,12 @@
         {/if}
 
         {if $blog->status eq 1}
+            <a data-toggle="lightbox" data-disable-external-check="true" data-type="url" data-remote="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/preview/{$blog->id}" class="btn btn-sm btn-primary">
+                Preview
+            </a>
+        {/if}
+
+        {if $blog->status eq 1}
             <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/edit_blog/{$blog->id}" class="btn btn-sm btn-primary">
                 Edit
             </a>
@@ -27,6 +33,7 @@
                 </div>
             </form>
         {/if}
+
 </div>
 
 

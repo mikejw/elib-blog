@@ -584,4 +584,12 @@ class Controller extends AdminController
         $this->setTemplate('elib://admin/blog/blog_images.tpl');
         $this->assign('blog_id', $id);
     }
+
+    public function preview()
+    {
+        $fc = new BlogFrontControllerNew($this->boot);
+        $fc->item(true);
+        $this->setTemplate('elib:/blog/blog_item.tpl');
+
+    }
 }

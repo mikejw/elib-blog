@@ -14,12 +14,27 @@ class BlogPage
     private $blog_comments;
     private $page_title;
 
-    public function __construct($id, $site_info = NULL)
+    private function notFound()
+    {
+        throw new RequestException('No blog item found', RequestException::NOT_FOUND);
+    }
+
+    public function __construct($id, $site_info = NULL, $preview = false)
     {
         $this->blog_item = Model::load('BlogItem');
         $this->blog_item->id = $id;
-        if (!$this->blog_item->load()) {
-            throw new RequestException('No blog item found', RequestException::NOT_FOUND);
+        if (
+            !$this->blog_item->load()
+        ) {
+            $this->notFound();
+
+        }
+
+        if (
+            (!$preview && $this->blog_item->status != BlogItemStatus::PUBLISHED) ||
+            ($preview && $this->blog_item->status != BlogItemStatus::DRAFT)
+        ) {
+            $this->notFound();
         }
 
         $t = Model::load('TagItem');

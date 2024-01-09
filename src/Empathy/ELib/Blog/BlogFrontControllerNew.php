@@ -103,9 +103,9 @@ class BlogFrontControllerNew extends EController
     }   
 
 
-    public function getBlogPageData($id)
+    public function getBlogPageData($id, $preview)
     {
-        return new BlogPage($id, $this->stash->get('site_info'));
+        return new BlogPage($id, $this->stash->get('site_info'), $preview);
     }
 
 
@@ -122,7 +122,7 @@ class BlogFrontControllerNew extends EController
         );
     }
 
-    public function item()
+    public function item($preview = false)
     {
         $slug_arr = array();
         $this->setTemplate('elib:/blog/blog_item.tpl');
@@ -154,7 +154,7 @@ class BlogFrontControllerNew extends EController
         }
 
         $id = $_GET['id'];
-        $blog_page = $this->cache->cachedCallback('blog_'.$id, array($this, 'getBlogPageData'), array($id));
+        $blog_page = $this->cache->cachedCallback('blog_'.$id, array($this, 'getBlogPageData'), array($id, $preview));
 
         if (isset($slug_arr)) {
             $this->assign('slug_arr', $slug_arr);    
