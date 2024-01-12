@@ -490,7 +490,7 @@ class BlogFrontControllerNew extends EController
     private function getAvailableTags()
     {
         $bc = $this->stash->get('blog_category');
-        $tags = $this->cache->cachedCallback('tags_'.$bc.'_', array($this, 'getAvailableTagsFetch'));
+        $tags = $this->cache->cachedCallback('tags_'.$bc, array($this, 'getAvailableTagsFetch'));
         //shuffle($tags);
         $this->assign('tags', $tags);
     }
