@@ -41,12 +41,18 @@ class BlogItem extends Entity
     private function getItemsQuery($found_items, $cat_blogs_string, $limit=array(), $authorId = null)
     {
         $queryParams = array();
-        $sql = 'SELECT t1.heading, t1.body,COUNT(t3.id) AS comments,'
-            .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug';
+        $sql = 'SELECT t1.heading, t1.body,COUNT(t5.id) AS comments,'
+            .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug, any_value(t4.body_revision) as body_revision';
         $sql .= ' FROM '.Model::getTable('UserItem').' t2,'
-            .Model::getTable('BlogItem').' t1'
-            .' LEFT JOIN '.Model::getTable('BlogComment').' t3'
-            .' ON t1.id = t3.blog_id'
+            .Model::getTable('BlogItem').' t1';
+
+        $sql .= ' left join'
+            .' (select max(id) as max, any_value(blog_id) as blog_id from blog_revision group by blog_id) t3'
+            .' on t3.blog_id = t1.id'
+            .' left join (select id, body as body_revision from blog_revision) t4 on t3.max = t4.id';
+
+        $sql .= ' LEFT JOIN '.Model::getTable('BlogComment').' t5'
+            .' ON t1.id = t5.blog_id'
             .' WHERE t1.user_id = t2.id';
 
         if ($found_items != '(0,)') {
@@ -65,10 +71,11 @@ class BlogItem extends Entity
         }
 
         $sql .= ' GROUP BY t1.id'
-            .' ORDER BY t1.stamp DESC';
+            .' ORDER BY t1.stamp DESC, t1.id DESC';
         if (sizeof($limit)) {
             $sql .= ' limit '. $limit[0] . ', ' . $limit[1];
         }
+
 
         return array($sql, $queryParams);
     }
@@ -88,7 +95,7 @@ class BlogItem extends Entity
         
         $start = ($page * $per_page) - $per_page;
         $end = $per_page;
-
+        
         //echo "start: $start end: $end<br />";
 
         list($sql, $params) = $this->getItemsQuery($found_items, $cat_blogs_string, array($start, $end), $authorId);
@@ -98,7 +105,7 @@ class BlogItem extends Entity
         for ($i = 0; $i < $pages; $i++) {
             $item = array();
             if ($page != $i+1) {
-                $item['current'] = false;                
+                $item['current'] = false;
             } else {
                 $item['current'] = true;
             }
@@ -107,6 +114,10 @@ class BlogItem extends Entity
         self::$pages = $struct_pages;
 
         foreach ($result as $row) {
+
+            if (isset($row['body_revision'])) {
+                $row['body'] = $row['body_revision'];
+            }
             $blogs[] = $row;
         }
         return $blogs;
@@ -149,7 +160,7 @@ class BlogItem extends Entity
             array_push($queryParams, $authorId);
         }
 
-        $sql .= ' ORDER BY stamp DESC LIMIT 0, 5';
+        $sql .= ' ORDER BY stamp DESC, id DESC LIMIT 0, 5';
         $error = 'Could not get blog feed.';
         $result = $this->query($sql, $error, $queryParams);
         $i = 0;
@@ -242,7 +253,7 @@ class BlogItem extends Entity
     {
         $queryParams = array();
         $cat_blogs_string = $this->getCategoryBlogs($cat);
-        
+
         $archive = array();
         /*
           $sql = 'SELECT MAX(UNIX_TIMESTAMP(stamp)) AS max,'
@@ -269,7 +280,7 @@ class BlogItem extends Entity
             array_push($queryParams, $authorId);
         }
 
-        $sql .= ' ORDER BY stamp DESC';
+        $sql .= ' ORDER BY stamp DESC, id DESC';
 
         $error = 'Could not get blog archive.';
         $result = $this->query($sql, $error, $queryParams);

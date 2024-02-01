@@ -27,7 +27,9 @@ class BlogPage
             !$this->blog_item->load()
         ) {
             $this->notFound();
-
+        } else {
+            $r = Model::load('BlogRevision');
+            $this->blog_item = $r->loadSaved($this->blog_item);
         }
 
         if (

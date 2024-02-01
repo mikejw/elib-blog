@@ -279,6 +279,9 @@ class Controller extends AdminController
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
         $b->load();
+        
+        $r = Model::load('BlogRevision');
+        $b = $r->loadSaved($b);
 
         $u = Model::load('UserItem');
         $u->id = $b->user_id;
