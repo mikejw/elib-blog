@@ -59,7 +59,7 @@ class BlogPage
 
         $this->page_title = $this->blog_item->heading;
 
-        if (is_object($site_info)) {
+        if (is_object($site_info) && isset($site_info->title)) {
             $this->page_title .= ' - '.$site_info->title;
         }
         

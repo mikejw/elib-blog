@@ -100,7 +100,7 @@ class Controller extends AdminController
 
 
 
-        $select = '*,t1.id AS id';
+        $select = '*,t1.id AS id, t4.body_revision';
         $sql = ' WHERE status = '.$_GET['status'];
 
         if (!$admin) {
@@ -110,12 +110,34 @@ class Controller extends AdminController
         $sql .= ' AND t1.user_id = t2.id';
         $sql .= ' ORDER BY stamp DESC';
 
-        $p_nav = $b->getPaginatePagesSimpleJoin($select, Model::getTable('BlogItem'), Model::getTable('UserItem'), $sql, $_GET['page'], REQUESTS_PER_PAGE);
+        $leftJoins = ' left join'
+            .' (select max(id) as max, any_value(blog_id) as blog_id from blog_revision group by blog_id) t3'
+            .' on t3.blog_id = t1.id'
+            .' left join (select id, body as body_revision from blog_revision) t4 on t3.max = t4.id,';
+
+        $p_nav = $b->getPaginatePagesSimpleJoin(
+            $select,
+            Model::getTable('BlogItem'),
+            Model::getTable('UserItem'),
+            $sql,
+            $_GET['page'],
+            REQUESTS_PER_PAGE,
+            $leftJoins
+        );
         $this->presenter->assign('p_nav', $p_nav);
 
         $this->presenter->assign('status', $_GET['status']);
 
-        $blogs = $b->getAllCustomPaginateSimpleJoin($select, Model::getTable('BlogItem'), Model::getTable('UserItem'), $sql, $_GET['page'], REQUESTS_PER_PAGE);
+        $blogs = $b->getAllCustomPaginateSimpleJoin(
+            $select,
+            Model::getTable('BlogItem'),
+            Model::getTable('UserItem'),
+            $sql,
+            $_GET['page'],
+            REQUESTS_PER_PAGE,
+            $leftJoins
+        );
+        
 
         foreach ($blogs as $index => $item) {
             $blog_cats = $c->getCategoriesForBlogItem($blogs[$index]['id']);
@@ -125,10 +147,11 @@ class Controller extends AdminController
                 $cats[] = $cats_arr[$bc_id];
             }
             $blogs[$index]['category'] = implode(', ', $cats);
+
+            if (isset($blogs[$index]['body_revision'])) {
+                $blogs[$index]['body'] = $blogs[$index]['body_revision'];
+            }
         }
-
-
-      
 
 
         $this->setTemplate('elib:/admin/blog/blog_admin.tpl');

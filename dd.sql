@@ -13,11 +13,17 @@ slug                    VARCHAR(64)             NULL,
 FOREIGN KEY (user_id) REFERENCES user(id)) ENGINE=InnoDB;
 
 
+CREATE TABLE blog_revision(
+id                      INT(11) AUTO_INCREMENT PRIMARY KEY,
+blog_id                 INT(11) NOT NULL,
+body                    TEXT NULL,
+FOREIGN KEY (blog_id) REFERENCES blog (id))  ENGINE = InnoDB;
+
+
 
 CREATE TABLE tag(
 id                      INT(11)                  AUTO_INCREMENT PRIMARY KEY,
 tag                     VARCHAR(128)             NOT NULL) ENGINE=InnoDB;
-
 
 
 CREATE TABLE blog_tag(
