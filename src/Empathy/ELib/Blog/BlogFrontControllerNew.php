@@ -43,7 +43,15 @@ class BlogFrontControllerNew extends EController
             ? $siteInfo->blogsubtitle
             : ELIB_BLOG_DESCRIPTION;
     }
-
+    
+    private function getDisqusUsername()
+    {
+        $siteInfo = $this->stash->get('site_info');
+        return isset($siteInfo->disqusUsername) && $siteInfo->disqusUsername !== ''
+            ? $siteInfo->disqusUsername
+            : '';
+    }
+    
     public function __construct($boot)
     {
         parent::__construct($boot);
@@ -54,6 +62,8 @@ class BlogFrontControllerNew extends EController
            $this->getSubtitle()
         );
 
+        $this->assign('disqusUsername', $this->getDisqusUsername());
+        
         $this->cache = $this->stash->get('cache');
         $vendor = $this->stash->get('vendor');
         if ($vendor) {
