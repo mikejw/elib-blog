@@ -365,6 +365,11 @@ class Controller extends AdminController
                 $b->stamp = date('Y-m-d H:i:s', time());              
                 $b->id = $b->insert(Model::getTable('BlogItem'), 1, array(''), 1);
                
+                $r = Model::load('BlogRevision');
+                $r->blog_id = $b->id;
+                $r->body = $b->body;
+                $r->insert(Model::getTable('BlogRevision'), 1, array(''), 1);
+
                 $bc = Model::load('BlogCategory');
                 $bc->createForBlogItem($_POST['category'], $b->id);
 

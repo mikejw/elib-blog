@@ -42,7 +42,11 @@ class BlogPage
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');
 
-        $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by id');
+        if ($preview) {
+            $cats = $bc->getAllCats(Model::getTable('BlogCategory'), ' order by id');
+        } else {
+            $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by id');
+        }
 
         $cats_lookup = array();
         foreach ($cats as $c) {

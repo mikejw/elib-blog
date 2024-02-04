@@ -179,6 +179,7 @@ class BlogFrontControllerNew extends EController
         $this->getAvailableTags();
         $this->getArchive();
         $cats = $this->getCategories();
+        $this->assign('categories', $cats);
         $this->setTemplate('elib:/blog/blog_item.tpl');
 
         $util = DI::getContainer()->get('BlogUtil');
@@ -187,13 +188,18 @@ class BlogFrontControllerNew extends EController
 
         $bc = Model::load('BlogCategory');
         $blog_cats = $bc->getCategoriesForBlogItem($id);
+
+        $allCats = $this->getCategories(false);
+
         $cats_lookup = array();
-        foreach ($cats as $c) {
-            $cats_lookup[$c['id']] = $c['label'];
+        foreach ($blog_cats as $c) {
+            $cats_lookup[$c] = $allCats[$c]['label'];
         }
-        if (sizeof($blog_cats)) {
-            $this->assign('sample_category', $cats_lookup[$blog_cats[0]]);    
+
+        if (sizeof($cats_lookup)) {
+            $this->assign('sample_category', array_values($cats_lookup)[0]);
         }
+
         $this->socialLinks();
     }
 
@@ -535,15 +541,21 @@ class BlogFrontControllerNew extends EController
         $this->assign('archive', $archive); 
     }
 
-    private function getCategories()
+    private function getCategories($published = true)
     {
         $authorId = $this->stash->get('authorId');
         $c = Model::load('BlogCategory');
-        $cats = $this->cache->cachedCallback(
-            'cats',
-            array($c, 'getAllPublished'),
-            array(Model::getTable('BlogCategory'), ' order by id', $authorId)
-        );
+
+        if (!$published) {
+            $cats = $c->getAllCats(Model::getTable('BlogCategory'), ' order by id', $authorId);
+        } else {
+            $cats = $this->cache->cachedCallback(
+                'cats',
+                array($c, 'getAllPublished'),
+                array(Model::getTable('BlogCategory'), ' order by id', $authorId)
+            );
+        }
+
         array_unshift($cats, array('id' => 0, 'label' => 'Any'));
 
         foreach ($cats as &$c) {
@@ -584,7 +596,6 @@ class BlogFrontControllerNew extends EController
                 $c['label_icon'] = '<i class="fa fa-'.$fa.'" aria-hidden="true"></i>&nbsp;&nbsp;';
             }
         }
-        $this->assign('categories', $cats);
         return $cats;
     }
 
@@ -598,6 +609,7 @@ class BlogFrontControllerNew extends EController
         $bc = Model::load('BlogCategory');
 
         $cats = $this->getCategories();
+        $this->assign('categories', $cats);
 
         $cat_id = Session::get('blog_category') ?? 0;
 
