@@ -556,8 +556,6 @@ class BlogFrontControllerNew extends EController
             );
         }
 
-        array_unshift($cats, array('id' => 0, 'label' => 'Any'));
-
         foreach ($cats as &$c) {
             switch ($c['label']) {
                 case 'Technology':

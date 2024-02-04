@@ -56,7 +56,6 @@ class BlogCategory extends Entity
     public function getAllCats($table, $sql_string, $authorId = null, $published = false)
     {
         $queryParams = array();
-        $all = array();
         //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
         $sql = "select c.id, c.label"
             ." from %s b"
@@ -83,13 +82,16 @@ class BlogCategory extends Entity
 
         $result = $this->query($sql, $error, $queryParams);
 
-        $i = 0;
+        $cats =  array(0 => array('id' => 0, 'label' => 'Any'));
+
         foreach ($result as $row) {
-            $all[$i] = $row;
-            $i++;
+            if ($row['id']) {
+                $cats[$row['id']] = $row;
+            }
         }
 
-        return $all;
+
+        return $cats;
     }
 
 
