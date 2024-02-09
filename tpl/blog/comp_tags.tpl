@@ -63,7 +63,7 @@
                             <ul{if $year eq $current_year || $year eq $blog->stamp|date_format:"%Y"} class="current"{/if}>
                                 {foreach from=$y item=m key=month}
                                     <li>
-                                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{$month|substr:0:3|lower}">{$month}</a>
+                                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{substr($month, 0, 3)|lower}">{$month}</a>
                                         <ul{if ($month eq $blog->stamp|date_format:"%B" && $year eq $blog->stamp|date_format:"%Y") ||
                                         ($month eq $current_month && $year eq $current_year)} class="current"{/if}>
                                             {foreach from=$m item=b key=id}
