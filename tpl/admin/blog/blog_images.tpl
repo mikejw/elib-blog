@@ -9,6 +9,10 @@
   </head>
   <body>
     <div class="container">
+
+      {if count($images) === 0}
+      <p>No images associated with this blog post.</p>
+      {else}
       <form method="post" action="">
         <div class="form-group">
           {foreach from=$images item=image}
@@ -64,6 +68,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
+      {/if}
     </div>
 
     <script type="text/javascript" src="http://{$WEB_ROOT}{$PUBLIC_DIR}/js/common.js"></script>

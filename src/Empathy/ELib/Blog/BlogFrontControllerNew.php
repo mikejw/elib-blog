@@ -556,39 +556,15 @@ class BlogFrontControllerNew extends EController
             );
         }
 
+
         foreach ($cats as &$c) {
             switch ($c['label']) {
-                case 'Technology':
-                    $fa = 'cog';
-                    break;
-                case 'Music':
-                    $fa = 'music';
-                    break;
-                case 'Other':
-                    $fa = 'plug';
-                    break;
-                case 'Photography':
-                    $fa = 'camera';
-                    break;
                 case 'Any':
                     $fa = 'random'; 
                     break;
-                case 'Releases':
-                    $fa = 'gift';
-                    break;
-                case 'NewVibes':
-                    $fa = 'bolt';
-                    break;
-                case 'Experiments':
-                    $fa = 'flask';
-                    break;
-                case 'Misc':
-                case 'Miscellaneous':
-                    $fa = 'pen-fancy';
-                    break;
                 default:
-                    $fa = NULL;
-                    break;
+                    $meta = json_decode($c['meta'], true);
+                    $fa = isset($meta['fa']) ? $meta['fa'] : '';
             }
             if ($fa !== NULL) {
                 $c['label_icon'] = '<i class="fa fa-'.$fa.'" aria-hidden="true"></i>&nbsp;&nbsp;';

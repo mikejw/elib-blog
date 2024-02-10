@@ -343,11 +343,14 @@ class Controller extends AdminController
         if (isset($_POST['cancel'])) {
             $this->redirect('admin/blog');
         } elseif (isset($_POST['save'])) {
+
+
             $b = Model::load('BlogItem');
             $tags_arr = $b->buildTags(); // errors ?
 
             $b->heading = $_POST['heading'];
             $b->body = $_POST['body'];
+
             $b->status = BlogItemStatus::DRAFT;
             $b->slug = $_POST['slug'];
 
@@ -368,7 +371,7 @@ class Controller extends AdminController
                 $r = Model::load('BlogRevision');
                 $r->blog_id = $b->id;
                 $r->body = $b->body;
-                $r->insert(Model::getTable('BlogRevision'), 1, array(''), 1);
+                $r->insert(Model::getTable('BlogRevision'), 1, array(''), 0);
 
                 $bc = Model::load('BlogCategory');
                 $bc->createForBlogItem($_POST['category'], $b->id);
@@ -428,6 +431,11 @@ class Controller extends AdminController
                 $bc->removeForBlogItem($b->id);
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
+                $r = Model::load('BlogRevision');
+                $r->blog_id = $b->id;
+                $r->body = $b->body;
+                $r->insert(Model::getTable('BlogRevision'), 1, array(''), 0);
+
                 Service::processTags($b, $tags_arr);
                 $this->redirect('admin/blog/view/'.$b->id);
             }
@@ -438,6 +446,9 @@ class Controller extends AdminController
             $b->load();
 
             //	$b->body = preg_replace('!<img src="http://'.WEB_ROOT.PUBLIC_DIR.'/uploads/(.*?)" alt="(.*?)" />!m', '<img src="" alt="$2" />', $b->body);
+
+            $r = Model::load('BlogRevision');
+            $b = $r->loadSaved($b);
 
             $this->presenter->assign('blog', $b);
 
@@ -611,7 +622,7 @@ class Controller extends AdminController
         $this->assertAuthorBlog($id);
         $image = Model::load('BlogImage');
         $images = $image->getForIDs(array($id));
-        $this->assign('images', $images[$id]);
+        $this->assign('images', count($images) ? $images[$id] : array());
         $this->setTemplate('elib://admin/blog/blog_images.tpl');
         $this->assign('blog_id', $id);
     }
@@ -623,4 +634,44 @@ class Controller extends AdminController
         $this->setTemplate('elib:/blog/blog_item.tpl');
 
     }
+
+    public function edit_cat_meta()
+    {
+
+        DI::getContainer()->get('CurrentUser')->denyNotAdmin();
+        $this->setTemplate('elib:/admin/blog/blog_cat_meta.tpl');
+        $ui_array = array('id');
+        $this->loadUIVars('ui_blog_cats_meta', $ui_array);
+        if (!isset($_GET['id']) || $_GET['id'] == '') {
+            $_GET['id'] = 0;
+        }
+
+        $this->buildNav();
+        $this->presenter->assign('blog_cat_id', $_GET['id']);
+        
+        if (isset($_POST['save'])) {
+            $c = Model::load('BlogCategory');
+            $c->id = $_POST['id'];
+            $c->load();
+            $c->meta = $_POST['meta'];
+
+            $c->validates();
+            if ($c->hasValErrors()) {
+                $this->presenter->assign('category_item', $c);
+                $this->presenter->assign('errors', $c->getValErrors());
+            } else {
+                $c->save(Model::getTable('BlogCategory'), array(), 1);
+                $this->clearCache();
+                $this->redirect('admin/blog/category/'.$c->id);
+            }
+        } elseif (isset($_POST['cancel'])) {
+            $this->redirect('admin/blog/category/'.$_POST['id']);
+        }
+
+        $c = Model::load('BlogCategory');
+        $c->id = $_GET['id'];
+        $c->load();
+        $this->presenter->assign('cat_item', $c);
+    }
+
 }

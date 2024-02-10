@@ -63,6 +63,7 @@ CREATE TABLE blog_category(
 id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
 blog_category_id        INT(11) NULL,
 label                   VARCHAR(64) NOT NULL,
+meta					TEXT NULL,
 FOREIGN KEY(blog_category_id) REFERENCES blog_category(id)) ENGINE=InnoDB;
 
 

@@ -38,6 +38,7 @@ class BlogCategory extends Entity
     public $id;
     public $blog_category_id;
     public $label;
+    public $meta;
 
 
     public function getAllPublished($table, $sql_string, $authorId = null)
@@ -57,7 +58,7 @@ class BlogCategory extends Entity
     {
         $queryParams = array();
         //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
-        $sql = "select c.id, c.label"
+        $sql = "select c.id, c.label, c.meta"
             ." from %s b"
             ." left join %s j on j.blog_id = b.id"
             ." left join %s c on c.id = j.blog_category_id";
