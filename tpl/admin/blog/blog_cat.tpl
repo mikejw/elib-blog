@@ -1,6 +1,7 @@
 {include file="elib:/admin/admin_header.tpl"}
 
 
+
 <div id="operations">
 <div class="grey_top">
 <div class="top_right">
@@ -19,6 +20,11 @@
 <form style="display: inline;" class="confirm" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/delete_category/{$blog_cat_id}" method="get">
     <button class="btn btn-sm btn-primary" type="submit" name="delete" value="1"{if $blog_cat_id eq 0} disabled="disabled"{/if}>Delete</button>
 </form>
+
+<form style="display: inline;" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/edit_cat_meta/{$blog_cat_id}" method="get">
+    <button class="btn btn-sm btn-primary" type="submit" name="delete" value="1"{if $blog_cat_id eq 0} disabled="disabled"{/if}>Edit Meta</button>
+</form>
+
 
 
 

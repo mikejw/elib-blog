@@ -27,7 +27,9 @@ class BlogPage
             !$this->blog_item->load()
         ) {
             $this->notFound();
-
+        } else {
+            $r = Model::load('BlogRevision');
+            list($this->blog_item) = $r->loadSaved($this->blog_item);
         }
 
         if (
@@ -40,7 +42,11 @@ class BlogPage
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');
 
-        $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by id');
+        if ($preview) {
+            $cats = $bc->getAllCats(Model::getTable('BlogCategory'), ' order by id');
+        } else {
+            $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by id');
+        }
 
         $cats_lookup = array();
         foreach ($cats as $c) {
@@ -59,7 +65,7 @@ class BlogPage
 
         $this->page_title = $this->blog_item->heading;
 
-        if (is_object($site_info)) {
+        if (is_object($site_info) && isset($site_info->title)) {
             $this->page_title .= ' - '.$site_info->title;
         }
         

@@ -43,7 +43,15 @@ class BlogFrontControllerNew extends EController
             ? $siteInfo->blogsubtitle
             : ELIB_BLOG_DESCRIPTION;
     }
-
+    
+    private function getDisqusUsername()
+    {
+        $siteInfo = $this->stash->get('site_info');
+        return isset($siteInfo->disqusUsername) && $siteInfo->disqusUsername !== ''
+            ? $siteInfo->disqusUsername
+            : '';
+    }
+    
     public function __construct($boot)
     {
         parent::__construct($boot);
@@ -54,6 +62,8 @@ class BlogFrontControllerNew extends EController
            $this->getSubtitle()
         );
 
+        $this->assign('disqusUsername', $this->getDisqusUsername());
+        
         $this->cache = $this->stash->get('cache');
         $vendor = $this->stash->get('vendor');
         if ($vendor) {
@@ -169,6 +179,7 @@ class BlogFrontControllerNew extends EController
         $this->getAvailableTags();
         $this->getArchive();
         $cats = $this->getCategories();
+        $this->assign('categories', $cats);
         $this->setTemplate('elib:/blog/blog_item.tpl');
 
         $util = DI::getContainer()->get('BlogUtil');
@@ -177,13 +188,18 @@ class BlogFrontControllerNew extends EController
 
         $bc = Model::load('BlogCategory');
         $blog_cats = $bc->getCategoriesForBlogItem($id);
+
+        $allCats = $this->getCategories(false);
+
         $cats_lookup = array();
-        foreach ($cats as $c) {
-            $cats_lookup[$c['id']] = $c['label'];
+        foreach ($blog_cats as $c) {
+            $cats_lookup[$c] = $allCats[$c]['label'];
         }
-        if (sizeof($blog_cats)) {
-            $this->assign('sample_category', $cats_lookup[$blog_cats[0]]);    
+
+        if (sizeof($cats_lookup)) {
+            $this->assign('sample_category', array_values($cats_lookup)[0]);
         }
+
         $this->socialLinks();
     }
 
@@ -525,56 +541,35 @@ class BlogFrontControllerNew extends EController
         $this->assign('archive', $archive); 
     }
 
-    private function getCategories()
+    private function getCategories($published = true)
     {
         $authorId = $this->stash->get('authorId');
         $c = Model::load('BlogCategory');
-        $cats = $this->cache->cachedCallback(
-            'cats',
-            array($c, 'getAllPublished'),
-            array(Model::getTable('BlogCategory'), ' order by id', $authorId)
-        );
-        array_unshift($cats, array('id' => 0, 'label' => 'Any'));
+
+        if (!$published) {
+            $cats = $c->getAllCats(Model::getTable('BlogCategory'), ' order by id', $authorId);
+        } else {
+            $cats = $this->cache->cachedCallback(
+                'cats',
+                array($c, 'getAllPublished'),
+                array(Model::getTable('BlogCategory'), ' order by id', $authorId)
+            );
+        }
+
 
         foreach ($cats as &$c) {
             switch ($c['label']) {
-                case 'Technology':
-                    $fa = 'cog';
-                    break;
-                case 'Music':
-                    $fa = 'music';
-                    break;
-                case 'Other':
-                    $fa = 'plug';
-                    break;
-                case 'Photography':
-                    $fa = 'camera';
-                    break;
                 case 'Any':
                     $fa = 'random'; 
                     break;
-                case 'Releases':
-                    $fa = 'gift';
-                    break;
-                case 'NewVibes':
-                    $fa = 'bolt';
-                    break;
-                case 'Experiments':
-                    $fa = 'flask';
-                    break;
-                case 'Misc':
-                case 'Miscellaneous':
-                    $fa = 'pen-fancy';
-                    break;
                 default:
-                    $fa = NULL;
-                    break;
+                    $meta = json_decode($c['meta'], true);
+                    $fa = isset($meta['fa']) ? $meta['fa'] : '';
             }
             if ($fa !== NULL) {
                 $c['label_icon'] = '<i class="fa fa-'.$fa.'" aria-hidden="true"></i>&nbsp;&nbsp;';
             }
         }
-        $this->assign('categories', $cats);
         return $cats;
     }
 
@@ -588,6 +583,7 @@ class BlogFrontControllerNew extends EController
         $bc = Model::load('BlogCategory');
 
         $cats = $this->getCategories();
+        $this->assign('categories', $cats);
 
         $cat_id = Session::get('blog_category') ?? 0;
 

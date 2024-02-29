@@ -30,7 +30,9 @@
 
         {*{include file="elib:/blog/comp_social_buttons.tpl"}*}
 
-        {include file="elib:/blog/comp_disqus.tpl" disqusUsername=$disqusUsername}
+        {if $disqusUsername neq ''}
+            {include file="elib:/blog/comp_disqus.tpl" disqusUsername=$disqusUsername}
+        {/if}
 
         <p class="entry_meta">
             {if isset($blog->cats) and sizeof($blog->cats)}

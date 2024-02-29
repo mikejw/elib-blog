@@ -38,8 +38,14 @@ class BlogCategory extends Entity
     public $id;
     public $blog_category_id;
     public $label;
+    public $meta;
 
 
+    public function getAllPublished($table, $sql_string, $authorId = null)
+    {
+        return $this->getAllCats($table, $sql_string, $authorId, true);
+    }
+    
     /**
     * Get list of all categories that only
     * have published blogs
@@ -48,21 +54,23 @@ class BlogCategory extends Entity
     *
     * @return array
     */
-    public function getAllPublished($table, $sql_string, $authorId = null)
+    public function getAllCats($table, $sql_string, $authorId = null, $published = false)
     {
         $queryParams = array();
-        $all = array();
         //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
-        $sql = "select c.id, c.label"
+        $sql = "select c.id, c.label, c.meta"
             ." from %s b"
             ." left join %s j on j.blog_id = b.id"
-            ." left join %s c on c.id = j.blog_category_id"
-            ." where b.status = ?";
+            ." left join %s c on c.id = j.blog_category_id";
 
-        array_push($queryParams, BlogItemStatus::PUBLISHED);
+        if ($published) {
+            $sql .= " where b.status = ?";
+            array_push($queryParams, BlogItemStatus::PUBLISHED);
+        }
 
         if (!is_null($authorId)) {
-            $sql .= ' AND b.user_id = ?';
+            $sql .=  count($queryParams) ? ' and' : ' where';
+            $sql .= ' b.user_id = ?';
             array_push($queryParams, $authorId);
         }
 
@@ -72,15 +80,19 @@ class BlogCategory extends Entity
             Model::getTable('BlogItemCategory'),
             Model::getTable('BlogCategory'));
         $error = 'Could not published categories.';
+
         $result = $this->query($sql, $error, $queryParams);
 
-        $i = 0;
+        $cats =  array(0 => array('id' => 0, 'label' => 'Any'));
+
         foreach ($result as $row) {
-            $all[$i] = $row;
-            $i++;
+            if ($row['id']) {
+                $cats[$row['id']] = $row;
+            }
         }
 
-        return $all;
+
+        return $cats;
     }
 
 

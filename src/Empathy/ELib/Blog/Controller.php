@@ -100,7 +100,7 @@ class Controller extends AdminController
 
 
 
-        $select = '*,t1.id AS id';
+        $select = '*,t1.id AS id, t4.body_revision';
         $sql = ' WHERE status = '.$_GET['status'];
 
         if (!$admin) {
@@ -110,12 +110,34 @@ class Controller extends AdminController
         $sql .= ' AND t1.user_id = t2.id';
         $sql .= ' ORDER BY stamp DESC';
 
-        $p_nav = $b->getPaginatePagesSimpleJoin($select, Model::getTable('BlogItem'), Model::getTable('UserItem'), $sql, $_GET['page'], REQUESTS_PER_PAGE);
+        $leftJoins = ' left join'
+            .' (select max(id) as max, any_value(blog_id) as blog_id from blog_revision group by blog_id) t3'
+            .' on t3.blog_id = t1.id'
+            .' left join (select id, body as body_revision from blog_revision) t4 on t3.max = t4.id,';
+
+        $p_nav = $b->getPaginatePagesSimpleJoin(
+            $select,
+            Model::getTable('BlogItem'),
+            Model::getTable('UserItem'),
+            $sql,
+            $_GET['page'],
+            REQUESTS_PER_PAGE,
+            $leftJoins
+        );
         $this->presenter->assign('p_nav', $p_nav);
 
         $this->presenter->assign('status', $_GET['status']);
 
-        $blogs = $b->getAllCustomPaginateSimpleJoin($select, Model::getTable('BlogItem'), Model::getTable('UserItem'), $sql, $_GET['page'], REQUESTS_PER_PAGE);
+        $blogs = $b->getAllCustomPaginateSimpleJoin(
+            $select,
+            Model::getTable('BlogItem'),
+            Model::getTable('UserItem'),
+            $sql,
+            $_GET['page'],
+            REQUESTS_PER_PAGE,
+            $leftJoins
+        );
+        
 
         foreach ($blogs as $index => $item) {
             $blog_cats = $c->getCategoriesForBlogItem($blogs[$index]['id']);
@@ -125,10 +147,11 @@ class Controller extends AdminController
                 $cats[] = $cats_arr[$bc_id];
             }
             $blogs[$index]['category'] = implode(', ', $cats);
+
+            if (isset($blogs[$index]['body_revision'])) {
+                $blogs[$index]['body'] = $blogs[$index]['body_revision'];
+            }
         }
-
-
-      
 
 
         $this->setTemplate('elib:/admin/blog/blog_admin.tpl');
@@ -256,6 +279,9 @@ class Controller extends AdminController
         $b = Model::load('BlogItem');
         $b->id = $_GET['id'];
         $b->load();
+        
+        $r = Model::load('BlogRevision');
+        list($b) = $r->loadSaved($b);
 
         $u = Model::load('UserItem');
         $u->id = $b->user_id;
@@ -317,11 +343,14 @@ class Controller extends AdminController
         if (isset($_POST['cancel'])) {
             $this->redirect('admin/blog');
         } elseif (isset($_POST['save'])) {
+
+
             $b = Model::load('BlogItem');
             $tags_arr = $b->buildTags(); // errors ?
 
             $b->heading = $_POST['heading'];
             $b->body = $_POST['body'];
+
             $b->status = BlogItemStatus::DRAFT;
             $b->slug = $_POST['slug'];
 
@@ -339,6 +368,20 @@ class Controller extends AdminController
                 $b->stamp = date('Y-m-d H:i:s', time());              
                 $b->id = $b->insert(Model::getTable('BlogItem'), 1, array(''), 1);
                
+                $r = Model::load('BlogRevision');
+                $r->blog_id = $b->id;
+                $r->body = $b->body;
+                $r->blog_id = $b->id;
+                $r->body = $b->body;
+                $r->stamp = 'MYSQLTIME';
+                $revisionMeta = new \stdClass();
+                $revisionMeta->category = $_POST['category'];
+                $revisionMeta->tags = $tags_arr;
+                $revisionMeta->slug = $b->slug;
+                $revisionMeta->heading = $b->heading;
+                $r->meta = json_encode($revisionMeta);
+                $r->insert(Model::getTable('BlogRevision'), 1, array(''), 0);
+
                 $bc = Model::load('BlogCategory');
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
@@ -397,7 +440,20 @@ class Controller extends AdminController
                 $bc->removeForBlogItem($b->id);
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
+                $r = Model::load('BlogRevision');
+                $r->blog_id = $b->id;
+                $r->body = $b->body;
+                $r->stamp = 'MYSQLTIME';
+                $revisionMeta = new \stdClass();
+                $revisionMeta->category = $_POST['category'];
+                $revisionMeta->tags = $tags_arr;
+                $revisionMeta->slug = $b->slug;
+                $revisionMeta->heading = $b->heading;
+                $r->meta = json_encode($revisionMeta);
+                $r->insert(Model::getTable('BlogRevision'), 1, array(''), 0);
+
                 Service::processTags($b, $tags_arr);
+                $this->clearCache();
                 $this->redirect('admin/blog/view/'.$b->id);
             }
         } else {
@@ -408,19 +464,40 @@ class Controller extends AdminController
 
             //	$b->body = preg_replace('!<img src="http://'.WEB_ROOT.PUBLIC_DIR.'/uploads/(.*?)" alt="(.*?)" />!m', '<img src="" alt="$2" />', $b->body);
 
+            $revision = 0;
+            if (isset($_GET['revision']) && is_numeric($_GET['revision'])) {
+                $revision = $_GET['revision'];
+            }
+
+            $r = Model::load('BlogRevision');
+            list($b, $revisionMeta) = $r->loadSaved($b, $revision);
+
+
             $this->presenter->assign('blog', $b);
 
             // categories
-            $bc = Model::load('BlogCategory');
-            $sql = ' WHERE blog_id = '.$b->id;
-            $blog_cats = $bc->getCategoriesForBlogItem($b->id);
-            $this->assign('blog_cats', $blog_cats);
+            if (isset($revisionMeta['category'])) {
+                $blogCats = $revisionMeta['category'];
+            } else {
+                $bc = Model::load('BlogCategory');
+                $sql = ' WHERE blog_id = '.$b->id;
+                $blogCats = $bc->getCategoriesForBlogItem($b->id);
+            }
+            $this->assign('blog_cats', $blogCats);
 
             // get tags
-            $bt = Model::load('BlogTag');
-            $tags_arr = $bt->getTags($b->id);
-            $tags = implode(', ', $tags_arr);
-            $this->presenter->assign('blog_tags', $tags);
+            if (isset($revisionMeta['tags'])) {
+                $tagsArr = $revisionMeta['tags'];
+            } else {
+                $bt = Model::load('BlogTag');
+                $tagsArr = $bt->getTags($b->id);
+            }
+            $this->presenter->assign('blog_tags', implode(', ', $tagsArr));
+            
+            // revisions
+            $this->assign('revision', $revision ?? '');
+            $this->assign('revisions',  $r->loadAll($b));
+
         }
 
         $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
@@ -580,7 +657,7 @@ class Controller extends AdminController
         $this->assertAuthorBlog($id);
         $image = Model::load('BlogImage');
         $images = $image->getForIDs(array($id));
-        $this->assign('images', $images[$id]);
+        $this->assign('images', count($images) ? $images[$id] : array());
         $this->setTemplate('elib://admin/blog/blog_images.tpl');
         $this->assign('blog_id', $id);
     }
@@ -592,4 +669,44 @@ class Controller extends AdminController
         $this->setTemplate('elib:/blog/blog_item.tpl');
 
     }
+
+    public function edit_cat_meta()
+    {
+
+        DI::getContainer()->get('CurrentUser')->denyNotAdmin();
+        $this->setTemplate('elib:/admin/blog/blog_cat_meta.tpl');
+        $ui_array = array('id');
+        $this->loadUIVars('ui_blog_cats_meta', $ui_array);
+        if (!isset($_GET['id']) || $_GET['id'] == '') {
+            $_GET['id'] = 0;
+        }
+
+        $this->buildNav();
+        $this->presenter->assign('blog_cat_id', $_GET['id']);
+        
+        if (isset($_POST['save'])) {
+            $c = Model::load('BlogCategory');
+            $c->id = $_POST['id'];
+            $c->load();
+            $c->meta = $_POST['meta'];
+
+            $c->validates();
+            if ($c->hasValErrors()) {
+                $this->presenter->assign('category_item', $c);
+                $this->presenter->assign('errors', $c->getValErrors());
+            } else {
+                $c->save(Model::getTable('BlogCategory'), array(), 1);
+                $this->clearCache();
+                $this->redirect('admin/blog/category/'.$c->id);
+            }
+        } elseif (isset($_POST['cancel'])) {
+            $this->redirect('admin/blog/category/'.$_POST['id']);
+        }
+
+        $c = Model::load('BlogCategory');
+        $c->id = $_GET['id'];
+        $c->load();
+        $this->presenter->assign('cat_item', $c);
+    }
+
 }
