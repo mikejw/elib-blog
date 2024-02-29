@@ -281,7 +281,7 @@ class Controller extends AdminController
         $b->load();
         
         $r = Model::load('BlogRevision');
-        $b = $r->loadSaved($b);
+        list($b) = $r->loadSaved($b);
 
         $u = Model::load('UserItem');
         $u->id = $b->user_id;
@@ -371,6 +371,15 @@ class Controller extends AdminController
                 $r = Model::load('BlogRevision');
                 $r->blog_id = $b->id;
                 $r->body = $b->body;
+                $r->blog_id = $b->id;
+                $r->body = $b->body;
+                $r->stamp = 'MYSQLTIME';
+                $revisionMeta = new \stdClass();
+                $revisionMeta->category = $_POST['category'];
+                $revisionMeta->tags = $tags_arr;
+                $revisionMeta->slug = $b->slug;
+                $revisionMeta->heading = $b->heading;
+                $r->meta = json_encode($revisionMeta);
                 $r->insert(Model::getTable('BlogRevision'), 1, array(''), 0);
 
                 $bc = Model::load('BlogCategory');
@@ -434,9 +443,17 @@ class Controller extends AdminController
                 $r = Model::load('BlogRevision');
                 $r->blog_id = $b->id;
                 $r->body = $b->body;
+                $r->stamp = 'MYSQLTIME';
+                $revisionMeta = new \stdClass();
+                $revisionMeta->category = $_POST['category'];
+                $revisionMeta->tags = $tags_arr;
+                $revisionMeta->slug = $b->slug;
+                $revisionMeta->heading = $b->heading;
+                $r->meta = json_encode($revisionMeta);
                 $r->insert(Model::getTable('BlogRevision'), 1, array(''), 0);
 
                 Service::processTags($b, $tags_arr);
+                $this->clearCache();
                 $this->redirect('admin/blog/view/'.$b->id);
             }
         } else {
@@ -447,22 +464,40 @@ class Controller extends AdminController
 
             //	$b->body = preg_replace('!<img src="http://'.WEB_ROOT.PUBLIC_DIR.'/uploads/(.*?)" alt="(.*?)" />!m', '<img src="" alt="$2" />', $b->body);
 
+            $revision = 0;
+            if (isset($_GET['revision']) && is_numeric($_GET['revision'])) {
+                $revision = $_GET['revision'];
+            }
+
             $r = Model::load('BlogRevision');
-            $b = $r->loadSaved($b);
+            list($b, $revisionMeta) = $r->loadSaved($b, $revision);
+
 
             $this->presenter->assign('blog', $b);
 
             // categories
-            $bc = Model::load('BlogCategory');
-            $sql = ' WHERE blog_id = '.$b->id;
-            $blog_cats = $bc->getCategoriesForBlogItem($b->id);
-            $this->assign('blog_cats', $blog_cats);
+            if (isset($revisionMeta['category'])) {
+                $blogCats = $revisionMeta['category'];
+            } else {
+                $bc = Model::load('BlogCategory');
+                $sql = ' WHERE blog_id = '.$b->id;
+                $blogCats = $bc->getCategoriesForBlogItem($b->id);
+            }
+            $this->assign('blog_cats', $blogCats);
 
             // get tags
-            $bt = Model::load('BlogTag');
-            $tags_arr = $bt->getTags($b->id);
-            $tags = implode(', ', $tags_arr);
-            $this->presenter->assign('blog_tags', $tags);
+            if (isset($revisionMeta['tags'])) {
+                $tagsArr = $revisionMeta['tags'];
+            } else {
+                $bt = Model::load('BlogTag');
+                $tagsArr = $bt->getTags($b->id);
+            }
+            $this->presenter->assign('blog_tags', implode(', ', $tagsArr));
+            
+            // revisions
+            $this->assign('revision', $revision ?? '');
+            $this->assign('revisions',  $r->loadAll($b));
+
         }
 
         $this->setTemplate('elib:/admin/blog/edit_blog.tpl');

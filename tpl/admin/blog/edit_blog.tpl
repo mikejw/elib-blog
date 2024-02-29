@@ -14,6 +14,14 @@
     </div>
 {/if}
 
+{if count($revisions) > 1}
+<div class="row revision-select">
+    <div class="col-4">Load revision:</div>
+    <div class="col-8">
+        {html_options options=$revisions selected=$revision name="revision" class="custom-select"}
+    </div>
+</div>
+{/if}
 
 <form action="" method="post" data-id={$blog->id}>
     <div class="form-group">

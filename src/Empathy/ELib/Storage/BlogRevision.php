@@ -2,8 +2,8 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+use Empathy\ELib\Model;
+use Empathy\MVC\Entity;
 
 class BlogRevision extends Entity
 {
@@ -23,20 +23,58 @@ class BlogRevision extends Entity
         }
     }
 
-    public function loadSaved($blog)
+    public function loadSaved($blog, $revision = 0)
     {
-        $sql = 'select max(id) as max from '.self::TABLE
-            .' where blog_id = ?'
-            .' group by blog_id';
-        
-        $result = $this->query($sql, 'Could not fetch latest blog revision', array($blog->id));
-        $rows = $result->fetch();
+        $meta = array();
+        if ($revision > 0) {
+            $this->id = $revision;
+            if ($this->load() && $blog->id === $this->blog_id) {
+                $meta = json_decode($this->meta, true);
+                if ($meta) {
+                    $blog->heading = $meta['heading'];
+                    $blog->slug = $meta['slug'];
+                }
+                $blog->body = $this->body;
+            } else {
+                throw new \Exception('Revision not found');
+            }
 
-        if (is_array($rows) && count($rows) === 1) {
-            $this->id = $rows['max'];
-            $this->load();
-            $blog->body = $this->body;
+        } else {
+            $sql = 'select max(id) as max from '.self::TABLE
+                .' where blog_id = ?'
+                .' group by blog_id';
+
+            $result = $this->query($sql, 'Could not fetch latest blog revision', array($blog->id));
+            $rows = $result->fetch();
+
+            if (is_array($rows) && count($rows) === 1) {
+                $this->id = $rows['max'];
+                $this->load();
+                $blog->body = $this->body;
+            }
         }
-        return $blog;
+       
+        return array($blog, $meta);
+    }
+
+    public function loadAll($blog)
+    {
+      $revisions = array();
+      $sql = 'select *, UNIX_TIMESTAMP(stamp) as stamp from '.self::TABLE
+            .' where blog_id = ?'
+            .' order by stamp desc';
+
+        $result = $this->query($sql, 'Could not fetch latest blog revision', array($blog->id));
+        $rows = $result->fetchAll();
+
+        if (is_array($rows) && count($rows) > 0) {
+            $i = 0;
+            foreach ($rows as &$r) {
+                $revisions[$r['id']] = count($rows) - ($i) .' - '.date('M jS, Y \a\t g:ia', $r['stamp']);
+                $i++;
+            }
+        }
+        
+        return $revisions;
     }
 }

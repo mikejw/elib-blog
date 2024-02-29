@@ -29,7 +29,7 @@ class BlogPage
             $this->notFound();
         } else {
             $r = Model::load('BlogRevision');
-            $this->blog_item = $r->loadSaved($this->blog_item);
+            list($this->blog_item) = $r->loadSaved($this->blog_item);
         }
 
         if (
