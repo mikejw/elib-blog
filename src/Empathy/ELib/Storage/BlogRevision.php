@@ -12,6 +12,8 @@ class BlogRevision extends Entity
     public $id;
     public $blog_id;
     public $body;
+    public $meta;
+    public $stamp;
 
     
     public function validates()
@@ -22,12 +24,12 @@ class BlogRevision extends Entity
     }
 
     public function loadSaved($blog)
-    {;
+    {
         $sql = 'select max(id) as max from '.self::TABLE
             .' where blog_id = ?'
             .' group by blog_id';
         
-        $result = $this->query($sql, 'Could not fetch latest blog reivision', array($blog->id));
+        $result = $this->query($sql, 'Could not fetch latest blog revision', array($blog->id));
         $rows = $result->fetch();
 
         if (is_array($rows) && count($rows) === 1) {
