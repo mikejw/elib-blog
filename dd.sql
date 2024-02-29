@@ -18,7 +18,7 @@ id                      INT(11) AUTO_INCREMENT PRIMARY KEY,
 blog_id                 INT(11) NOT NULL,
 body                    TEXT NULL,
 meta                    TEXT NULL,
-stamp                   TIMESTAMP NULL DEFAULT NULL
+stamp                   TIMESTAMP NULL DEFAULT NULL,
 FOREIGN KEY (blog_id) REFERENCES blog (id))  ENGINE = InnoDB;
 
 
