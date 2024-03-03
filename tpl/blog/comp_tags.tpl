@@ -10,14 +10,12 @@
     <ul class="clear">
         {foreach from=$categories item=c}
             <li>
-
                 {if $c.id eq $blog_category}
-                    {if $c.label_icon}{$c.label_icon} {$c.label}{else}{$c.label}{/if}
+                    <i class="mr-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
                 {else}
-                    <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">{if $c.label_icon}{$c.label_icon} {$c.label}{else}{$c.label}{/if}</a>
-                    {*<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/set_category/{$c.label|lower}/">{$c.label}</a>*}
-
-
+                    <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">
+                        <i class="mr-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
+                    </a>
                 {/if}
             </li>
         {/foreach}

@@ -556,18 +556,16 @@ class BlogFrontControllerNew extends EController
             );
         }
 
-
         foreach ($cats as &$c) {
             switch ($c['label']) {
                 case 'Any':
-                    $fa = 'random'; 
+                    $c['label_icon'] = 'random';
                     break;
                 default:
-                    $meta = json_decode($c['meta'], true);
-                    $fa = isset($meta['fa']) ? $meta['fa'] : '';
-            }
-            if ($fa !== NULL) {
-                $c['label_icon'] = '<i class="fa fa-'.$fa.'" aria-hidden="true"></i>&nbsp;&nbsp;';
+                    if ($c['meta']) {
+                        $meta = json_decode($c['meta'], true);
+                        $c['label_icon'] = isset($meta['fa']) ? $meta['fa'] : '';
+                    }
             }
         }
         return $cats;
