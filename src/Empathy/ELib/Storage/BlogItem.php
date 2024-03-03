@@ -2,8 +2,9 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+use Empathy\ELib\Model;
+use Empathy\MVC\Entity;
+use Empathy\MVC\Model as EModel;
 
 class BlogItem extends Entity
 {
@@ -17,7 +18,7 @@ class BlogItem extends Entity
     public $heading;
     public $body;
     public $slug;
-    private static $pages;
+    private $pages;
 
     private function getCategoryBlogs($cat)
     {
@@ -80,7 +81,7 @@ class BlogItem extends Entity
         return array($sql, $queryParams);
     }
 
-    public function getItems($found_items, $cat=null, $page=1, $authorId = null)
+    public function getItems($found_items, $cat=null, $page=1, $authorId = null, $count = self::DEF_BLOG_PER_PAGE)
     {       
         $cat_blogs_string = $this->getCategoryBlogs($cat);
 
@@ -90,7 +91,7 @@ class BlogItem extends Entity
         $result = $this->query($sql, $error, $params);
         $rows = $result->rowCount();
 
-        $per_page = defined('ELIB_DEF_BLOG_PER_PAGE')? ELIB_DEF_BLOG_PER_PAGE: self::DEF_BLOG_PER_PAGE;
+        $per_page = $count;
         $pages = ceil($rows / $per_page);
         
         $start = ($page * $per_page) - $per_page;
@@ -111,7 +112,7 @@ class BlogItem extends Entity
             }
             $struct_pages[$i+1] = $item;
         }
-        self::$pages = $struct_pages;
+        $this->pages = $struct_pages;
 
         foreach ($result as $row) {
 
@@ -120,13 +121,15 @@ class BlogItem extends Entity
             }
             $blogs[] = $row;
         }
-        return $blogs;
+
+        EModel::disconnect(array($this));
+        return array($this, $blogs);
     }
 
 
     public function getPages()
     {
-        return self::$pages;
+        return $this->pages;
     }
 
 

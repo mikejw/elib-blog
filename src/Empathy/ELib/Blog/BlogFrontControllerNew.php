@@ -88,6 +88,7 @@ class BlogFrontControllerNew extends EController
         $page = $_GET['id'];
 
         $blogs = $this->getBlogs($b, $found_items, $page);
+
         $this->assign('page', $page);
         $this->assign('pages', $b->getPages());
         $this->assign('total_pages', sizeof($b->getPages()));
@@ -571,12 +572,29 @@ class BlogFrontControllerNew extends EController
         return $cats;
     }
 
-    private function getBlogs($b, $found_items, $page)
+    private function getBlogs(&$b, $found_items, $page)
     {
         $authorId = $this->stash->get('authorId');
         $bc = $this->stash->get('blog_category');
-        $blogs = $b->getItems($found_items, $bc, $page, $authorId);
 
+        $count = get_class($b)::DEF_BLOG_PER_PAGE;
+        $count = (
+            defined('ELIB_DEF_BLOG_PER_PAGE') &&
+            is_numeric(ELIB_DEF_BLOG_PER_PAGE)
+        )
+            ? ELIB_DEF_BLOG_PER_PAGE
+            : $count;
+
+        if (isset($_GET['count']) && is_numeric($_GET['count'])) {
+            $count = $_GET['count'];
+        }
+
+        $key = json_encode(array($found_items, $bc, $page, $authorId, $count));
+        list($b, $blogs) = $this->cache->cachedCallback(
+            'blog_items_'.$key,
+            array($b, 'getItems'), array($found_items, $bc, $page, $authorId, $count)
+        );
+        
         $t = Model::load('TagItem');
         $bc = Model::load('BlogCategory');
 
@@ -613,9 +631,10 @@ class BlogFrontControllerNew extends EController
             $b_item['cats'] = $cat_names;
         }
 
-        if(defined('ELIB_TRUNCATE_BLOG_ITEMS') &&
-           ELIB_TRUNCATE_BLOG_ITEMS == true)
-        {
+        if (
+            defined('ELIB_TRUNCATE_BLOG_ITEMS') &&
+           ELIB_TRUNCATE_BLOG_ITEMS == true
+        ) {
             foreach ($blogs as $index => $item) {
                 $body_arr = array();
                 $body_new = array();
@@ -638,9 +657,10 @@ class BlogFrontControllerNew extends EController
         }
 
         // fetch all images associated with each blog item
-        if(defined('ELIB_FETCH_BLOG_IMAGES') &&
-           ELIB_FETCH_BLOG_IMAGES == true)
-        {
+        if (
+            defined('ELIB_FETCH_BLOG_IMAGES') &&
+           ELIB_FETCH_BLOG_IMAGES == true
+        ) {
             $bi = Model::load('BlogImage');
             $b_ids = array();
             foreach ($blogs as $item) {
@@ -656,6 +676,7 @@ class BlogFrontControllerNew extends EController
             }
             $this->assign('blog_images', $blog_images);
         }
+
         return $blogs;
     }
 
