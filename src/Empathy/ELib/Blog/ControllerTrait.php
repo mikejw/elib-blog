@@ -64,12 +64,10 @@ trait ControllerTrait
     {
         $ui_array = array('page', 'status');
         $this->loadUIVars('ui_blog', $ui_array);
-        if (!isset($_GET['page']) || $_GET['page'] == '') {
-            $_GET['page'] = 1;
-        }
-        if (!isset($_GET['status']) || $_GET['status'] == '') {
-            $_GET['status'] = 1;
-        }
+        
+        $_GET['page'] = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) ?? 1 : 1;
+        $_GET['status'] = isset($_GET['status']) && is_numeric($_GET['status']) ? intval($_GET['status']) ?? 1 : 1;
+
         $this->presenter->assign('page', $_GET['page']);
         $this->presenter->assign('status', $_GET['status']);
 
