@@ -43,9 +43,9 @@ class BlogPage
         $bc = Model::load('BlogCategory');
 
         if ($preview) {
-            $cats = $bc->getAllCats(Model::getTable('BlogCategory'), ' order by id');
+            $cats = $bc->getAllCats(Model::getTable('BlogCategory'), ' order by position');
         } else {
-            $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by id');
+            $cats = $bc->getAllPublished(Model::getTable('BlogCategory'), ' order by position');
         }
 
         $cats_lookup = array();

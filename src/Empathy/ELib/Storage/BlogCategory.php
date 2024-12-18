@@ -39,6 +39,7 @@ class BlogCategory extends Entity
     public $blog_category_id;
     public $label;
     public $meta;
+    public $position;
 
 
     public function getAllPublished($table, $sql_string, $authorId = null)
@@ -58,7 +59,7 @@ class BlogCategory extends Entity
     {
         $queryParams = array();
         //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
-        $sql = "select c.id, c.label, c.meta"
+        $sql = "select c.id, c.label, c.meta, c.position"
             ." from %s b"
             ." left join %s j on j.blog_id = b.id"
             ." left join %s c on c.id = j.blog_category_id";
@@ -82,14 +83,12 @@ class BlogCategory extends Entity
         $error = 'Could not published categories.';
 
         $result = $this->query($sql, $error, $queryParams);
-
-        $cats =  array(0 => array('id' => 0, 'label' => 'Any'));
-
         foreach ($result as $row) {
             if ($row['id']) {
                 $cats[$row['id']] = $row;
             }
         }
+        array_push($cats, array('id' => 0, 'label' => 'Any'));
 
 
         return $cats;
@@ -185,10 +184,10 @@ class BlogCategory extends Entity
         $queryParams = array();
         if ($current == 0) {
             $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory')
-                .' WHERE blog_category_id IS NULL';
+                .' WHERE blog_category_id IS NULL order by position';
         } else {
             $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory')
-                .' WHERE blog_category_id = ?';
+                .' WHERE blog_category_id = ? order by position';
             array_push($queryParams, $current);
         }
 

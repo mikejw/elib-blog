@@ -95,8 +95,6 @@ trait ControllerTrait
         $b = Model::load('BlogItem');
         $blogs = array();
 
-
-
         $select = '*,t1.id AS id, t4.body_revision';
         $sql = ' WHERE status = '.$_GET['status'];
 
@@ -534,6 +532,25 @@ trait ControllerTrait
         $this->buildNav();
         $this->presenter->assign('blog_cat_id', $_GET['id']);
         $this->presenter->assign('class', 'blog_cat');
+    }
+
+    public function cat_sort() {
+        header('Content-type: application/json');
+
+        $position = 1;
+        foreach($_POST as $type => $value) {
+            $object = Model::load('BlogCategory');
+
+            foreach ($value as $id) {
+                $object->id = $id;
+                $object->load();
+                $object->position = $position;
+                $object->save();
+                $position++;
+            }
+        }
+        echo json_encode(1);
+        return false;
     }
 
     public function assertID()

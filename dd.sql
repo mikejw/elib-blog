@@ -66,6 +66,7 @@ id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
 blog_category_id        INT(11) NULL,
 label                   VARCHAR(64) NOT NULL,
 meta					TEXT NULL,
+position                INT(11) NOT NULL DEFAULT 0,
 FOREIGN KEY(blog_category_id) REFERENCES blog_category(id)) ENGINE=InnoDB;
 
 

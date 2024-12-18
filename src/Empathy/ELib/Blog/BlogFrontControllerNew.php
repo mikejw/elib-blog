@@ -27,7 +27,7 @@ class SimpleXMLExtended extends \SimpleXMLElement {
 class BlogFrontControllerNew extends EController
 {
     private $cache;
-
+    
     private function getTitle()
     {
         $siteInfo = $this->stash->get('site_info');
@@ -548,12 +548,12 @@ class BlogFrontControllerNew extends EController
         $c = Model::load('BlogCategory');
 
         if (!$published) {
-            $cats = $c->getAllCats(Model::getTable('BlogCategory'), ' order by id', $authorId);
+            $cats = $c->getAllCats(Model::getTable('BlogCategory'), ' order by position', $authorId);
         } else {
             $cats = $this->cache->cachedCallback(
                 'cats',
                 array($c, 'getAllPublished'),
-                array(Model::getTable('BlogCategory'), ' order by id', $authorId)
+                array(Model::getTable('BlogCategory'), ' order by position', $authorId)
             );
         }
 
