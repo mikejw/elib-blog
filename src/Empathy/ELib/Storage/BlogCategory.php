@@ -83,6 +83,7 @@ class BlogCategory extends Entity
         $error = 'Could not published categories.';
 
         $result = $this->query($sql, $error, $queryParams);
+        $cats = array();
         foreach ($result as $row) {
             if ($row['id']) {
                 $cats[$row['id']] = $row;
