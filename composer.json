@@ -6,7 +6,7 @@
         "lib"
     ],
     "homepage": "http://empathyphp.co.uk",
-    "license": "GPL3",
+    "license": "MIT",
     "authors": [
         {
             "name": "Mike Whiting",
