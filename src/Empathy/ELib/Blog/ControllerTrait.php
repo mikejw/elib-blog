@@ -668,7 +668,7 @@ trait ControllerTrait
     public function blog_images()
     {
         $id = $_GET['id'];
-        $this->assertAuthorBlog($id);
+        $this->assertAuthorBlog($id);     
         $image = Model::load('BlogImage');
         $images = $image->getForIDs(array($id));
         $this->assign('images', count($images) ? $images[$id] : array());

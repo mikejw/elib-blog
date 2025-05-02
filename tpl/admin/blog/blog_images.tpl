@@ -84,7 +84,6 @@
             if (!payload) {
               alert('Please select an image!');
             } else {
-              console.log(payload);
               var data = JSON.parse(atob(payload));
               data.size = $('form input[name=size]:checked').val();
               data.fluid = $('form input[name=fluid]:checked').val() || '';
