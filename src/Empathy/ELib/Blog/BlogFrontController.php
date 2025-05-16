@@ -17,6 +17,7 @@ class BlogFrontController extends CustomController
         $blogs = array();
 
         $sql = '';
+        $params = [];
 
         if (isset($_GET['active_tags'])) {
             $active_tags = $_GET['active_tags'];
@@ -34,7 +35,8 @@ class BlogFrontController extends CustomController
                 //$this->error('Intersection of tags produced no results.', true);
                 $this->http_error(404);
             } else {
-                $sql = ' WHERE t1.id IN'.$blogs;
+                $sql = ' WHERE t1.id IN?';
+                $params[] = $blogs;
             }
         } else {
             $this->presenter->assign('active_tags', array());
@@ -49,7 +51,14 @@ class BlogFrontController extends CustomController
         $sql .= ' AND t1.status = 2';
         $sql .= ' ORDER BY t1.stamp DESC';
 
-        $blogs = $b->getAllCustomPaginateSimpleJoin('*,UNIX_TIMESTAMP(stamp) AS stamp, t1.id AS blog_id', Model::getTable('BlogItem'), Model::getTable('UserItem'), $sql, 1, 12);
+        $blogs = $b->getAllCustomPaginateSimpleJoin(
+            '*,UNIX_TIMESTAMP(stamp) AS stamp, t1.id AS blog_id',
+            Model::getTable('UserItem'),
+            $sql,
+            1,
+            12,
+            $params
+        );
         //$this->presenter->assign('blogs', $blogs);
 
         // truncate
@@ -147,7 +156,9 @@ class BlogFrontController extends CustomController
     {
         $b = Model::load('BlogItem');
         $bt = Model::load('BlogTag');
-        $blogs = array();
+        $blogs = [];
+        $sql = '';
+        $params = [];
 
         if(isset($_GET['active_tags'])) {
             // if (sizeof($_SESSION['active_tag']) > 0) 
@@ -160,19 +171,20 @@ class BlogFrontController extends CustomController
                 $this->presenter->assign('module', '');
                 $this->error('Intersection of tags produced no results.', true);
             } else {
-                $sql = ' WHERE id IN'.$blogs.' ORDER BY ID DESC';
+                $sql .= ' WHERE id IN? ORDER BY ID DESC';
+                $params[] = $blogs;
             }
         } else {
-            $sql = ' ORDER BY ID DESC';
-            $this->presenter->assign('active_tags', array());
+            $sql .= ' ORDER BY ID DESC';
+            $this->presenter->assign('active_tags', []);
         }
 
-        $blogs = $b->getAllCustomPaginate(BlogItem::$table, $sql, 1, 200);
+        $blogs = $b->getAllCustomPaginate($sql, 1, 200, $params);
         $this->presenter->assign('blogs', $blogs);
 
         // get tags
         $t = Model::load('TagItem');
-        $tags = $t->getAllCustom(TagItem::$table, '');
+        $tags = $t->getAll();
         foreach ($tags as $index => $item) {
             $tags[$index]['tag_esc'] = '+'.$tags[$index]['tag'];
         }
@@ -253,7 +265,7 @@ class BlogFrontController extends CustomController
            $this->presenter->assign('errors', $bc->val->errors);
            } else {
            $bc->stamp = date('Y-m-d H:i:s', time());
-           $bc->insert(BlogComment::$table, 1, array('body'), 1);
+           $bc->insert(['body']);
            $this->redirect('news/item/'.$bc->blog_id);
            }
 
@@ -269,15 +281,13 @@ class BlogFrontController extends CustomController
             $this->http_error(400);
         }
         $b = Model::load('BlogItem');
-        $b->id = $_GET['id'];
-        if (!$b->load()) {
+        if (!$b->load($_GET['id'])) {
             $this->http_error(404);
         }
         $b->body = preg_replace('/mid_/', 'tn_', $b->body);
 
         $u = Model::load('UserItem');
-        $u->id = $b->user_id;
-        $u->load();
+        $u->load($b->user_id);
 
         /*
           $bi = new BlogImage($this);
@@ -292,11 +302,20 @@ class BlogFrontController extends CustomController
 
         $bc = Model::load('BlogComment');
 
+        $params = [];
         $sql = ' WHERE t1.user_id = t2.id';
         $sql .= ' AND t1.status = 1';
-        $sql .= ' AND t1.blog_id = '.$b->id;
+        $sql .= ' AND t1.blog_id = ?';
+        $params[] = $b->id;
         $sql .= ' ORDER BY t1.stamp';
-        $comments = $bc->getAllCustomPaginateSimpleJoin('*,t1.id AS id', Model::getTable('BlogComment'), Model::getTable('UserItem'), $sql, 1, 200);
+        $comments = $bc->getAllCustomPaginateSimpleJoin(
+            '*,t1.id AS id',
+            Model::getTable('UserItem'),
+            $sql,
+            1,
+            200,
+            $params
+        );
 
         $this->presenter->assign('comments', $comments);
 

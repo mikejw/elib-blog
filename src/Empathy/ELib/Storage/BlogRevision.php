@@ -27,8 +27,7 @@ class BlogRevision extends Entity
     {
         $meta = array();
         if ($revision > 0) {
-            $this->id = $revision;
-            if ($this->load() && $blog->id === $this->blog_id) {
+            if ($this->load($revision) && $blog->id === $this->blog_id) {
                 $meta = json_decode($this->meta, true);
                 if ($meta) {
                     $blog->heading = $meta['heading'];
@@ -48,8 +47,7 @@ class BlogRevision extends Entity
             $rows = $result->fetch();
 
             if (is_array($rows) && count($rows) === 1) {
-                $this->id = $rows['max'];
-                $this->load();
+                $this->load($rows['max']);
                 $blog->body = $this->body;
             }
         }

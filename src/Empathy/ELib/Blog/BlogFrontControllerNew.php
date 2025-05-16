@@ -455,7 +455,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('errors', $bc->getValErrors());
         } else {
             $bc->stamp = date('Y-m-d H:i:s', time());
-            $bc->insert(Model::getTable('BlogComment'), 1, array('body'), 1);
+            $bc->insert(['body']);
             if (is_numeric($blog_route)) {
                 $this->redirect('blog/item/'.$bc->blog_id);
             } else {
