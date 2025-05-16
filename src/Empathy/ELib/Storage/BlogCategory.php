@@ -150,7 +150,7 @@ class BlogCategory extends Entity
         foreach ($categories as $cat) {
             $bc->blog_id = $blog_id;
             $bc->blog_category_id = $cat;
-            $bc->insert();
+            $bc->insert([], false);
         }
     }
 

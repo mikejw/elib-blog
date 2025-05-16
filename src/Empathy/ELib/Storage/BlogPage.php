@@ -121,6 +121,7 @@ class BlogPage
             $sql,
             1,
             200,
+            '',
             $params
         );
     }

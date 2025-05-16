@@ -30,7 +30,7 @@ class Service
                 $bt = Model::load('BlogTag');
                 $bt->blog_id = $b->id;
                 $bt->tag_id = $id;
-                $bt->insert();
+                $bt->insert([], false);
             }
         }
         $t->cleanup();

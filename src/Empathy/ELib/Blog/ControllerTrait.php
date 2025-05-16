@@ -282,7 +282,7 @@ trait ControllerTrait
 
         $bi = Model::load('BlogImage');
         $sql = ' WHERE blog_id = ?';
-        $images = $bi->getAllCustom($sql. [$b->id]);
+        $images = $bi->getAllCustom($sql, [$b->id]);
 
         /*
           $image = array();
@@ -498,7 +498,6 @@ trait ControllerTrait
     {
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-            
             if($_GET['id'] < 1) {
                 $_GET['id'] = null;
             }
@@ -506,6 +505,7 @@ trait ControllerTrait
             $b = Model::load('BlogCategory');
             $b->blog_category_id = $_GET['id'];
             $b->label = 'New Category';
+            $b->position = 0;
             $b->insert();
         }
 
