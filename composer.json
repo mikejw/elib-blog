@@ -14,8 +14,8 @@
         }
     ],
     "require": {
-        "mikejw/elib-base": "dev-master",
-        "mikejw/elib-siteinfo": "dev-bootstrap4"
+        "mikejw/elib-base": "^1",
+        "mikejw/elib-siteinfo": "dev-master"
     },
     "autoload": {
         "psr-0": {
