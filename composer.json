@@ -14,11 +14,7 @@
         }
     ],
     "require": {
-<<<<<<< HEAD
         "mikejw/elib-base": "^2",
-=======
-        "mikejw/elib-base": "^1",
->>>>>>> 58d38d8 (first release)
         "mikejw/elib-siteinfo": "dev-master"
     },
     "autoload": {
