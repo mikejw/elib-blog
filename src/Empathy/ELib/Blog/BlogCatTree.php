@@ -88,13 +88,14 @@ class BlogCatTree extends Tree
     
     private function buildMarkup($data, $level, $current_id, $last_id, $last_node_data)
     {
-        $markup = "\n<ul";
-        
+        $markup = "\n<ul data-controller=\"admin/blog/cat_sort\" class=\"clearfix";
         $ancestors = $this->_blogCategoryAncestors;
         
         if (!in_array($last_id, $ancestors)) {
-            $markup .= " class=\"hidden_sections\"";
+            $markup .= " hidden_sections";
         }
+
+        $markup .= "\"";
         if ($level == 0) {
             $markup .= " id=\"tree\"";
             $level++;
@@ -102,25 +103,29 @@ class BlogCatTree extends Tree
         $markup .=">\n";
         foreach ($data as $index => $value) {
             $toggle = '+';
-            $folder = 't_folder_closed.gif';
+            $folder = '<i class="far fa-folder"></i>';
             $url = 'blog/category';
             
             if (in_array($value['id'], $ancestors)) {
                 $toggle = '-';
-                $folder = 't_folder_open.gif';
+                $folder = '<i class="far fa-folder-open"></i>';
             }
             
             if (isset($value['banner']) && $value['banner'] == 1) {
-                $folder = 'data.gif';
+                $folder = '<i class="far fa-file"></i>';
                 $url = 'banner';
             }
 
             $children = sizeof($value['children']);
+            $class = "clearfix";
             $markup .= "<li";
 
+            $markup .= " id=\"category_".$value['id']."\"";
+
             if ($current_id == $value['id']) {
-                $markup .= " class=\"current\"";
+                $class .= " current";
             }
+            $markup .= " class=\"$class\"";
 
             $markup .= ">\n";
             if ($children > 0) {
@@ -132,7 +137,7 @@ class BlogCatTree extends Tree
             } else {
                 $markup .= "<span class=\"toggle\">&nbsp;</span>";
             }
-            $markup .= "<img src=\"http://".Config::get('WEB_ROOT').Config::get('PUBLIC_DIR')."/elib/$folder\" alt=\"\" />\n";
+            $markup .= $folder;
 
             if ($current_id == $value['id']) {
                 $markup .= "<span class=\"label current\">".$value['label']."</span>";

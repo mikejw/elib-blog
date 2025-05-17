@@ -30,7 +30,7 @@ class Service
                 $bt = Model::load('BlogTag');
                 $bt->blog_id = $b->id;
                 $bt->tag_id = $id;
-                $bt->insert(Model::getTable('BlogTag'), 0, array(), 0);
+                $bt->insert([], false);
             }
         }
         $t->cleanup();
@@ -60,15 +60,14 @@ class Service
     {
         $b = \Empathy\ELib\Model::load('BlogItem');
         $table =
-        $all = $b->getAllCustom(Model::getTable('BlogItem'), ' where status = '.\Empathy\ELib\Storage\BlogItemStatus::PUBLISHED);
+        $all = $b->getAllCustom(' where status = ?' [\Empathy\ELib\Storage\BlogItemStatus::PUBLISHED]);
         $ids = array();
         foreach ($all as $item) {
             array_push($ids, $item['id']);
         }
         foreach ($ids as $id) {
             $b = \Empathy\ELib\Model::load('BlogItem');
-            $b->id = $id;
-            $b->load();
+            $b->load($id);
             self::addToIndex($b);
         }
     }
@@ -84,8 +83,7 @@ class Service
             $cats_arr = array();
             foreach ($cats as $c) {
                 $item = Model::load('BlogCategory');
-                $item->id = $c;
-                $item->load();
+                $item->load($c);
                 array_push($cats_arr, $item->label);
             }
 

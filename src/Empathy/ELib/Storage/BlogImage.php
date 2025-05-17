@@ -12,15 +12,17 @@ class BlogImage extends Entity
     public $id;
     public $blog_id;
     public $filename;
+    public $image_width;
+    public $image_height;
 
     public function getForIDs($ids)
     {
         $images = array();
         foreach ($ids as $item) {
-            $sql = 'SELECT * FROM '.Model::getTable('BlogImage').' WHERE blog_id = '.$item
+            $sql = 'SELECT * FROM '.Model::getTable('BlogImage').' WHERE blog_id = ?'
                 .' ORDER BY id';
             $error = 'Could not get blog images.';
-            $result = $this->query($sql, $error);
+            $result = $this->query($sql, $error, array($item));
             if ($result->rowCount() > 0) {
                 foreach ($result as $row) {
                     $images[$item][] = $row;

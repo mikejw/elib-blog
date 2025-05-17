@@ -2,120 +2,97 @@
 
 {*<p><a href="http://instagram.com/mikeyjw"><img id="me" src="http://{$WEB_ROOT}{$PUBLIC_DIR}/img/mikewhiting.jpg" alt="" /></a></p>*}
 
+<div id="categories" class="sidebar-module">
+    <h4>Category</h4>
 
-<div id="categories">
-<h4>Category</h4>
+    <!-- @todo: put font-awesome icons in CMS -->
 
-<!-- @todo: put font-awesome icons in CMS -->
-
-<ul class="clear">
-{foreach from=$categories item=c}
-<li>
-
-{if $c.id eq $blog_category}
-{if $c.label_icon}{$c.label_icon} {$c.label}{else}{$c.label}{/if}
-{else}
-
-<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">{if $c.label_icon}{$c.label_icon} {$c.label}{else}{$c.label}{/if}</a>
-
-{*<a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/set_category/{$c.label|lower}/">{$c.label}</a>*}
-
-
-{/if}
-</li>
-{/foreach}
-</ul>
+    <ul class="clear">
+        {foreach from=$categories item=c}
+            <li>
+                {if $c.id eq $blog_category}
+                    <i class="mr-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
+                {else}
+                    <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">
+                        <i class="mr-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
+                    </a>
+                {/if}
+            </li>
+        {/foreach}
+    </ul>
 </div>
 
+
+
+<div class="tags sidebar-module">
+    <div id="tags_collapsible" class="clear">
+        <h4>Tags</h4>
+        {section name=tag_item loop=$tags}
+            <a style="font-size:{$tags[tag_item].size}rem;"
+               class="{if is_array($active_tags) && in_array($tags[tag_item].tag, $active_tags)}text-info active font-weight-bold{/if}"
+               href="http://{$WEB_ROOT}{$PUBLIC_DIR}{if $active_tags_string eq ''}/tags/{$tags[tag_item].tag}{elseif in_array($tags[tag_item].tag, $active_tags) and sizeof($active_tags) eq 1}/blog{elseif in_array($tags[tag_item].tag, $active_tags)}/tags/{$active_tags_string|regex_replace:$tags[tag_item].tag_esc_1:''|regex_replace:$tags[tag_item].tag_esc_2:''|replace:$tags[tag_item].tag:''}{else}/tags/{$active_tags_string}+{$tags[tag_item].tag}{/if}">{$tags[tag_item].tag}</a>
+        {/section}
+
+        {if $active_tags_string neq ''}
+            <p>&nbsp;</p>
+            <p style="text-align: center;">
+                <a class="btn btn-default" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog">
+                    [ Clear active tag{if $multi_tags}s{/if} ]
+                </a>
+            </p>
+        {/if}
+    </div>
+</div>
 
 
 {if isset($archive)}
+    <div id="archive" class="sidebar-module">
 
-<div id="archive">
+        <h4>Archive</h4>
 
-<h4>Archive</h4>
+        {if sizeof($archive) lt 1}
+            <p>None found.</p>
+        {else}
+            <nav>
+                <ul>
+                    {foreach from=$archive item=y key=year}
+                        <li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}">{$year}</a>
+                            {*<ul{if $year eq $blog->stamp|date_format:"%Y"} class="current"{/if}>*}
+                            <ul{if $year eq $current_year || $year eq $blog->stamp|date_format:"%Y"} class="current"{/if}>
+                                {foreach from=$y item=m key=month}
+                                    <li>
+                                        <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{substr($month, 0, 3)|lower}">{$month}</a>
+                                        <ul{if ($month eq $blog->stamp|date_format:"%B" && $year eq $blog->stamp|date_format:"%Y") ||
+                                        ($month eq $current_month && $year eq $current_year)} class="current"{/if}>
+                                            {foreach from=$m item=b key=id}
+                                                {if $id neq $blog->id}
 
-{if sizeof($archive) lt 1}
-<p>None found.</p>
-{else}
-<nav>
-<ul>
-{foreach from=$archive item=y key=year}
-<li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}">{$year}</a>
-	{*<ul{if $year eq $blog->stamp|date_format:"%Y"} class="current"{/if}>*}
-	<ul{if $year eq $current_year || $year eq $blog->stamp|date_format:"%Y"} class="current"{/if}>
-	{foreach from=$y item=m key=month}
-	<li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{$month|substr:0:3|lower}">{$month}</a>
-		<ul{if ($month eq $blog->stamp|date_format:"%B" && $year eq $blog->stamp|date_format:"%Y") ||
-		($month eq $current_month && $year eq $current_year)} class="current"{/if}>
-		{foreach from=$m item=b key=id}
-		{if $id neq $blog->id}
-                
-                {if $b.slug neq ''}
-                <li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{$b.month_slug}/{$b.day}/{$b.slug}">{$b.heading}</a></li>
-                {else}
-		<li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$id}">{$b.heading}</a></li>
-                {/if}
-                
-		{else}
+                                                    {if $b.slug neq ''}
+                                                        <li>
+                                                            <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{$b.month_slug}/{$b.day}/{$b.slug}">{$b.heading}</a>
+                                                        </li>
+                                                    {else}
+                                                        <li>
+                                                            <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$id}">{$b.heading}</a>
+                                                        </li>
+                                                    {/if}
 
-		<li>{$b.heading}</li>
-
-		{/if}
-		{/foreach}
-		</ul>
-	</li>
-	{/foreach}
-	</ul>
-</li>
-{/foreach}
-</ul>
-</nav>
+                                                {else}
+                                                    <li>{$b.heading}</li>
+                                                {/if}
+                                            {/foreach}
+                                        </ul>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+                    {/foreach}
+                </ul>
+            </nav>
+        {/if}
+    </div>
 {/if}
-</div>
-{/if}
 
-
-<div class="tags">
-<div id="tags_collapsible" class="clear">
-
-{section name=tag_item loop=$tags}
-<a style="font-size:{$tags[tag_item].share * 2}em;" {if is_array($active_tags) && in_array($tags[tag_item].tag, $active_tags)}class="active" {/if}href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{if $active_tags_string eq ''}{$tags[tag_item].tag}{elseif in_array($tags[tag_item].tag, $active_tags)}{$active_tags_string|regex_replace:$tags[tag_item].tag_esc_1:''|regex_replace:$tags[tag_item].tag_esc_2:''|replace:$tags[tag_item].tag:''}{else}{$active_tags_string}+{$tags[tag_item].tag}{/if}">{$tags[tag_item].tag}</a>
-{/section}
-
-</div>
-</div>
-
-<p>
-{*<a href="#">&nbsp;<span>Show</span> Tags</a>*}
-
-</p>
-
-
-{*
-<div class="tags">
-<div class="clear">
-<span>Links:</span> 
-<span><a href="http://twitter.com/mikejw">twitter.com/mikejw</a></span>
-<span><a href="http://uk.linkedin.com/in/mikejw">uk.linkedin.com/in/mikejw</a></span>
-<span><a href="http://www.facebook.com/mikewhiting">facebook.com/mikewhiting</a></span>
-</div>
-</div>
-
-<div class="tags">
-<div class="clear">
-<span>Contact:</span> 
-<span>mail@mikejw.co.uk</span>
-</div>
-</div>
-*}
-
-
-
-{*
-<p>&nbsp;</p>
-<img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/img/mikejw_caricature.png" alt="" />
-*}
 
 
 

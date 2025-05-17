@@ -5,16 +5,17 @@
     "keywords": [
         "lib"
     ],
-    "homepage": "http://empathyphp.co.uk",
-    "license": "GPL-3.0-only",
+    "homepage": "https://empathy.sh",
+    "license": "MIT",
     "authors": [
         {
-            "name": "Mike Whiting",
+            "name": "Michael J. Whiting",
             "email": "mail@mikejw.co.uk"
         }
     ],
     "require": {
-        "mikejw/elib-base": "dev-master"
+        "mikejw/elib-base": "^2",
+        "mikejw/elib-siteinfo": "dev-master"
     },
     "autoload": {
         "psr-0": {

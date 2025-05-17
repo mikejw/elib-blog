@@ -1,70 +1,57 @@
 {include file="elib:/admin/admin_header.tpl"}
 
-
-<div class="grey_top">
-<div class="top_right">
-<div class="top_left"></div>
-</div>
-</div>
-
-
-<div class="grey">
-
-{if sizeof($errors) > 0}
-<ul id="error">
-{foreach from=$errors item=error}
-<li>{$error}</li>
-{/foreach}
-</ul>
+{if isset($errors)}
+    <p>&nbsp;</p>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong>
+        {foreach from=$errors item=e}
+            <p>{$e}</p>
+        {/foreach}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
 {/if}
 
 
-<form action="" method="post">
-<fieldset>
-<legend>Create Blog Item</legend>
-<p>
-<label>Heading</label>
-<input type="text" name="heading" value="{$blog->heading}" />
-</p>
-<p>
-<label>Body</label>
-{*
-<textarea rows="0" cols="0" name="body">{$blog->body|replace:'<br />':"\r\n"}</textarea>
-*}
-<textarea rows="0" cols="0" name="body">{$blog->body|replace:'</p><p>':"\r\n"|replace:'<p>':""|replace:'</p>':""}</textarea>
 
-</p>
-<p>
-<label>Tags</label>
-<input type="text" name="tags" value="{$blog_tags}" />
-</p>
-<p>
-<label>Category</label>
-<select name="category[]" multiple="yes">
-{html_options options=$cats selected=$blog_cats}
-</select>
-</p>
-<p>
-<label>Friendly URL 'Slug'</label>
-<input type="text" name="slug" value="{$blog->slug}" />
-</p>
-<p>
-<label>&nbsp;</label>
-<input type="hidden" name="id" value="{$blog->id}" />
-<button type="submit" name="save">Save</button>
-<button type="submit" name="cancel">Cancel</button>
-</p>
-</fieldset>
+<form action="" method="post">
+    <div class="form-group">
+        <label for="heading">Heading</label>
+        <input name="heading" type="text" class="form-control" placeholder="Enter heading" value="{$blog->heading}">
+    </div>
+    <div class="form-group">
+        <label for="body">Body</label>
+	{*
+	<textarea rows="0" cols="0" name="body">{$blog->body|replace:'<br />':"\r\n"}</textarea>
+	*}
+	<textarea rows="20" name="body">{$blog->body|replace:'</p><p>':"\r\n"|replace:'<p>':""|replace:'</p>':""}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <select class="form-control" name="category[]" multiple="yes">
+            {html_options options=$cats selected=$blog_cats}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="tags">Tags (Comma separated.)</label>
+        <input name="tags" type="text" class="form-control" placeholder="Enter tags" value="{$blog_tags}">
+    </div>
+    <div class="form-group">
+        <label for="slug">Friendly URL 'Slug'</label>
+        <input name="slug" type="text" class="form-control" placeholder="Enter slug" value="{$blog->slug}">
+    </div>
+
+    <input type="hidden" name="id" value="{$blog->id}" />
+    <button type="submit" name="save" class="btn btn-primary">Submit</button>
+    <button type="submit" name="cancel" class="btn btn-primary">Cancel</button>
+    <p><br /><br />New items will be automatically saved to drafts.</p>
 </form>
 
-<p><br /><br />New items will be automatically saved to drafts.</p>
 
-</div>
-<div class="grey_bottom">
-<div class="bottom_right">
-<div class="bottom_left"></div>
-</div>
-</div>
+
+
 
 
 
