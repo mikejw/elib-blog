@@ -6,18 +6,26 @@ CREATE TABLE blog(
 id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
 status                  INT(11)                 NOT NULL,
 user_id                 INT(11)                 NOT NULL,        
-stamp                   TIMESTAMP               NOT NULL,
+stamp                   TIMESTAMP               NULL DEFAULT NULL,
 heading                 VARCHAR(64)             NOT NULL,
 body                    TEXT,
 slug                    VARCHAR(64)             NULL,
-FOREIGN KEY (user_id) REFERENCES e_user(id)) ENGINE=InnoDB;
+FOREIGN KEY (user_id) REFERENCES user(id)) ENGINE=InnoDB;
+
+
+CREATE TABLE blog_revision(
+id                      INT(11) AUTO_INCREMENT PRIMARY KEY,
+blog_id                 INT(11) NOT NULL,
+body                    TEXT NULL,
+meta                    TEXT NULL,
+stamp                   TIMESTAMP NULL DEFAULT NULL,
+FOREIGN KEY (blog_id) REFERENCES blog (id))  ENGINE = InnoDB;
 
 
 
 CREATE TABLE tag(
 id                      INT(11)                  AUTO_INCREMENT PRIMARY KEY,
 tag                     VARCHAR(128)             NOT NULL) ENGINE=InnoDB;
-
 
 
 CREATE TABLE blog_tag(
@@ -33,6 +41,8 @@ CREATE TABLE blog_image(
 id                      INT(11)                  AUTO_INCREMENT PRIMARY KEY,
 blog_id                 INT(11)                  NOT NULL,
 filename                VARCHAR(64)              NOT NULL,
+image_width             VARCHAR(11)              NULL,
+image_height            VARCHAR(11)              NULL,
 FOREIGN KEY(blog_id) REFERENCES blog(id)) ENGINE=InnoDB;
 
 
@@ -47,7 +57,7 @@ stamp                   TIMESTAMP               NOT NULL,
 heading                 VARCHAR(64)             NULL,
 body                    TEXT,
 FOREIGN KEY(blog_id) REFERENCES blog(id),
-FOREIGN KEY(user_id) REFERENCES e_user(id)) ENGINE=InnoDB;
+FOREIGN KEY(user_id) REFERENCES user(id)) ENGINE=InnoDB;
 
 
 
@@ -55,6 +65,8 @@ CREATE TABLE blog_category(
 id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
 blog_category_id        INT(11) NULL,
 label                   VARCHAR(64) NOT NULL,
+meta					TEXT NULL,
+position                INT(11) NOT NULL DEFAULT 0,
 FOREIGN KEY(blog_category_id) REFERENCES blog_category(id)) ENGINE=InnoDB;
 
 
@@ -68,4 +80,11 @@ FOREIGN KEY(blog_category_id) REFERENCES blog_category(id),
 PRIMARY KEY(blog_id, blog_category_id));
 
 
+
+CREATE TABLE blog_attachment(
+id                      INT(11)                 AUTO_INCREMENT PRIMARY KEY,
+blog_id                 INT(11)                 NOT NULL,
+filename                VARCHAR(128)            NULL,
+url                     VARCHAR(128)            NULL,
+FOREIGN KEY(blog_id) REFERENCES blog(id)) ENGINE=InnoDB;
 

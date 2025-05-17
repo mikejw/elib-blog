@@ -18,6 +18,10 @@ class BlogComment extends Entity
 
     public function validates()
     {
+        $allowed_chars = '/[\.\s\\\\\/]/';
+        if ($this->heading == '' || !ctype_alnum(preg_replace($allowed_chars, '', $this->heading))) {
+            $this->addValError('Invalid heading');
+        }
         if ($this->body == '') {
             $this->addValError('Invalid body');
         }

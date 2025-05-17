@@ -1,6 +1,13 @@
 
 
-Licence
+
+ELib Blog
+===
+
+See the quickstart section of [/docs/base-docker/README.md](/docs/base-docker/README.md) for instructions for getting
+started with elib-blog.
+
+License
 ---
-Empathy and officially released extension libraries are now distributed under an
-MIT license.  See [LICENSE](./LICENSE).
+
+See [LICENSE](./LICENSE).

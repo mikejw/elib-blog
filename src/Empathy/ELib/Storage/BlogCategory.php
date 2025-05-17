@@ -38,8 +38,15 @@ class BlogCategory extends Entity
     public $id;
     public $blog_category_id;
     public $label;
+    public $meta;
+    public $position;
 
 
+    public function getAllPublished($table, $sql_string, $authorId = null)
+    {
+        return $this->getAllCats($table, $sql_string, $authorId, true);
+    }
+    
     /**
     * Get list of all categories that only
     * have published blogs
@@ -48,30 +55,44 @@ class BlogCategory extends Entity
     *
     * @return array
     */
-    public function getAllPublished($table, $sql_string)
+    public function getAllCats($table, $sql_string, $authorId = null, $published = false)
     {
-        $all = array();
+        $queryParams = array();
         //$sql = "select c.id, c.label, b.status, b.id, b.heading, j.blog_category_id"
-        $sql = "select c.id, c.label"
-        ." from %s b"
-        ." left join %s j on j.blog_id = b.id"
-        ." left join %s c on c.id = j.blog_category_id"
-        ." where b.status = 2"
-        ." group by j.blog_category_id".$sql_string;
+        $sql = "select c.id, c.label, c.meta, c.position"
+            ." from %s b"
+            ." left join %s j on j.blog_id = b.id"
+            ." left join %s c on c.id = j.blog_category_id";
+
+        if ($published) {
+            $sql .= " where b.status = ?";
+            array_push($queryParams, BlogItemStatus::PUBLISHED);
+        }
+
+        if (!is_null($authorId)) {
+            $sql .=  count($queryParams) ? ' and' : ' where';
+            $sql .= ' b.user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+        $sql .= " group by j.blog_category_id".$sql_string;
 
         $sql = sprintf($sql, Model::getTable('BlogItem'),
             Model::getTable('BlogItemCategory'),
             Model::getTable('BlogCategory'));
         $error = 'Could not published categories.';
-        $result = $this->query($sql, $error);
 
-        $i = 0;
+        $result = $this->query($sql, $error, $queryParams);
+        $cats = array();
         foreach ($result as $row) {
-            $all[$i] = $row;
-            $i++;
+            if ($row['id']) {
+                $cats[$row['id']] = $row;
+            }
         }
+        array_push($cats, array('id' => 0, 'label' => 'Any'));
 
-        return $all;
+
+        return $cats;
     }
 
 
@@ -88,9 +109,9 @@ class BlogCategory extends Entity
         $sql = 'SELECT id FROM '.self::TABLE.' c'
             .', '.Model::getTable('BlogItemCategory').' b'
             .' WHERE b.blog_category_id = c.id'
-            .' AND b.blog_id = '.$blog_id;
+            .' AND b.blog_id = ?';
         $error = 'Could not get categories for blog item.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($blog_id));
         foreach ($result as $row) {
             $categories[] = $row['id'];
         }
@@ -109,9 +130,9 @@ class BlogCategory extends Entity
     public function removeForBlogItem($blog_id)
     {
         $sql = 'DELETE FROM '.Model::getTable('BlogItemCategory')
-            .' WHERE blog_id = '.$blog_id;
+            .' WHERE blog_id = ?';
         $error = 'Could not clear categories associated with blog item.';
-        $this->query($sql, $error);
+        $this->query($sql, $error, array($blog_id));
     }
 
 
@@ -129,7 +150,7 @@ class BlogCategory extends Entity
         foreach ($categories as $cat) {
             $bc->blog_id = $blog_id;
             $bc->blog_category_id = $cat;
-            $bc->insert(Model::getTable('BlogItemCategory'), false, array(), 1);
+            $bc->insert([], false);
         }
     }
 
@@ -161,17 +182,18 @@ class BlogCategory extends Entity
     {
         $i = 0;
         $nodes = array();
-
+        $queryParams = array();
         if ($current == 0) {
             $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory')
-                .' WHERE blog_category_id IS NULL';
+                .' WHERE blog_category_id IS NULL order by position';
         } else {
             $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory')
-                .' WHERE blog_category_id = '.$current;
+                .' WHERE blog_category_id = ? order by position';
+            array_push($queryParams, $current);
         }
 
         $error = 'Could not get child blog categories.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, $queryParams);
         if ($result->rowCount() > 0) {
             foreach ($result as $row) {
                 $id = $row['id'];
@@ -201,9 +223,9 @@ class BlogCategory extends Entity
         $section_id = 0;
         $sql = 'SELECT blog_category_id FROM '
             .Model::getTable('BlogCategory')
-            .' WHERE id = '.$id;
+            .' WHERE id = ?';
         $error = 'Could not get parent id from blog category.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($id));
         if ($result->rowCount() > 0) {
             $row = $result->fetch();
             $blog_category_id = $row['blog_category_id'];
@@ -228,9 +250,9 @@ class BlogCategory extends Entity
     {
         $cats = false;
         $sql = 'SELECT id FROM '.Model::getTable('BlogCategory')
-            .' WHERE blog_category_id = '.$id;
+            .' WHERE blog_category_id = ?';
         $error = 'Could not check for existing child categories.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($id));
         if ($result->rowCount() > 0) {
             $cats = true;
         }
@@ -250,9 +272,9 @@ class BlogCategory extends Entity
     {
         $cat = 0;
         $sql = 'SELECT id from '.Model::getTable('BlogCategory')
-            .' WHERE label like \'%'.$label.'%\'';
+            .' WHERE label like ?';
         $error = 'Could not get current category id.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array('%' . $label . '%'));
         if ($result->rowCount() == 1) {
             $row = $result->fetch();
             $cat = $row['id'];

@@ -2,8 +2,9 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+use Empathy\ELib\Model;
+use Empathy\MVC\Entity;
+use Empathy\MVC\DI;
 
 
 class TagItem extends Entity
@@ -19,9 +20,9 @@ class TagItem extends Entity
         $sql = 'SELECT tag FROM '.self::TABLE.' t'
             .', '.Model::getTable('BlogTag').' b'
             .' WHERE b.tag_id = t.id'
-            .' AND b.blog_id = '.$blog_id;
+            .' AND b.blog_id = ?';
         $error = 'Could not get tags for blog item.';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, array($blog_id));
         foreach ($result as $row) {
             $tags[] = $row['tag'];
         }
@@ -35,17 +36,17 @@ class TagItem extends Entity
         $ids = array();
         $i = 0;
         foreach ($tags as $tag) {
-            $sql = 'SELECT id FROM '.$table.' WHERE tag = \''.$tag.'\'';
+            $sql = 'SELECT id FROM '.$table.' WHERE tag = ?';
             $error = 'Could not check for tag id.';
-            $result = $this->query($sql, $error);
+            $result = $this->query($sql, $error, array($tag));
             if ($result->rowCount() == 1) {
                 $row = $result->fetch();
                 $id = $row['id'];
                 $ids[$i] = $id;
             } elseif (!($locked)) {
-                $sql = 'INSERT INTO '.$table.' VALUES(NULL, \''.$tag.'\')';
+                $sql = 'INSERT INTO '.$table.' VALUES(NULL, ?)';
                 $error = 'Could not insert tag.';
-                $result = $this->query($sql, $error);
+                $result = $this->query($sql, $error, array($tag));
                 $ids[$i] = $this->insertId();
             }
             $i++;
@@ -54,30 +55,67 @@ class TagItem extends Entity
         return $ids;
     }
 
-    public function getAllTags()
+    public function getAllTags($category_id, $authorId = null)
     {
+        $queryParams = array();
+        $category_id = (int) $category_id;
         $total = 0;
         $sql = 'SELECT COUNT(b.blog_id) AS count FROM '.Model::getTable('BlogTag').' b,'
-            .Model::getTable('BlogItem').' c WHERE c.id = b.blog_id AND c.status = 2';
+            .Model::getTable('BlogItem').' c';
+
+        if ($category_id > 0) {
+            $sql .= ', '.Model::getTable('BlogItemCategory').' d';
+        }
+
+        $sql .= ' WHERE c.id = b.blog_id AND c.status = ?';
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if ($category_id > 0) {
+            $sql .= ' AND d.blog_category_id = ?'
+                .' AND d.blog_id = b.blog_id';
+            array_push($queryParams, $category_id);
+        }
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND c.user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
         $error = 'Could not get total number of tagging instances';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, $queryParams);
         $row = $result->fetch();
         $total = $row['count'];
 
+        $queryParams = array();
         $tag = array();
         $sql = 'SELECT t.tag, COUNT(b.blog_id) AS count FROM '.Model::getTable('BlogItem').' c, '.Model::getTable('TagItem').' t LEFT JOIN '.Model::getTable('BlogTag')
-            .' b ON (b.tag_id = t.id) WHERE c.status = 2 AND b.blog_id = c.id GROUP BY t.id';
+            .' b ON (b.tag_id = t.id)';
+
+        if ($category_id > 0) {
+            $sql .= ', '.Model::getTable('BlogItemCategory').' d';
+        }
+        $sql .= ' WHERE c.status = ? AND b.blog_id = c.id';
+        array_push($queryParams, BlogItemStatus::PUBLISHED);
+
+        if ($category_id > 0) {
+            $sql .= ' AND d.blog_category_id = ?'
+                .' AND d.blog_id = b.blog_id';
+            array_push($queryParams, $category_id);
+        }
+
+        if (!is_null($authorId)) {
+            $sql .= ' AND c.user_id = ?';
+            array_push($queryParams, $authorId);
+        }
+
+        $sql .= ' GROUP BY t.id';
+
         $error = 'Could not get all active tags';
-        $result = $this->query($sql, $error);
+        $result = $this->query($sql, $error, $queryParams);
         $i = 0;
         foreach ($result as $row) {
             $tag[$i] = $row;
             $share = ceil(100 / $total * $tag[$i]['count']);
-            if ($share < 10) {
-                $share = '0'.$share;
-            } elseif ($share > 99) {
-                $share = 99;
-            }
             $tag[$i]['share'] = $share;
             $i++;
         }
@@ -108,18 +146,16 @@ class TagItem extends Entity
             $i++;
         }
 
-        $dumped = '(0';
+        $dumped = array();
 
         foreach ($stored as $item) {
             if (!in_array($item, $current)) {
-                $dumped .= ','.$item;
+                array_push($dumped, $item);
             }
         }
 
-        $dumped .= ')';
-
         if ($dumped != '(0)') {
-            $sql = 'DELETE FROM '.Model::getTable('TagItem').' WHERE id IN'.$dumped;
+            $sql = 'DELETE FROM '.Model::getTable('TagItem').' WHERE id IN'.$this->buildUnionString($dumped);
             $error = 'Could not remove redundant tags.';
             $this->query($sql, $error);
         }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Empathy\ELib\Blog;
 
 use Empathy\ELib\Model;
@@ -8,13 +7,20 @@ use Elasticsearch\ClientBuilder;
 
 class Service
 {
+    private static function getClient() {
+        $hosts = defined('ELIB_ES_HOSTS')
+            ? json_decode(ELIB_ES_HOSTS)
+            : [];
+        return ClientBuilder::create()
+            ->setHosts($hosts)
+            ->build();
+    }
 
     public static function processTags($b, $tags_arr, $cats_arr=array())
     {
         // deal with tags
         $bt = Model::load('BlogTag');
         $bt->removeAll($b->id);
-
         $t = Model::load('TagItem');
 
         if (strlen($_POST['tags']) > 0) {
@@ -24,12 +30,11 @@ class Service
                 $bt = Model::load('BlogTag');
                 $bt->blog_id = $b->id;
                 $bt->tag_id = $id;
-                $bt->insert(Model::getTable('BlogTag'), 0, array(), 0);
+                $bt->insert([], false);
             }
         }
-        $t->cleanup();        
+        $t->cleanup();
     }
-
 
     public static function search($query)
     {
@@ -45,8 +50,7 @@ class Service
                 'size' => 250
             ]
         ];
-
-        $client = ClientBuilder::create()->build();
+        $client = self::getClient();
         $response = $client->search($params);
         return $response;
     }
@@ -55,22 +59,20 @@ class Service
     public function addAllToIndex()
     {
         $b = \Empathy\ELib\Model::load('BlogItem');
-        $table = 
-        $all = $b->getAllCustom(Model::getTable('BlogItem'), ' where status = '.\Empathy\ELib\Storage\BlogItemStatus::PUBLISHED);
+        $table =
+        $all = $b->getAllCustom(' where status = ?' [\Empathy\ELib\Storage\BlogItemStatus::PUBLISHED]);
         $ids = array();
         foreach ($all as $item) {
             array_push($ids, $item['id']);
         }
         foreach ($ids as $id) {
             $b = \Empathy\ELib\Model::load('BlogItem');
-            $b->id = $id;
-            $b->load();
+            $b->load($id);
             self::addToIndex($b);
         }
-
     }
 
-    public static function addToIndex($b) 
+    public static function addToIndex($b)
     {
         if (defined('ELIB_BLOG_ELASTIC') && ELIB_BLOG_ELASTIC) {
 
@@ -81,11 +83,9 @@ class Service
             $cats_arr = array();
             foreach ($cats as $c) {
                 $item = Model::load('BlogCategory');
-                $item->id = $c;
-                $item->load();
+                $item->load($c);
                 array_push($cats_arr, $item->label);
             }
-
 
             $params = [
                 'index' => 'elib_blog',
@@ -104,12 +104,11 @@ class Service
             //header('Content-type: application/json');
             //echo json_encode($params); exit();
 
-            $client = ClientBuilder::create()->build();
+            $client = self::getClient();
             $response = $client->index($params);
         }
 
     }
-
 
     public static function removeFromIndex($b)
     {
@@ -120,18 +119,19 @@ class Service
                 'id' => $b->id
             ];
 
-            $client = ClientBuilder::create()->build();
+            $client = self::getClient();
             $response = $client->delete($params);
         }
     }
 
-
     public static function getMonthSlug($stamp)
     {
-        //echo ; exit();
         return strtolower(substr(date('F', strtotime($stamp)), 0, 3));
     }
 
+    public static function getHealth()
+    {
+        $client = self::getClient();
+        return $response = $client->cat()->health();
+    }
 }
-
-
