@@ -201,7 +201,7 @@ class BlogItem extends Entity
         $built = [];
         if ($tags != '') {
             if (ctype_alnum(str_replace(',', '', str_replace(' ', '', $tags)))) {
-                $tags = explode(',', str_replace(' ', '', $tags));
+                $built = explode(',', str_replace(' ', '', $tags));
             } else {
                 $this->addValError('Invalid tags submitted');
             }
