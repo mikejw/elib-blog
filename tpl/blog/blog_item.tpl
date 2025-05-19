@@ -46,10 +46,10 @@
                         </span>
                     </span>
                 {/foreach}
-                <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
             {/if}
 
             {if isset($blog->tags) and sizeof($blog->tags)}
+                <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 Tags:
                 {foreach from=$blog->tags item=t}
                     <span class="tag">

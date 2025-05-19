@@ -7,6 +7,9 @@
 ### Fixed
 
 - Improve ORM code
+- Remove old code
+- Fix blog item template (separator between cats and tags)
+- Prevent blog admin form being submitted without category selection
 
 
 ## [2.0.0] - 2025-05-17

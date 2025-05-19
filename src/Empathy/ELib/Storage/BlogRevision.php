@@ -57,7 +57,7 @@ class BlogRevision extends Entity
 
     public function loadAll($blog)
     {
-      $revisions = array();
+      $revisions = [];
       $sql = 'select *, UNIX_TIMESTAMP(stamp) as stamp from '.self::TABLE
             .' where blog_id = ?'
             .' order by stamp desc';

@@ -19,10 +19,11 @@ class BlogItem extends Entity
     public $body;
     public $slug;
     private $pages;
+    private $category;
 
     private function getCategoryBlogs($cat)
     {
-        $cat_blogs_string = '';
+        $cat_blogs_string = ['', []];
         if($cat !== null && $cat != 0) {
             $ids = array(0);
             $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = ?';
@@ -41,8 +42,7 @@ class BlogItem extends Entity
 
     private function getItemsQuery($found_items, $cat_blogs_string, $limit=array(), $authorId = null)
     {
-
-        $queryParams = array();
+        $queryParams = [];
         $sql = 'SELECT t1.heading, t1.body,COUNT(t5.id) AS comments,'
             .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug, any_value(t4.body_revision) as body_revision';
         $sql .= ' FROM '.Model::getTable('UserItem').' t2,'
@@ -57,14 +57,16 @@ class BlogItem extends Entity
             .' ON t1.id = t5.blog_id'
             .' WHERE t1.user_id = t2.id';
 
-        if ($found_items != '(0,)') {
-            $sql .= ' AND t1.id IN'.$found_items;
+        if (count($found_items[1])) {
+            $sql .= ' AND t1.id IN ' . $found_items[0];
+            $queryParams = array_merge($queryParams, $found_items[1]);
         }
         $sql .= ' AND t1.status = ?';
         array_push($queryParams, BlogItemStatus::PUBLISHED);
 
-        if($cat_blogs_string != '') {
-            $sql .= ' AND t1.id IN'.$cat_blogs_string;
+        if (count($cat_blogs_string[1])) {
+            $sql .= ' AND t1.id IN ' . $cat_blogs_string[0];
+            $queryParams = array_merge($queryParams, $cat_blogs_string[1]);
         }
 
         if (!is_null($authorId)) {
@@ -74,11 +76,10 @@ class BlogItem extends Entity
 
         $sql .= ' GROUP BY t1.id'
             .' ORDER BY t1.stamp DESC, t1.id DESC';
+
         if (sizeof($limit)) {
             $sql .= ' limit '. $limit[0] . ', ' . $limit[1];
         }
-
-
         return array($sql, $queryParams);
     }
 
@@ -138,15 +139,18 @@ class BlogItem extends Entity
     {
 	    $allowed_chars = '/[\.\s\\\\\/]/';
         if ($this->heading == '' || !ctype_alnum(preg_replace($allowed_chars, '', $this->heading))) {
-            $this->addValError('Invalid heading');
+            $this->addValError('Invalid heading', 'heading');
         }
         if ($this->body == '') {
-            $this->addValError('Invalid body');
+            $this->addValError('Invalid body', 'body');
         }
         if ($this->slug != '') {
             if (!ctype_alnum(str_replace('-', '', $this->slug))) {
-                $this->addValError('Invalid URL Slug');
+                $this->addValError('Invalid URL Slug', 'slug');
             }
+        }
+        if (!count($this->category)) {
+            $this->addValError('Choose at least one category', 'category');
         }
     }
 
@@ -192,18 +196,17 @@ class BlogItem extends Entity
         }
     }
 
-    public function buildTags()
+    public function buildTags($tags)
     {
-        $tags = array();
-        if ($_POST['tags'] != '') {
-            if (ctype_alnum(str_replace(',', '', str_replace(' ', '', $_POST['tags'])))) {
-                $tags = explode(',', str_replace(' ', '', $_POST['tags']));
+        $built = [];
+        if ($tags != '') {
+            if (ctype_alnum(str_replace(',', '', str_replace(' ', '', $tags)))) {
+                $tags = explode(',', str_replace(' ', '', $tags));
             } else {
                 $this->addValError('Invalid tags submitted');
             }
         }
-
-        return $tags;
+        return $built;
     }
 
     public function getStamp()
@@ -255,16 +258,10 @@ class BlogItem extends Entity
 
     public function getArchive($cat = null, $authorId = null)
     {
-        $queryParams = array();
+        $queryParams = [];
         $cat_blogs_string = $this->getCategoryBlogs($cat);
 
         $archive = array();
-        /*
-          $sql = 'SELECT MAX(UNIX_TIMESTAMP(stamp)) AS max,'
-          .' MIN(UNIX_TIMESTAMP(stamp)) AS min'
-          .' FROM '.Model::getTable('BlogItem');
-        */
-
         $sql = 'SELECT id, YEAR(stamp) AS year, MONTH(stamp) AS month,'
             .' MONTHNAME(stamp) AS monthname,'
             .' DAY(stamp) AS day,'
@@ -274,9 +271,9 @@ class BlogItem extends Entity
 
         array_push($queryParams, BlogItemStatus::PUBLISHED);
 
-        if($cat_blogs_string != '') {
-
-            $sql .= ' AND id IN'.$cat_blogs_string;
+        if (count($cat_blogs_string[1])) {
+            $sql .= ' AND id IN ' . $cat_blogs_string[0];
+            $queryParams = array_merge($queryParams, $cat_blogs_string[1]);
         }
 
         if (!is_null($authorId)) {
@@ -299,21 +296,7 @@ class BlogItem extends Entity
             $archive[$year][$month][$id]['slug'] = $row['slug'];
             $archive[$year][$month][$id]['month_slug'] = strtolower(substr($month, 0, 3));
         }
-
-//        print_r($archive);
-
         return $archive;
-        //    print_r($archive);
-
-        //    $max = $row['stamp'];
-
-        /*
-          $sql = 'SELECT MIN(UNIX_TIMESTAMP(stamp)) AS stamp FROM '.Model::getTable('BlogItem');
-          $result = $this->query($sql, $error);
-          $row = $result->fetch();
-          $max = $row['stamp'];
-        */
-
     }
 
     public function getYear($year, $authorId = null)
@@ -513,5 +496,15 @@ class BlogItem extends Entity
             $podcast[] = $row;
         }
         return $podcast;
+    }
+
+    public function setCategory($category)
+    {
+        $this->category = $category;
+    }
+
+    public function getCategory()
+    {
+        return $this->category;
     }
 }

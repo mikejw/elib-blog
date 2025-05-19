@@ -76,7 +76,7 @@ class BlogFrontControllerNew extends EController
         $b = Model::load('BlogItem');
         
         $sql = '';
-        $found_items = '(0,)';
+        $found_items = ['', []];
 
         if (isset($_GET['active_tags'])) {
             $found_items = $this->getActiveTags();

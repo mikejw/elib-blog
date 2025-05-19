@@ -147,19 +147,17 @@ class TagItem extends Entity
         }
 
         $dumped = array();
-
         foreach ($stored as $item) {
             if (!in_array($item, $current)) {
                 array_push($dumped, $item);
             }
         }
 
-        if ($dumped != '(0)') {
+        if (count($dumped)) {
             list($unionSql, $params) = $this->buildUnionString($dumped);
             $sql = 'DELETE FROM '.Model::getTable('TagItem').' WHERE id IN ' . $unionSql;
             $error = 'Could not remove redundant tags.';
             $this->query($sql, $error, $params);
         }
     }
-
 }

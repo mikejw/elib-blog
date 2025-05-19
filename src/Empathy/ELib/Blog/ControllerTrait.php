@@ -336,13 +336,14 @@ trait ControllerTrait
 
 
             $b = Model::load('BlogItem');
-            $tags_arr = $b->buildTags(); // errors ?
+            $tags_arr = $b->buildTags($_POST['tags']); // errors ?
 
             $b->heading = $_POST['heading'];
             $b->body = $_POST['body'];
 
             $b->status = BlogItemStatus::DRAFT;
             $b->slug = $_POST['slug'];
+            $b->setCategory($_POST['category'] ?? []);
 
             $b->checkForDuplicates($tags_arr);
             $b->validates();
@@ -351,7 +352,7 @@ trait ControllerTrait
                 $this->presenter->assign('blog', $b);
                 $this->presenter->assign('blog_tags', $_POST['tags']);
                 $this->presenter->assign('errors', $b->getValErrors());
-                $this->assign('blog_cats', $_POST['category']);
+                $this->assign('blog_cats', $b->getCategory());
             } else {
                 $b->assignFromPost(array('user_id', 'id', 'stamp', 'tags', 'status'));
                 $b->user_id = Session::get('user_id');
@@ -373,7 +374,7 @@ trait ControllerTrait
                 $r->insert();
 
                 $bc = Model::load('BlogCategory');
-                $bc->createForBlogItem($_POST['category'], $b->id);
+                $bc->createForBlogItem($b->getCategory(), $b->id);
 
                 Service::processTags($b, $tags_arr, $cats_arr);
                 $this->redirect('admin/blog');
@@ -392,6 +393,7 @@ trait ControllerTrait
         }
 
         $this->presenter->assign('cats', $cats_arr);
+        $revisions = [];
 
         if (isset($_POST['cancel'])) {
             $this->redirect('admin/blog/view/'.$_POST['id']);
@@ -399,10 +401,10 @@ trait ControllerTrait
             $b = Model::load('BlogItem');
             $this->assertAuthorBlog($_POST['id']);
 
-            $tags_arr = $b->buildTags();
+            $tags_arr = $b->buildTags($_POST['tags']);
+            $b->setCategory($_POST['category'] ?? []);
 
             $b->load($_POST['id']);
-
             $b->assignFromPost(array('stamp', 'id', 'tags', 'user_id', 'status'));
 
             $b->validates($tags_arr);
@@ -413,7 +415,7 @@ trait ControllerTrait
                 $b->body = $_POST['body'];
                 $this->presenter->assign('blog', $b);
                 $this->presenter->assign('blog_tags', $_POST['tags']);
-                $this->presenter->assign('blog_cats', $_POST['category']);
+                $this->presenter->assign('blog_cats', $b->getCategory());
                 $this->presenter->assign('errors', $b->getValErrors());
             } else {
                 $bi = Model::load('BlogImage');
@@ -481,13 +483,11 @@ trait ControllerTrait
                 $tagsArr = $bt->getTags($b->id);
             }
             $this->presenter->assign('blog_tags', implode(', ', $tagsArr));
-            
-            // revisions
+
             $this->assign('revision', $revision ?? '');
-            $this->assign('revisions',  $r->loadAll($b));
-
+            $revisions = $r->loadAll($b);
         }
-
+        $this->assign('revisions', $revisions);
         $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
     }
 
