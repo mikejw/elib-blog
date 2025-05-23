@@ -14,6 +14,7 @@ use Empathy\ELib\Storage\BlogCategory;
 use Empathy\ELib\Storage\BlogComment;
 use Empathy\ELib\Storage\TagItem;
 use Empathy\ELib\Storage\BlogImage;
+use Empathy\ELib\Storage\BlogTag;
 use Empathy\MVC\Config;
 use Empathy\ELib\Blog\Util;
 
