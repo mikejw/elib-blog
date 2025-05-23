@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "mikejw/elib-base": "^2",
+        "mikejw/elib-base": "^3",
         "mikejw/elib-siteinfo": "^2"
     },
     "autoload": {
