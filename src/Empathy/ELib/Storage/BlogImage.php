@@ -2,8 +2,9 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+use Empathy\MVC\Model;
+use Empathy\MVC\Entity;
+use Empathy\ELib\Storage\BlogImage as EBlogImage;
 
 class BlogImage extends Entity
 {
@@ -19,7 +20,7 @@ class BlogImage extends Entity
     {
         $images = array();
         foreach ($ids as $item) {
-            $sql = 'SELECT * FROM '.Model::getTable('BlogImage').' WHERE blog_id = ?'
+            $sql = 'SELECT * FROM '.Model::getTable(EBlogImage::class).' WHERE blog_id = ?'
                 .' ORDER BY id';
             $error = 'Could not get blog images.';
             $result = $this->query($sql, $error, array($item));
@@ -29,8 +30,6 @@ class BlogImage extends Entity
                 }
             }
         }
-
         return $images;
     }
-
 }

@@ -2,9 +2,11 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model;
+use Empathy\MVC\Model;
 use Empathy\MVC\Entity;
 use Empathy\MVC\DI;
+use Empathy\ELib\Storage\BlogTag;
+use Empathy\ELib\Storage\TagItem as ETagItem;
 
 
 class TagItem extends Entity
@@ -18,7 +20,7 @@ class TagItem extends Entity
     {
         $tags = array();
         $sql = 'SELECT tag FROM '.self::TABLE.' t'
-            .', '.Model::getTable('BlogTag').' b'
+            .', '.Model::getTable(BlogTag::class).' b'
             .' WHERE b.tag_id = t.id'
             .' AND b.blog_id = ?';
         $error = 'Could not get tags for blog item.';
@@ -32,7 +34,7 @@ class TagItem extends Entity
 
     public function getIds($tags, $locked)
     {
-        $table = Model::getTable('TagItem');
+        $table = Model::getTable(ETagItem::class);
         $ids = array();
         $i = 0;
         foreach ($tags as $tag) {
@@ -60,11 +62,11 @@ class TagItem extends Entity
         $queryParams = array();
         $category_id = (int) $category_id;
         $total = 0;
-        $sql = 'SELECT COUNT(b.blog_id) AS count FROM '.Model::getTable('BlogTag').' b,'
-            .Model::getTable('BlogItem').' c';
+        $sql = 'SELECT COUNT(b.blog_id) AS count FROM '.Model::getTable(BlogTag::class).' b,'
+            .Model::getTable(BlogItem::class).' c';
 
         if ($category_id > 0) {
-            $sql .= ', '.Model::getTable('BlogItemCategory').' d';
+            $sql .= ', '.Model::getTable(BlogItemCategory::class).' d';
         }
 
         $sql .= ' WHERE c.id = b.blog_id AND c.status = ?';
@@ -88,11 +90,11 @@ class TagItem extends Entity
 
         $queryParams = array();
         $tag = array();
-        $sql = 'SELECT t.tag, COUNT(b.blog_id) AS count FROM '.Model::getTable('BlogItem').' c, '.Model::getTable('TagItem').' t LEFT JOIN '.Model::getTable('BlogTag')
+        $sql = 'SELECT t.tag, COUNT(b.blog_id) AS count FROM '.Model::getTable(BlogItem::class).' c, '.Model::getTable(ETagItem::class).' t LEFT JOIN '.Model::getTable(BlogTag::class)
             .' b ON (b.tag_id = t.id)';
 
         if ($category_id > 0) {
-            $sql .= ', '.Model::getTable('BlogItemCategory').' d';
+            $sql .= ', '.Model::getTable(BlogItemCategory::class).' d';
         }
         $sql .= ' WHERE c.status = ? AND b.blog_id = c.id';
         array_push($queryParams, BlogItemStatus::PUBLISHED);
@@ -126,7 +128,7 @@ class TagItem extends Entity
     public function cleanup()
     {
         $current = array();
-        $sql = 'SELECT DISTINCT b.tag_id FROM '.Model::getTable('BlogTag').' b';
+        $sql = 'SELECT DISTINCT b.tag_id FROM '.Model::getTable(BlogTag::class).' b';
         $error = 'Could not get all current tag ids.';
         $result = $this->query($sql, $error);
 
@@ -137,7 +139,7 @@ class TagItem extends Entity
         }
 
         $stored = array();
-        $sql = 'SELECT t.id FROM '.Model::getTable('TagItem').' t';
+        $sql = 'SELECT t.id FROM '.Model::getTable(ETagItem::class).' t';
         $error = 'Could not get all tag ids';
         $result = $this->query($sql, $error);
         $i = 0;
@@ -155,7 +157,7 @@ class TagItem extends Entity
 
         if (count($dumped)) {
             list($unionSql, $params) = $this->buildUnionString($dumped);
-            $sql = 'DELETE FROM '.Model::getTable('TagItem').' WHERE id IN ' . $unionSql;
+            $sql = 'DELETE FROM '.Model::getTable(ETagItem::class).' WHERE id IN ' . $unionSql;
             $error = 'Could not remove redundant tags.';
             $this->query($sql, $error, $params);
         }

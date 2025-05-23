@@ -2,14 +2,21 @@
 
 namespace Empathy\ELib\Blog;
 
-
 use Empathy\ELib\File\Image as ImageUpload;
 use Empathy\ELib\File\Upload;
-use Empathy\ELib\Model;
+use Empathy\MVC\Model;
 use Empathy\MVC\DI;
 use Empathy\MVC\RequestException;
 use Empathy\MVC\Session;
 use Empathy\ELib\Storage\BlogItemStatus;
+use Empathy\ELib\Storage\BlogItem;
+use Empathy\ELib\Storage\BlogTag;
+use Empathy\ELib\Storage\BlogCategory;
+use Empathy\ELib\Storage\UserAccess;
+use Empathy\ELib\Storage\UserItem;
+use Empathy\ELib\Storage\BlogImage;
+use Empathy\ELib\Storage\BlogRevision;
+use Empathy\ELib\Storage\BlogAttachment;
 use Empathy\MVC\Config;
 
 
@@ -42,17 +49,17 @@ trait ControllerTrait
         $authorId = $this->stash->get('authorId');
 
         $u = DI::getContainer()->get('CurrentUser')->getUser();
-        $ua = Model::load('UserAccess');
+        $ua = new UserAccess();
         if (!($u->auth < $ua->getLevel('admin')) && is_null($authorId)) {
             return;
         }
 
         if ($authorId) {
-            $b = Model::load('BlogItem');
-            $sql = 'select id from ' . Model::getTable('BlogItem')
+            $b = Model::load(BlogItem::class);
+            $sql = 'select id from ' . Model::getTable(BlogItem::class)
                 . ' where user_id = ?'
                 . ' and id = ?';
-            $result = $b->query($sql, '', array($authorId, $id));
+            $result = $b->query($sql, '', [$authorId, $id]);
             $authed = $result->rowCount() === 1;
         }
         if (!$authed) {
@@ -62,7 +69,7 @@ trait ControllerTrait
 
     public function default_event()
     {
-        $ui_array = array('page', 'status');
+        $ui_array = ['page', 'status'];
         $this->loadUIVars('ui_blog', $ui_array);
         
         $_GET['page'] = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) ?? 1 : 1;
@@ -74,24 +81,24 @@ trait ControllerTrait
         $admin = false;
 
         // is admin user?
-        $u = Model::load('UserItem');
+        $u = Model::load(UserItem::class);
         $u->load(Session::get('user_id'));
-        $ua = Model::load('UserAccess');
+        $ua = new UserAccess();
         if ($u->auth >= $ua->getLevel('admin')) {
             $admin = true;
         }
         $this->presenter->assign('super', $admin);
 
-        $c = Model::load('BlogCategory');
+        $c = Model::load(BlogCategory::class);
         $cats = $c->getAll();
-        $cats_arr = array();
+        $cats_arr = [];
         foreach ($cats as $index => $item) {
             $id = $item['id'];
             $cats_arr[$id] = $item['label'];
         }
 
-        $b = Model::load('BlogItem');
-        $blogs = array();
+        $b = Model::load(BlogItem::class);
+        $blogs = [];
 
         $params = [];
         $select = '*,t1.id AS id, t4.body_revision';
@@ -113,7 +120,7 @@ trait ControllerTrait
 
         $p_nav = $b->getPaginatePagesSimpleJoin(
             $select,
-            Model::getTable('UserItem'),
+            Model::getTable(UserItem::class),
             $sql,
             $_GET['page'],
             REQUESTS_PER_PAGE,
@@ -126,7 +133,7 @@ trait ControllerTrait
 
         $blogs = $b->getAllCustomPaginateSimpleJoin(
             $select,
-            Model::getTable('UserItem'),
+            Model::getTable(UserItem::class),
             $sql,
             $_GET['page'],
             REQUESTS_PER_PAGE,
@@ -138,7 +145,7 @@ trait ControllerTrait
         foreach ($blogs as $index => $item) {
             $blog_cats = $c->getCategoriesForBlogItem($blogs[$index]['id']);
 
-            $cats = array();
+            $cats = [];
             foreach ($blog_cats as $bc_id) {
                 $cats[] = $cats_arr[$bc_id];
             }
@@ -157,15 +164,17 @@ trait ControllerTrait
     private function uploadImage()
     {
         $_GET['id'] = $_POST['id'];
-        $sizes = array(array('l_', 800, 600),
-                       array('tn_', 200, 200),
-                       array('mid_', 468, 5000));
+        $sizes = [
+            ['l', 800, 600],
+            ['tn', 200, 200],
+            ['mid', 468, 5000]
+        ];
         $u = new ImageUpload('blog', true, $sizes);
 
         if ($u->error != '') {
             $this->presenter->assign('error', $u->error);
         } else {
-            $bi = Model::load('BlogImage');
+            $bi = Model::load(BlogImage::class);
             $bi->filename = $u->getFile();
             $bi->blog_id = $_GET['id'];
             $bi->image_width = $u->getDimensions()[0];
@@ -202,11 +211,11 @@ trait ControllerTrait
             $_GET['id'] = 0;
         }
         $this->assertAuthorBlog($_GET['id']);
-        $i = Model::load('BlogImage');
+        $i = Model::load(BlogImage::class);
         $i->load($_GET['id']);
 
-        $u = new ImageUpload('blog', false, array());
-        if ($u->remove(array($i->filename))) {
+        $u = new ImageUpload('blog', false, []);
+        if ($u->remove([$i->filename])) {
             $i->delete();
         }
 
@@ -215,7 +224,7 @@ trait ControllerTrait
 
     public function delete()
     {
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $this->assertAuthorBlog($_GET['id']);
         $b->load($_GET['id']);
         $b->status = BlogItemStatus::DELETED;
@@ -228,7 +237,7 @@ trait ControllerTrait
 
     public function redraft()
     {
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $this->assertAuthorBlog($_GET['id']);
         $b->load($_GET['id']);
         $b->status = BlogItemStatus::DRAFT;
@@ -243,7 +252,7 @@ trait ControllerTrait
 
     public function publish()
     {
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $this->assertAuthorBlog($_GET['id']);
         $b->load($_GET['id']);
         if (isset($_GET['stamp']) && $_GET['stamp'] == 1) {
@@ -268,24 +277,24 @@ trait ControllerTrait
             $this->uploadAttachment();
         }   
 
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $b->load($_GET['id']);
         
-        $r = Model::load('BlogRevision');
+        $r = Model::load(BlogRevision::class);
         list($b) = $r->loadSaved($b);
 
-        $u = Model::load('UserItem');
+        $u = Model::load(UserItem::class);
         $u->load($b->user_id);
 
         $this->presenter->assign('author', $u->username);
         $this->presenter->assign('blog', $b);
 
-        $bi = Model::load('BlogImage');
+        $bi = Model::load(BlogImage::class);
         $sql = ' WHERE blog_id = ?';
         $images = $bi->getAllCustom($sql, [$b->id]);
 
         /*
-          $image = array();
+          $image = [];
           foreach ($images as $item) {
           array_push($image, $item['filename']);
           }
@@ -293,12 +302,12 @@ trait ControllerTrait
 
         $this->presenter->assign('images', $images);
 
-        $ba = Model::load('BlogAttachment');
+        $ba = Model::load(BlogAttachment::class);
         $sql = ' WHERE blog_id = ?';
         $attachments = $ba->getAllCustom($sql, [$b->id]);
 
         /*
-          $image = array();
+          $image = [];
           foreach($images as $item)
           {
           array_push($image, $item['filename']);
@@ -308,7 +317,7 @@ trait ControllerTrait
 
 
         // get tags
-        $bt = Model::load('BlogTag');
+        $bt = Model::load(BlogTag::class);
         $tags_arr = $bt->getTags($b->id);
         $tags = implode(', ', $tags_arr);
         $this->presenter->assign('blog_tags', $tags);
@@ -318,9 +327,9 @@ trait ControllerTrait
 
     public function create()
     {
-        $c = Model::load('BlogCategory');
+        $c = Model::load(BlogCategory::class);
         $cats = $c->getAll();
-        $cats_arr = array();
+        $cats_arr = [];
         foreach ($cats as $index => $item) {
             $id = $item['id'];
             $cats_arr[$id] = $item['label'];
@@ -335,7 +344,7 @@ trait ControllerTrait
         } elseif (isset($_POST['save'])) {
 
 
-            $b = Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $tags_arr = $b->buildTags($_POST['tags']); // errors ?
 
             $b->heading = $_POST['heading'];
@@ -354,12 +363,12 @@ trait ControllerTrait
                 $this->presenter->assign('errors', $b->getValErrors());
                 $this->assign('blog_cats', $b->getCategory());
             } else {
-                $b->assignFromPost(array('user_id', 'id', 'stamp', 'tags', 'status'));
+                $b->assignFromPost(['user_id', 'id', 'stamp', 'tags', 'status']);
                 $b->user_id = Session::get('user_id');
                 $b->stamp = date('Y-m-d H:i:s', time());              
                 $b->id = $b->insert();
                
-                $r = Model::load('BlogRevision');
+                $r = Model::load(BlogRevision::class);
                 $r->blog_id = $b->id;
                 $r->body = $b->body;
                 $r->blog_id = $b->id;
@@ -373,7 +382,7 @@ trait ControllerTrait
                 $r->meta = json_encode($revisionMeta);
                 $r->insert();
 
-                $bc = Model::load('BlogCategory');
+                $bc = Model::load(BlogCategory::class);
                 $bc->createForBlogItem($b->getCategory(), $b->id);
 
                 Service::processTags($b, $tags_arr, $cats_arr);
@@ -384,9 +393,9 @@ trait ControllerTrait
 
     public function edit_blog()
     {
-        $c = Model::load('BlogCategory');
+        $c = Model::load(BlogCategory::class);
         $cats = $c->getAll();
-        $cats_arr = array();
+        $cats_arr = [];
         foreach ($cats as $index => $item) {
             $id = $item['id'];
             $cats_arr[$id] = $item['label'];
@@ -398,14 +407,14 @@ trait ControllerTrait
         if (isset($_POST['cancel'])) {
             $this->redirect('admin/blog/view/'.$_POST['id']);
         } elseif (isset($_POST['save'])) {
-            $b = Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $this->assertAuthorBlog($_POST['id']);
 
             $tags_arr = $b->buildTags($_POST['tags']);
             $b->setCategory($_POST['category'] ?? []);
 
             $b->load($_POST['id']);
-            $b->assignFromPost(array('stamp', 'id', 'tags', 'user_id', 'status'));
+            $b->assignFromPost(['stamp', 'id', 'tags', 'user_id', 'status']);
 
             $b->validates($tags_arr);
             $b->checkForDuplicates($tags_arr);
@@ -418,20 +427,20 @@ trait ControllerTrait
                 $this->presenter->assign('blog_cats', $b->getCategory());
                 $this->presenter->assign('errors', $b->getValErrors());
             } else {
-                $bi = Model::load('BlogImage');
+                $bi = Model::load(BlogImage::class);
 
-                $images = $bi->getForIDs(array($b->id));
+                $images = $bi->getForIDs([$b->id]);
                 
                 $b->body = DI::getContainer()
                     ->get('BlogUtil')
                     ->reverseParseBlogImages($b->body);
 
                 $b->save();
-                $bc = Model::load('BlogCategory');
+                $bc = Model::load(BlogCategory::class);
                 $bc->removeForBlogItem($b->id);
                 $bc->createForBlogItem($_POST['category'], $b->id);
 
-                $r = Model::load('BlogRevision');
+                $r = Model::load(BlogRevision::class);
                 $r->blog_id = $b->id;
                 $r->body = $b->body;
                 $r->stamp = 'MYSQLTIME';
@@ -448,7 +457,7 @@ trait ControllerTrait
                 $this->redirect('admin/blog/view/'.$b->id);
             }
         } else {
-            $b = Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $this->assertAuthorBlog($_GET['id']);
             $b->load($_GET['id']);
 
@@ -459,7 +468,7 @@ trait ControllerTrait
                 $revision = $_GET['revision'];
             }
 
-            $r = Model::load('BlogRevision');
+            $r = Model::load(BlogRevision::class);
             list($b, $revisionMeta) = $r->loadSaved($b, $revision);
 
 
@@ -469,7 +478,7 @@ trait ControllerTrait
             if (isset($revisionMeta['category'])) {
                 $blogCats = $revisionMeta['category'];
             } else {
-                $bc = Model::load('BlogCategory');
+                $bc = Model::load(BlogCategory::class);
                 $sql = ' WHERE blog_id = '.$b->id;
                 $blogCats = $bc->getCategoriesForBlogItem($b->id);
             }
@@ -479,7 +488,7 @@ trait ControllerTrait
             if (isset($revisionMeta['tags'])) {
                 $tagsArr = $revisionMeta['tags'];
             } else {
-                $bt = Model::load('BlogTag');
+                $bt = Model::load(BlogTag::class);
                 $tagsArr = $bt->getTags($b->id);
             }
             $this->presenter->assign('blog_tags', implode(', ', $tagsArr));
@@ -502,7 +511,7 @@ trait ControllerTrait
                 $_GET['id'] = null;
             }
 
-            $b = Model::load('BlogCategory');
+            $b = Model::load(BlogCategory::class);
             $b->blog_category_id = $_GET['id'];
             $b->label = 'New Category';
             $b->position = 0;
@@ -516,7 +525,7 @@ trait ControllerTrait
     {
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
-        $ui_array = array('id');
+        $ui_array = ['id'];
         $this->loadUIVars('ui_blog_cats', $ui_array);
         if (!isset($_GET['id']) || $_GET['id'] == '') {
             $_GET['id'] = 0;
@@ -532,7 +541,7 @@ trait ControllerTrait
 
         $position = 1;
         foreach($_POST as $type => $value) {
-            $object = Model::load('BlogCategory');
+            $object = Model::load(BlogCategory::class);
 
             foreach ($value as $id) {
                 $object->load($id);
@@ -560,7 +569,7 @@ trait ControllerTrait
             $_GET['collapsed'] = 0;
         }
 
-        $b = Model::load('BlogCategory');
+        $b = Model::load(BlogCategory::class);
         $b->load($_GET['id']);
 
         $bt = new BlogCatTree($b, 1, $_GET['collapsed']);
@@ -572,7 +581,7 @@ trait ControllerTrait
     {
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->assertID();
-        $b = Model::load('BlogCategory');
+        $b = Model::load(BlogCategory::class);
         $b->load($_GET['id']);
         if ($b->hasCats($b->id)) {
             $this->redirect('admin/blog/category/'.$b->id);
@@ -587,7 +596,7 @@ trait ControllerTrait
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->buildNav();
         if (isset($_POST['save'])) {
-            $b = Model::load('BlogCategory');
+            $b = Model::load(BlogCategory::class);
             $b->load($_POST['id']);
             $b->label = $_POST['label'];
             $b->validates();
@@ -599,7 +608,7 @@ trait ControllerTrait
                 $this->redirect('admin/blog/category/'.$b->id);
             }
         } else {
-            $b = Model::load('BlogCategory');
+            $b = Model::load(BlogCategory::class);
             $b->load($_GET['id']);
             $this->presenter->assign('blog_category', $b);
         }
@@ -617,12 +626,12 @@ trait ControllerTrait
             $_GET['id'] = 0;
         }
 
-        $a = Model::load('BlogAttachment');
+        $a = Model::load(BlogAttachment::class);
         $a->load($_GET['id']);
         $this->assertAuthorBlog($a->blog_id);
 
         $u = new Upload();
-        if($u->remove(array($a->filename)))
+        if($u->remove([$a->filename]))
         {
             $a->delete();
         }
@@ -643,7 +652,7 @@ trait ControllerTrait
         }
         else
         {
-            $ba = Model::load('BlogAttachment');
+            $ba = Model::load(BlogAttachment::class);
             $ba->filename = $u->getFile();
             $ba->blog_id = $_GET['id'];
             $ba->insert();
@@ -655,9 +664,9 @@ trait ControllerTrait
     {
         $id = $_GET['id'];
         $this->assertAuthorBlog($id);     
-        $image = Model::load('BlogImage');
-        $images = $image->getForIDs(array($id));
-        $this->assign('images', count($images) ? $images[$id] : array());
+        $image = Model::load(BlogImage::class);
+        $images = $image->getForIDs([$id]);
+        $this->assign('images', count($images) ? $images[$id] : []);
         $this->setTemplate('elib://admin/blog/blog_images.tpl');
         $this->assign('blog_id', $id);
     }
@@ -675,7 +684,7 @@ trait ControllerTrait
 
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->setTemplate('elib:/admin/blog/blog_cat_meta.tpl');
-        $ui_array = array('id');
+        $ui_array = ['id'];
         $this->loadUIVars('ui_blog_cats_meta', $ui_array);
         if (!isset($_GET['id']) || $_GET['id'] == '') {
             $_GET['id'] = 0;
@@ -685,7 +694,7 @@ trait ControllerTrait
         $this->presenter->assign('blog_cat_id', $_GET['id']);
         
         if (isset($_POST['save'])) {
-            $c = Model::load('BlogCategory');
+            $c = Model::load(BlogCategory::class);
             $c->load($_POST['id']);
             $c->meta = $_POST['meta'];
 
@@ -702,8 +711,7 @@ trait ControllerTrait
             $this->redirect('admin/blog/category/'.$_POST['id']);
         }
 
-        $c = Model::load('BlogCategory');
-        $c->load($_GET['id']);
+        $c = Model::load(BlogCategory::class, $_GET['id']);
         $this->presenter->assign('cat_item', $c);
     }
 

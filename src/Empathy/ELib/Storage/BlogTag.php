@@ -2,8 +2,12 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+use Empathy\MVC\Model;
+use Empathy\MVC\Entity;
+use Empathy\ELib\Storage\BlogTag as EBlogTag;
+use Empathy\ELib\Storage\TagItem;
+use Empathy\ELib\Storage\BlogItem;
+
 
 class BlogTag extends Entity
 {
@@ -14,7 +18,7 @@ class BlogTag extends Entity
 
     public function removeAll($blog_id)
     {
-        $sql = 'DELETE FROM '.Model::getTable('BlogTag').' WHERE blog_id = ?';
+        $sql = 'DELETE FROM '.Model::getTable(EBlogTag::class).' WHERE blog_id = ?';
         $error = 'Could not clear existing tags for blog item.';
         $this->query($sql, $error, array($blog_id));
     }
@@ -22,8 +26,8 @@ class BlogTag extends Entity
     public function getTags($blog_id)
     {
         $tags = array();
-        $sql = 'SELECT t.tag FROM '.Model::getTable('TagItem').' t, '
-            .Model::getTable('BlogTag').' b WHERE t.id = b.tag_id AND b.blog_id = ?';
+        $sql = 'SELECT t.tag FROM '.Model::getTable(TagItem::class).' t, '
+            .Model::getTable(BlogTag::class).' b WHERE t.id = b.tag_id AND b.blog_id = ?';
         $error = 'Could not get tags.';
         $result = $this->query($sql, $error, array($blog_id));
         $i = 0;
@@ -39,11 +43,11 @@ class BlogTag extends Entity
     {
         $queryParams = array();
         $id = array();
-        $sql = 'SELECT DISTINCT b.id FROM '.Model::getTable('BlogItem').' b';
+        $sql = 'SELECT DISTINCT b.id FROM '.Model::getTable(BlogItem::class).' b';
         $i = 0;
         foreach ($tags as $tag) {
             $glue = 't'.($i + 1);
-            $sql .= ' LEFT JOIN '.Model::getTable('BlogTag').' '.$glue.' ON '.$glue.'.tag_id = ?';
+            $sql .= ' LEFT JOIN '.Model::getTable(EBlogTag::class).' '.$glue.' ON '.$glue.'.tag_id = ?';
             array_push($queryParams, $tag);
             $i++;
         }

@@ -1,25 +1,12 @@
 <?php
 
-/**
-* Empathy/ELib/Storage/BlogCategory.php
-*
-* PHP Version 5
-*
-* LICENSE: This source file is subject to the LGPLv3 License that is bundled
-* with this source code in the file licence.txt
-*
-* @category  Application
-* @package   ELib_Blog
-* @author    Mike Whiting <mail@mikejw.co.uk>
-* @copyright 2008-2013 Mike Whiting
-* @license   http://www.gnu.org/licenses/gpl-3.0-standalone.html GPL v3.0
-* @link      http://empathyphp.co.uk
-*
-*/
-
 namespace Empathy\ELib\Storage;
-use Empathy\ELib\Model,
-    Empathy\MVC\Entity;
+
+use Empathy\MVC\Model;
+use Empathy\MVC\Entity;
+use Empathy\ELib\Storage\BlogItemCategory;
+use Empathy\ELib\Storage\BlogItem;
+use Empathy\ELib\Storage\BlogCategory as EBlogCategory;
 
 /**
 * Empathy CLI Utility class.
@@ -46,7 +33,7 @@ class BlogCategory extends Entity
     {
         return $this->getAllCats($table, $sql_string, $authorId, true);
     }
-    
+
     /**
     * Get list of all categories that only
     * have published blogs
@@ -77,9 +64,9 @@ class BlogCategory extends Entity
 
         $sql .= " group by j.blog_category_id".$sql_string;
 
-        $sql = sprintf($sql, Model::getTable('BlogItem'),
-            Model::getTable('BlogItemCategory'),
-            Model::getTable('BlogCategory'));
+        $sql = sprintf($sql, Model::getTable(BlogItem::class),
+            Model::getTable(BlogItemCategory::class),
+            Model::getTable(EBlogCategory::class));
         $error = 'Could not published categories.';
 
         $result = $this->query($sql, $error, $queryParams);
@@ -107,7 +94,7 @@ class BlogCategory extends Entity
     {
         $categories = array();
         $sql = 'SELECT id FROM '.self::TABLE.' c'
-            .', '.Model::getTable('BlogItemCategory').' b'
+            .', '.Model::getTable(BlogItemCategory::class).' b'
             .' WHERE b.blog_category_id = c.id'
             .' AND b.blog_id = ?';
         $error = 'Could not get categories for blog item.';
@@ -129,7 +116,7 @@ class BlogCategory extends Entity
     */
     public function removeForBlogItem($blog_id)
     {
-        $sql = 'DELETE FROM '.Model::getTable('BlogItemCategory')
+        $sql = 'DELETE FROM '.Model::getTable(BlogItemCategory::class)
             .' WHERE blog_id = ?';
         $error = 'Could not clear categories associated with blog item.';
         $this->query($sql, $error, array($blog_id));
@@ -146,7 +133,7 @@ class BlogCategory extends Entity
     */
     public function createForBlogItem($categories, $blog_id)
     {
-        $bc = Model::load('BlogItemCategory');
+        $bc = Model::load(BlogItemCategory::class);
         foreach ($categories as $cat) {
             $bc->blog_id = $blog_id;
             $bc->blog_category_id = $cat;
@@ -184,10 +171,10 @@ class BlogCategory extends Entity
         $nodes = array();
         $queryParams = array();
         if ($current == 0) {
-            $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory')
+            $sql = 'SELECT id,label FROM '.Model::getTable(EBlogCategory::class)
                 .' WHERE blog_category_id IS NULL order by position';
         } else {
-            $sql = 'SELECT id,label FROM '.Model::getTable('BlogCategory')
+            $sql = 'SELECT id,label FROM '.Model::getTable(EBlogCategory::class)
                 .' WHERE blog_category_id = ? order by position';
             array_push($queryParams, $current);
         }
@@ -222,7 +209,7 @@ class BlogCategory extends Entity
     {
         $section_id = 0;
         $sql = 'SELECT blog_category_id FROM '
-            .Model::getTable('BlogCategory')
+            .Model::getTable(EBlogCategory::class)
             .' WHERE id = ?';
         $error = 'Could not get parent id from blog category.';
         $result = $this->query($sql, $error, array($id));
@@ -249,7 +236,7 @@ class BlogCategory extends Entity
     public function hasCats($id)
     {
         $cats = false;
-        $sql = 'SELECT id FROM '.Model::getTable('BlogCategory')
+        $sql = 'SELECT id FROM '.Model::getTable(EBlogCategory::class)
             .' WHERE blog_category_id = ?';
         $error = 'Could not check for existing child categories.';
         $result = $this->query($sql, $error, array($id));
@@ -271,7 +258,7 @@ class BlogCategory extends Entity
     public function getIdByLabel($label)
     {
         $cat = 0;
-        $sql = 'SELECT id from '.Model::getTable('BlogCategory')
+        $sql = 'SELECT id from '.Model::getTable(EBlogCategory::class)
             .' WHERE label like ?';
         $error = 'Could not get current category id.';
         $result = $this->query($sql, $error, array('%' . $label . '%'));

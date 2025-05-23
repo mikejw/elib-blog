@@ -2,13 +2,18 @@
 
 namespace Empathy\ELib\Blog;
 
-use Empathy\ELib\Model;
+use Empathy\MVC\Model;
 use Empathy\ELib\EController;
 use Empathy\ELib\User\CurrentUser;
 use Empathy\MVC\DI;
 use Empathy\MVC\Session;
 use Empathy\MVC\RequestException;
 use Empathy\ELib\Storage\BlogPage;
+use Empathy\ELib\Storage\BlogItem;
+use Empathy\ELib\Storage\BlogCategory;
+use Empathy\ELib\Storage\BlogComment;
+use Empathy\ELib\Storage\TagItem;
+use Empathy\ELib\Storage\BlogImage;
 use Empathy\MVC\Config;
 use Empathy\ELib\Blog\Util;
 
@@ -21,8 +26,6 @@ class SimpleXMLExtended extends \SimpleXMLElement {
     	   $node->appendChild($no->createCDATASection($cdata_text));
     }
 }
-
-
 
 class BlogFrontControllerNew extends EController
 {
@@ -73,7 +76,7 @@ class BlogFrontControllerNew extends EController
 
     public function default_event()
     {
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         
         $sql = '';
         $found_items = ['', []];
@@ -123,7 +126,7 @@ class BlogFrontControllerNew extends EController
    public function getBlogIdBySlug($slug_arr)
     {
         $authorId = $this->stash->get('authorId');
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         return $b->findByArchiveURL(
             $this->convertMonth($slug_arr['month']), 
             $slug_arr['year'],
@@ -187,7 +190,7 @@ class BlogFrontControllerNew extends EController
         $util->parseBlogImages($blog_page->getBody());
         $this->assign('primary_image', $util->getFirstImage());
 
-        $bc = Model::load('BlogCategory');
+        $bc = Model::load(BlogCategory::class);
         $blog_cats = $bc->getCategoriesForBlogItem($id);
 
         $allCats = $this->getCategories(false);
@@ -227,7 +230,7 @@ class BlogFrontControllerNew extends EController
     {
         if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             $authorId = $this->stash->get('authorId');
-            $b = Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $months = $b->getYear($_GET['id'], $authorId);
             $this->presenter->assign('months', $months);
             $this->presenter->assign('year', $_GET['id']);
@@ -245,7 +248,7 @@ class BlogFrontControllerNew extends EController
             $year = $_GET['year'];
             $m = $this->convertMonth($_GET['month']);
 
-            $b = Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $blogs = $b->getMonth($m, $year, $authorId);
 
             foreach ($blogs as $index => $item) {
@@ -273,7 +276,7 @@ class BlogFrontControllerNew extends EController
             $m = $this->convertMonth($_GET['month']);
             $day = $_GET['day'];
 
-            $b = Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $blogs = array();
 
             if (!checkdate($m, $day, $year)) {
@@ -327,7 +330,7 @@ class BlogFrontControllerNew extends EController
     {
         $id = 0;
         if($cat != 'any') {
-            $c = Model::load('BlogCategory');        
+            $c = Model::load(BlogCategory::class);
             if(0 === $id = $c->getIdByLabel($cat)) {
                 throw new RequestException('Not a valid category', RequestException::BAD_REQUEST);
             }
@@ -407,7 +410,7 @@ class BlogFrontControllerNew extends EController
 
         $xml = new SimpleXMLExtended($content);
 
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $blogs = $b->getFeed($authorId);
 
         foreach ($blogs as $item) {
@@ -443,7 +446,7 @@ class BlogFrontControllerNew extends EController
 
     private function submitComment($blog_route)
     {
-        $bc = Model::load('BlogComment');
+        $bc = Model::load(BlogComment::class);
         $bc->blog_id = $_GET['id'];
         $bc->status = 1;
         $bc->body = $_POST['body'];
@@ -514,7 +517,7 @@ class BlogFrontControllerNew extends EController
 
     public function getAvailableTagsFetch()
     {
-        $t = Model::load('TagItem');
+        $t = Model::load(TagItem::class);
         $bc = $this->stash->get('blog_category');
         
         $authorId = $this->stash->get('authorId');
@@ -536,7 +539,7 @@ class BlogFrontControllerNew extends EController
     private function getArchive()
     {
         $authorId = $this->stash->get('authorId');
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $bc = $this->stash->get('blog_category');
         $archive = $this->cache->cachedCallback('archive_'.$bc, array($b, 'getArchive'), array($bc, $authorId));
         $this->assign('archive', $archive); 
@@ -545,15 +548,15 @@ class BlogFrontControllerNew extends EController
     private function getCategories($published = true)
     {
         $authorId = $this->stash->get('authorId');
-        $c = Model::load('BlogCategory');
+        $c = Model::load(BlogCategory::class);
 
         if (!$published) {
-            $cats = $c->getAllCats(Model::getTable('BlogCategory'), ' order by position', $authorId);
+            $cats = $c->getAllCats(Model::getTable(BlogCategory::class), ' order by position', $authorId);
         } else {
             $cats = $this->cache->cachedCallback(
                 'cats',
                 array($c, 'getAllPublished'),
-                array(Model::getTable('BlogCategory'), ' order by position', $authorId)
+                array(Model::getTable(BlogCategory::class), ' order by position', $authorId)
             );
         }
 
@@ -595,8 +598,8 @@ class BlogFrontControllerNew extends EController
             array($b, 'getItems'), array($found_items, $bc, $page, $authorId, $count)
         );
         
-        $t = Model::load('TagItem');
-        $bc = Model::load('BlogCategory');
+        $t = Model::load(TagItem::class);
+        $bc = Model::load(BlogCategory::class);
 
         $cats = $this->getCategories();
         $this->assign('categories', $cats);
@@ -661,7 +664,7 @@ class BlogFrontControllerNew extends EController
             defined('ELIB_FETCH_BLOG_IMAGES') &&
            ELIB_FETCH_BLOG_IMAGES == true
         ) {
-            $bi = Model::load('BlogImage');
+            $bi = Model::load(BlogImage::class);
             $b_ids = array();
             foreach ($blogs as $item) {
                 array_push($b_ids, $item['blog_id']);
@@ -682,8 +685,8 @@ class BlogFrontControllerNew extends EController
 
     public function findBlogsByTags($active_tags)
     {
-        $t = Model::load('TagItem');
-        $bt = Model::load('BlogTag');  
+        $t = Model::load(TagItem::class);
+        $bt = Model::load(BlogTag::class);
         $tags = $t->getIds($active_tags, true);
         if(sizeof($tags) != sizeof($active_tags)) {
             return false; // contains invalid tags

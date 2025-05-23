@@ -2,8 +2,12 @@
 
 namespace Empathy\ELib\Blog;
 
-use Empathy\ELib\Model;
 use Elasticsearch\ClientBuilder;
+use Empathy\MVC\Model;
+use Empathy\ELib\Storage\BlogTag;
+use Empathy\ELib\Storage\TagItem;
+use Empathy\ELib\Storage\BlogItem;
+use Empathy\ELib\Storage\BlogCategory;
 
 class Service
 {
@@ -19,15 +23,15 @@ class Service
     public static function processTags($b, $tags_arr, $cats_arr=array())
     {
         // deal with tags
-        $bt = Model::load('BlogTag');
+        $bt = Model::load(BlogTag::class);
         $bt->removeAll($b->id);
-        $t = Model::load('TagItem');
+        $t = Model::load(TagItem::class);
 
         if (strlen($_POST['tags']) > 0) {
             $tag_ids = $t->getIds($tags_arr, false);
 
             foreach ($tag_ids as $id) {
-                $bt = Model::load('BlogTag');
+                $bt = Model::load(BlogTag::class);
                 $bt->blog_id = $b->id;
                 $bt->tag_id = $id;
                 $bt->insert([], false);
@@ -58,7 +62,7 @@ class Service
 
     public function addAllToIndex()
     {
-        $b = \Empathy\ELib\Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $table =
         $all = $b->getAllCustom(' where status = ?' [\Empathy\ELib\Storage\BlogItemStatus::PUBLISHED]);
         $ids = array();
@@ -66,7 +70,7 @@ class Service
             array_push($ids, $item['id']);
         }
         foreach ($ids as $id) {
-            $b = \Empathy\ELib\Model::load('BlogItem');
+            $b = Model::load(BlogItem::class);
             $b->load($id);
             self::addToIndex($b);
         }
@@ -76,13 +80,13 @@ class Service
     {
         if (defined('ELIB_BLOG_ELASTIC') && ELIB_BLOG_ELASTIC) {
 
-            $bt = Model::load('BlogTag');
-            $bc = Model::load('BlogCategory');
+            $bt = Model::load(BlogTag::class);
+            $bc = Model::load(BlogCategory::class);
             $cats = $bc->getCategoriesForBlogItem($b->id);
 
             $cats_arr = array();
             foreach ($cats as $c) {
-                $item = Model::load('BlogCategory');
+                $item = Model::load(BlogCategory::class);
                 $item->load($c);
                 array_push($cats_arr, $item->label);
             }

@@ -1,9 +1,10 @@
 <?php
 
-
 namespace Empathy\ELib\Blog;
+
 use Empathy\MVC\Config;
-use Empathy\ELib\Model;
+use Empathy\MVC\Model;
+use Empathy\ELib\Storage\BlogItem;
 
 class FeedController
 {
@@ -45,7 +46,7 @@ class FeedController
                 'entries' => array(),
                 );
     
-        $b = Model::load('BlogItem');
+        $b = Model::load(BlogItem::class);
         $blogs = $b->getPodcast();
     
         foreach($blogs as $article)

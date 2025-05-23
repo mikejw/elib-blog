@@ -2,9 +2,13 @@
 
 namespace Empathy\ELib\Storage;
 
-use Empathy\ELib\Model;
+use Empathy\MVC\Model;
 use Empathy\MVC\Entity;
-use Empathy\MVC\Model as EModel;
+use Empathy\ELib\Storage\BlogItemCategory;
+use Empathy\ELib\Storage\BlogItem as EBlogItem;
+use Empathy\ELib\Storage\BlogAttachment;
+use Empathy\ELib\Storage\UserItem;
+use Empathy\ELib\Storage\BlogComment;
 
 class BlogItem extends Entity
 {
@@ -26,7 +30,7 @@ class BlogItem extends Entity
         $cat_blogs_string = ['', []];
         if($cat !== null && $cat != 0) {
             $ids = array(0);
-            $sql = 'SELECT blog_id from '.Model::getTable('BlogItemCategory').' where blog_category_id = ?';
+            $sql = 'SELECT blog_id from '.Model::getTable(BlogItemCategory::class).' where blog_category_id = ?';
             $error = 'Could not get blogs from cateogry.';
             $result = $this->query($sql, $error, array($cat));
             if($result->rowCount() > 0) {
@@ -45,15 +49,15 @@ class BlogItem extends Entity
         $queryParams = [];
         $sql = 'SELECT t1.heading, t1.body,COUNT(t5.id) AS comments,'
             .' UNIX_TIMESTAMP(t1.stamp) AS stamp, t1.id AS blog_id, t1.slug, any_value(t4.body_revision) as body_revision';
-        $sql .= ' FROM '.Model::getTable('UserItem').' t2,'
-            .Model::getTable('BlogItem').' t1';
+        $sql .= ' FROM '.Model::getTable(UserItem::class).' t2,'
+            .Model::getTable(EBlogItem::class).' t1';
 
         $sql .= ' left join'
             .' (select max(id) as max, any_value(blog_id) as blog_id from blog_revision group by blog_id) t3'
             .' on t3.blog_id = t1.id'
             .' left join (select id, body as body_revision from blog_revision) t4 on t3.max = t4.id';
 
-        $sql .= ' LEFT JOIN '.Model::getTable('BlogComment').' t5'
+        $sql .= ' LEFT JOIN '.Model::getTable(BlogComment::class).' t5'
             .' ON t1.id = t5.blog_id'
             .' WHERE t1.user_id = t2.id';
 
@@ -124,7 +128,7 @@ class BlogItem extends Entity
             $blogs[] = $row;
         }
 
-        EModel::disconnect(array($this));
+        Model::disconnect(array($this));
         return array($this, $blogs);
     }
 
@@ -158,7 +162,7 @@ class BlogItem extends Entity
     {
         $queryParams = array();
         $entry = array();
-        $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
+        $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable(EBlogItem::class)
             .' WHERE status = ?';
 
         array_push($queryParams, BlogItemStatus::PUBLISHED);
@@ -212,7 +216,7 @@ class BlogItem extends Entity
     public function getStamp()
     {
         $stamp = 0;
-        $sql = 'SELECT UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
+        $sql = 'SELECT UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable(EBlogItem::class)
             .' WHERE id = ?';
         $error = 'Could not get stamp.';
         $result = $this->query($sql, $error, array($this->id));
@@ -227,7 +231,7 @@ class BlogItem extends Entity
     public function getRecentlyModified()
     {
         $stamp = 0;
-        $sql = 'SELECT UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem')
+        $sql = 'SELECT UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable(EBlogItem::class)
             .' ORDER BY stamp DESC LIMIT 0, 1';
         $error = 'Could not get recently modified blogs';
         $result = $this->query($sql, $error);
@@ -242,7 +246,7 @@ class BlogItem extends Entity
     public function getAllForSiteMap()
     {
         $blogs = array();
-        $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable('BlogItem').' b'
+        $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.Model::getTable(EBlogItem::class).' b'
             .' WHERE status = ?';
         $error = 'Could not get blogs for sitemap';
         $result = $this->query($sql, $error, array(BlogItemStatus::PUBLISHED));
@@ -266,7 +270,7 @@ class BlogItem extends Entity
             .' MONTHNAME(stamp) AS monthname,'
             .' DAY(stamp) AS day,'
             .' slug,'
-            .' heading FROM '.Model::getTable('BlogItem')
+            .' heading FROM '.Model::getTable(EBlogItem::class)
             .' WHERE status = ?';
 
         array_push($queryParams, BlogItemStatus::PUBLISHED);
@@ -486,7 +490,7 @@ class BlogItem extends Entity
     {
         $podcast = array();
         $sql = 'SELECT *, UNIX_TIMESTAMP(stamp) AS stamp FROM '.self::TABLE.' b,'
-            .' '.Model::getTable('BlogAttachment').' a'
+            .' '.Model::getTable(BlogAttachment::class).' a'
             .' WHERE a.blog_id = b.id AND b.status = ?'
             .' ORDER BY b.stamp DESC';
         $error = 'Could not get podcast.';
