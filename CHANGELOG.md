@@ -7,6 +7,7 @@
 ### Changed
 
 - Bump ELib Base version
+- Bump ELib SiteInfo version
 
 
 ## [2.0.1] - 2025-05-19
