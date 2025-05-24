@@ -18,6 +18,7 @@
 */
 
 namespace Empathy\ELib\Blog;
+
 use Empathy\ELib\Tree;
 use Empathy\MVC\Config;
 
@@ -32,10 +33,10 @@ use Empathy\MVC\Config;
 */
 class BlogCatTree extends Tree
 {
-    
     private $_blogCategory;
     private $_data;
     private $_blogCategoryAncestors;
+    private $banner;
     
 
     public function getData() {

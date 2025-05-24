@@ -37,7 +37,7 @@ class BlogFrontControllerNew extends EController
         $siteInfo = $this->stash->get('site_info');
         return isset($siteInfo->blogtitle) && $siteInfo->blogtitle !== ''
             ? $siteInfo->blogtitle
-            : ELIB_BLOG_TITLE;
+            : 'ELib Blog';
     }
 
     private function getSubtitle()
@@ -45,7 +45,7 @@ class BlogFrontControllerNew extends EController
         $siteInfo = $this->stash->get('site_info');
         return isset($siteInfo->blogsubtitle) && $siteInfo->blogsubtitle !== ''
             ? $siteInfo->blogsubtitle
-            : ELIB_BLOG_DESCRIPTION;
+            : 'An Empathy Powered Blog';
     }
     
     private function getDisqusUsername()
