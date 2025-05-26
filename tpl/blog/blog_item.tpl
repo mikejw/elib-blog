@@ -15,7 +15,7 @@
 
     <div class="col-sm-7 blog-post">
 
-        {include file="elib://blog/comp_blog_heading.tpl"}
+        {include file="elib:blog/comp_blog_heading.tpl"}
 
 
         <h2 class="blog-post-title">
@@ -28,16 +28,17 @@
             {$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR}
         </div>
 
-        {*{include file="elib:/blog/comp_social_buttons.tpl"}*}
+        {*{include file="elib:blog/comp_social_buttons.tpl"}*}
 
         {if $disqusUsername neq ''}
-            {include file="elib:/blog/comp_disqus.tpl" disqusUsername=$disqusUsername}
+            {include file="elib:blog/comp_disqus.tpl" disqusUsername=$disqusUsername}
         {/if}
 
         <p class="entry_meta">
-            {if isset($blog->cats) and sizeof($blog->cats)}
+            {assign var=itemCats value=$blog->getCats()}
+            {if isset($itemCats) and count($itemCats)}
                 Categories:
-                {foreach from=$blog->cats key=i item=c}
+                {foreach from=$itemCats key=i item=c}
                     <span class="tag">
                         <span class="badge badge-{if $i eq $blog_category}success{else}secondary{/if}">
                             <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c|lower}">
@@ -48,12 +49,13 @@
                 {/foreach}
             {/if}
 
-            {if isset($blog->tags) and sizeof($blog->tags)}
+            {assign var=itemTags value=$blog->getTags()}
+            {if isset($itemTags) and count($itemTags)}
                 <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 Tags:
-                {foreach from=$blog->tags item=t}
+                {foreach from=$itemTags item=t}
                     <span class="tag">
-                        <span class="badge badge-{if isset($active_tags) and sizeof($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
+                        <span class="badge badge-{if isset($active_tags) and count($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
                             <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}">
                                 {$t}
                             </a>
@@ -82,7 +84,7 @@
 
         {if 0 and $user_id > 0}
 
-            {if isset($errors) and sizeof($errors) > 0}
+            {if isset($errors) and count($errors) > 0}
                 <ul id="error">
                     {foreach from=$errors item=error}
                         <li>{$error}</li>
@@ -122,7 +124,7 @@
 
     </div><!-- /.blog-main -->
 
-    {include file="elib:/blog/sidebar.tpl"}
+    {include file="elib:blog/sidebar.tpl"}
 
 </div><!-- /.row -->
 

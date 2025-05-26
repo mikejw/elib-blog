@@ -261,7 +261,8 @@ class BlogCategory extends Entity
         $sql = 'SELECT id from '.Model::getTable(EBlogCategory::class)
             .' WHERE label like ?';
         $error = 'Could not get current category id.';
-        $result = $this->query($sql, $error, array('%' . $label . '%'));
+
+        $result = $this->query($sql, $error, ['%' . $label . '%']);
         if ($result->rowCount() == 1) {
             $row = $result->fetch();
             $cat = $row['id'];

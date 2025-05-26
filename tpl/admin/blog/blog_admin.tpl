@@ -1,4 +1,4 @@
-{include file="elib:/admin/admin_header.tpl"}
+{include file="elib:admin/admin_header.tpl"}
 
 
 <div class="form-group cms-actions">
@@ -29,7 +29,7 @@
 
 
 
-{if sizeof($blogs) < 1}
+{if count($blogs) < 1}
 <p>Nothing to display.</p>
 {else}
 <table class="table">
@@ -63,11 +63,11 @@
 {/if}
 
 
-{include file="elib://comp_pagination.tpl"}
+{include file="elib:comp_pagination.tpl"}
 
 
 
 
 
 
-{include file="elib:/admin/admin_footer.tpl"}
+{include file="elib:admin/admin_footer.tpl"}

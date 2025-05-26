@@ -1,4 +1,4 @@
-{include file="elib:/admin/admin_header.tpl"}
+{include file="elib:admin/admin_header.tpl"}
 
 
 
@@ -100,7 +100,7 @@
 
 {if $class eq 'blog_cat'}
 {if $event eq 'rename'}
-{include file="elib:/admin/blog/rename.tpl"}
+{include file="elib:admin/blog/rename.tpl"}
 {/if}
 {/if}
 
@@ -108,4 +108,4 @@
 
 
 
-{include file="elib:/admin/admin_footer.tpl"}
+{include file="elib:admin/admin_footer.tpl"}

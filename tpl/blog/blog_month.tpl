@@ -10,7 +10,7 @@
 <h2>Archive for {$month} {$year}</h2>
 
 
-{if sizeof($blogs) > 0}
+{if count($blogs) > 0}
 <ul>
 {foreach from=$blogs item=i}
 <li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{$month_slug}/{$i.day}">{$i.day_str}{$i.suffix}</a>:

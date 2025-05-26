@@ -58,15 +58,15 @@ class BlogPage
             $cats_lookup[$c['id']] = $c['label'];
         }
 
-        $this->blog_item->tags = $t->getTagsForBlogItem($this->blog_item->id);
-        $this->blog_item->cats = $bc->getCategoriesForBlogItem($this->blog_item->id);
-        $cats = $this->blog_item->cats;
+        $this->blog_item->setTags($t->getTagsForBlogItem($this->blog_item->id));
+        $this->blog_item->setCats($bc->getCategoriesForBlogItem($this->blog_item->id));
+        $cats = $this->blog_item->getCats();
         $cat_names = array();
         foreach ($cats as $c) {
             $cat_names[$c] = $cats_lookup[$c];
         }
-        $this->blog_item->cats = $cat_names;
 
+        $this->blog_item->setCats($cat_names);
 
         $this->page_title = $this->blog_item->heading;
 

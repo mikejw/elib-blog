@@ -1,4 +1,4 @@
-{include file="elib:/admin/admin_header.tpl"}
+{include file="elib:admin/admin_header.tpl"}
 
 <div class="form-group cms-actions">
 
@@ -70,7 +70,7 @@
 
 {/if}
 
-{if sizeof($images) > 0}
+{if count($images) > 0}
     {foreach from=$images item=image}
         <p><img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/uploads/tn_{$image.filename}" alt="" /></p>
         <p><a class="confirm" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/remove_image/{$image.id}">Delete</a></p>
@@ -100,7 +100,7 @@
 </div>
 {/if}
 
-{if sizeof($attachments) > 0}
+{if count($attachments) > 0}
 <ul>
 {foreach from=$attachments item=a}
 <li><a target="_blank" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/episodes/{$a.filename}">{$a.filename}</a> - <a class="confirm" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/remove_attachment/{$a.id}">Delete</a></li>
@@ -110,4 +110,4 @@
 
 *}
 
-{include file="elib:/admin/admin_footer.tpl"}
+{include file="elib:admin/admin_footer.tpl"}

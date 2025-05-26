@@ -88,7 +88,7 @@
 
 <div id="right">
 
-{if sizeof($errors) > 0}
+{if count($errors) > 0}
 <ul id="error">
 {foreach from=$errors item=error}
 <li>{$error}</li>
