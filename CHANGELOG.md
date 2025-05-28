@@ -2,6 +2,16 @@
 # Changelog
 
 
+## [4.0.0] - 2025-05-28
+
+### Changed
+
+- Bump ELib Base version
+
+### Fixed
+
+- Misc fixes
+
 ## [3.0.0] - 2025-05-23
 
 ### Changed
