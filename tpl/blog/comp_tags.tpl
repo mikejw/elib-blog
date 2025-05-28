@@ -22,16 +22,14 @@
     </ul>
 </div>
 
-
-
 <div class="tags sidebar-module">
     <div id="tags_collapsible" class="clear">
         <h4>Tags</h4>
-        {section name=tag_item loop=$tags}
-            <a style="font-size:{$tags[tag_item].size}rem;"
-               class="{if is_array($active_tags) && in_array($tags[tag_item].tag, $active_tags)}text-info active font-weight-bold{/if}"
-               href="http://{$WEB_ROOT}{$PUBLIC_DIR}{if $active_tags_string eq ''}/tags/{$tags[tag_item].tag}{elseif in_array($tags[tag_item].tag, $active_tags) and sizeof($active_tags) eq 1}/blog{elseif in_array($tags[tag_item].tag, $active_tags)}/tags/{$active_tags_string|regex_replace:$tags[tag_item].tag_esc_1:''|regex_replace:$tags[tag_item].tag_esc_2:''|replace:$tags[tag_item].tag:''}{else}/tags/{$active_tags_string}+{$tags[tag_item].tag}{/if}">{$tags[tag_item].tag}</a>
-        {/section}
+        {foreach from=$tags key=k item=tag}
+            <a style="font-size:{$tags[$k].size}rem;"
+               class="{if is_array($active_tags) && in_array($tags[$k].tag, $active_tags)}text-info active font-weight-bold{/if}"
+               href="http://{$WEB_ROOT}{$PUBLIC_DIR}{if $active_tags_string eq ''}/tags/{$tags[$k].tag}{elseif in_array($tags[$k].tag, $active_tags) and count($active_tags) eq 1}/blog{elseif in_array($tags[$k].tag, $active_tags)}/tags/{$active_tags_string|regex_replace:$tags[$k].tag_esc_1:''|regex_replace:$tags[$k].tag_esc_2:''|replace:$tags[$k].tag:''}{else}/tags/{$active_tags_string}+{$tags[$k].tag}{/if}">{$tags[$k].tag}</a>
+        {/foreach}
 
         {if $active_tags_string neq ''}
             <p>&nbsp;</p>
@@ -50,7 +48,7 @@
 
         <h4>Archive</h4>
 
-        {if sizeof($archive) lt 1}
+        {if count($archive) lt 1}
             <p>None found.</p>
         {else}
             <nav>

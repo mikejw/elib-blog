@@ -157,7 +157,7 @@ trait ControllerTrait
         }
 
 
-        $this->setTemplate('elib:/admin/blog/blog_admin.tpl');
+        $this->setTemplate('elib:admin/blog/blog_admin.tpl');
         $this->presenter->assign('blogs', $blogs);
     }
 
@@ -322,7 +322,7 @@ trait ControllerTrait
         $tags = implode(', ', $tags_arr);
         $this->presenter->assign('blog_tags', $tags);
 
-        $this->setTemplate('elib:/admin/blog/view_blog_item.tpl');
+        $this->setTemplate('elib:admin/blog/view_blog_item.tpl');
     }
 
     public function create()
@@ -337,7 +337,7 @@ trait ControllerTrait
 
         $this->presenter->assign('cats', $cats_arr);
 
-        $this->setTemplate('elib:/admin/blog/create_blog.tpl');
+        $this->setTemplate('elib:admin/blog/create_blog.tpl');
 
         if (isset($_POST['cancel'])) {
             $this->redirect('admin/blog');
@@ -497,7 +497,7 @@ trait ControllerTrait
             $revisions = $r->loadAll($b);
         }
         $this->assign('revisions', $revisions);
-        $this->setTemplate('elib:/admin/blog/edit_blog.tpl');
+        $this->setTemplate('elib:admin/blog/edit_blog.tpl');
     }
 
 
@@ -524,7 +524,7 @@ trait ControllerTrait
     public function category()
     {
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
-        $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
+        $this->setTemplate('elib:admin/blog/blog_cat.tpl');
         $ui_array = ['id'];
         $this->loadUIVars('ui_blog_cats', $ui_array);
         if (!isset($_GET['id']) || $_GET['id'] == '') {
@@ -612,7 +612,7 @@ trait ControllerTrait
             $b->load($_GET['id']);
             $this->presenter->assign('blog_category', $b);
         }
-        $this->setTemplate('elib:/admin/blog/blog_cat.tpl');
+        $this->setTemplate('elib:admin/blog/blog_cat.tpl');
         $this->assign('class', 'blog_cat');
         $this->assign('event', 'rename');
     }
@@ -667,7 +667,7 @@ trait ControllerTrait
         $image = Model::load(BlogImage::class);
         $images = $image->getForIDs([$id]);
         $this->assign('images', count($images) ? $images[$id] : []);
-        $this->setTemplate('elib://admin/blog/blog_images.tpl');
+        $this->setTemplate('elib:admin/blog/blog_images.tpl');
         $this->assign('blog_id', $id);
     }
 
@@ -675,7 +675,7 @@ trait ControllerTrait
     {
         $fc = new BlogFrontControllerNew($this->boot);
         $fc->item(true);
-        $this->setTemplate('elib:/blog/blog_item.tpl');
+        $this->setTemplate('elib:blog/blog_item.tpl');
 
     }
 
@@ -683,7 +683,7 @@ trait ControllerTrait
     {
 
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
-        $this->setTemplate('elib:/admin/blog/blog_cat_meta.tpl');
+        $this->setTemplate('elib:admin/blog/blog_cat_meta.tpl');
         $ui_array = ['id'];
         $this->loadUIVars('ui_blog_cats_meta', $ui_array);
         if (!isset($_GET['id']) || $_GET['id'] == '') {

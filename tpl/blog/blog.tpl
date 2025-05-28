@@ -5,7 +5,8 @@
 <div class="row d-flex justify-content-between">
     <div class="col-sm-7 blog-main">
 
-        {include file="elib://blog/comp_blog_heading.tpl"}
+        {include file="elib:blog/comp_blog_heading.tpl"}
+
 
         {foreach from=$blogs item=blog_item}
             <div class="blog-post">
@@ -52,7 +53,7 @@
                         <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/blog/item/{$blog_item.blog_id}{if $disqusUsername neq ''}#disqus_thread{/if}">Permalink</a>
                     {/if}
 
-                    {if isset($blog_item.cats) && sizeof($blog_item.cats)}
+                    {if isset($blog_item.cats) && count($blog_item.cats)}
                         <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                         Categories:
                         {foreach from=$blog_item.cats key=i item=c}
@@ -66,19 +67,19 @@
                         {/foreach}
                     {/if}
 
-                    {if isset($blog_item.tags) and sizeof($blog_item.tags)}
+                    {if isset($blog_item.tags) and count($blog_item.tags)}
                         <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                         Tags:
                         {foreach from=$blog_item.tags item=t}
                             <span class="tag">
-                                <span class="badge badge-{if isset($active_tags) and sizeof($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
+                                <span class="badge badge-{if isset($active_tags) and count($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
                                     <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}">
                                         {$t}
                                     </a>
                                 </span>
                             </span>
                             {*
-                            <a class="button{if isset($active_tags) and isset($$active_tgas) and sizeof($active_tags) and in_array($t, $active_tags)} active{/if}" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}"><span class="label label-default">{$t}</span></a>
+                            <a class="button{if isset($active_tags) and isset($$active_tgas) and count($active_tags) and in_array($t, $active_tags)} active{/if}" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}"><span class="label label-default">{$t}</span></a>
                             *}
                         {/foreach}
                     {/if}
@@ -96,12 +97,12 @@
 
 
 
-        {include file="elib:/blog/comp_blog_pagi.tpl"}
+        {include file="elib:blog/comp_blog_pagi.tpl"}
 
 
     </div><!-- /.blog-main -->
 
-    {include file="elib:/blog/sidebar.tpl"}
+    {include file="elib:blog/sidebar.tpl"}
 
 </div><!-- /.row -->
 

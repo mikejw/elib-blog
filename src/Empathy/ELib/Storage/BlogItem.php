@@ -24,6 +24,8 @@ class BlogItem extends Entity
     public $slug;
     private $pages;
     private $category;
+    private $tags = [];
+    private $cats = [];
 
     private function getCategoryBlogs($cat)
     {
@@ -510,5 +512,23 @@ class BlogItem extends Entity
     public function getCategory()
     {
         return $this->category;
+    }
+
+    public function setTags($tags = []) {
+        $this->tags = $tags;
+    }
+
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    public function setCats($cats = []) {
+        $this->cats = $cats;
+    }
+
+    public function getCats()
+    {
+        return $this->cats;
     }
 }

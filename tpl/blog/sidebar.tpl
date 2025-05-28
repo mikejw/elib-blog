@@ -16,7 +16,7 @@
     {/if}
 
 
-    {include file="elib:/blog/comp_tags.tpl"}
+    {include file="elib:blog/comp_tags.tpl"}
 
 
     <div class="sidebar-module">

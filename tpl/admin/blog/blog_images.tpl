@@ -17,7 +17,7 @@
         <div class="form-group">
           {foreach from=$images item=image}
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="image" id="image{$image.id}" value="{$image.id}" data-payload="{base64_encode(json_encode($image))}">
+            <input class="form-check-input" type="radio" name="image" id="image{$image.id}" value="{$image.id}" data-payload="{json_encode($image)|base64_encode}">
             <label class="form-check-label" for="image{$image.id}">
               <img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/uploads/{$image.filename}" class="img-thumbnail" alt="Image {$image.id}" />
             </label>

@@ -22,8 +22,5 @@ INSERT INTO blog_category VALUES(
 NULL, NULL, 'Experiments', '{ "fa": "flask"}', 7);
 
 INSERT INTO blog_category VALUES(
-NULL, NULL, 'BMX', '{ "fa": "bicycle"}', 8);
-
-INSERT INTO blog_category VALUES(
 NULL, NULL, 'Misc', '{ "fa": "pen-fancy"}', 9);
 

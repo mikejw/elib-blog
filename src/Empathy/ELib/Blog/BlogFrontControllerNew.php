@@ -37,7 +37,7 @@ class BlogFrontControllerNew extends EController
         $siteInfo = $this->stash->get('site_info');
         return isset($siteInfo->blogtitle) && $siteInfo->blogtitle !== ''
             ? $siteInfo->blogtitle
-            : ELIB_BLOG_TITLE;
+            : 'ELib Blog';
     }
 
     private function getSubtitle()
@@ -45,7 +45,7 @@ class BlogFrontControllerNew extends EController
         $siteInfo = $this->stash->get('site_info');
         return isset($siteInfo->blogsubtitle) && $siteInfo->blogsubtitle !== ''
             ? $siteInfo->blogsubtitle
-            : ELIB_BLOG_DESCRIPTION;
+            : 'An Empathy Powered Blog';
     }
     
     private function getDisqusUsername()
@@ -140,7 +140,7 @@ class BlogFrontControllerNew extends EController
     public function item($preview = false)
     {
         $slug_arr = array();
-        $this->setTemplate('elib:/blog/blog_item.tpl');
+        $this->setTemplate('elib:blog/blog_item.tpl');
 
         if (isset($_GET['id']) && $_GET['id'] == 0) {
             $slug_arr = array(
@@ -182,10 +182,11 @@ class BlogFrontControllerNew extends EController
         $this->assign('comments', $blog_page->getComments());
 
         $this->getAvailableTags();
+
         $this->getArchive();
         $cats = $this->getCategories();
         $this->assign('categories', $cats);
-        $this->setTemplate('elib:/blog/blog_item.tpl');
+        $this->setTemplate('elib:blog/blog_item.tpl');
 
         $util = DI::getContainer()->get('BlogUtil');
         $util->parseBlogImages($blog_page->getBody());
@@ -237,7 +238,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('year', $_GET['id']);
             $this->presenter->assign('custom_title', "Archive for ".$_GET['id']." - Mike Whiting's Blog");
         }
-        $this->setTemplate('elib:/blog/blog_year.tpl');
+        $this->setTemplate('elib:blog/blog_year.tpl');
     }
 
     public function month()
@@ -263,7 +264,7 @@ class BlogFrontControllerNew extends EController
             $this->presenter->assign('custom_title', "Archive for $month $year - Mike Whiting's Blog");
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('elib:/blog/blog_month.tpl');
+        $this->setTemplate('elib:blog/blog_month.tpl');
     }
 
     public function day()
@@ -324,15 +325,15 @@ class BlogFrontControllerNew extends EController
 
             $this->presenter->assign('blogs', $blogs);
         }
-        $this->setTemplate('elib:/blog/blog_day.tpl');
+        $this->setTemplate('elib:blog/blog_day.tpl');
     }
 
     public function fetchCategoryId($cat)
     {
         $id = 0;
-        if($cat != 'any') {
+        if ($cat != 'any') {
             $c = Model::load(BlogCategory::class);
-            if(0 === $id = $c->getIdByLabel($cat)) {
+            if (0 === $id = $c->getIdByLabel($cat)) {
                 throw new RequestException('Not a valid category', RequestException::BAD_REQUEST);
             }
         }
@@ -360,6 +361,7 @@ class BlogFrontControllerNew extends EController
         $cat_id = $this->cache->cachedCallback('category_'.$cat,
                      array($this, 'fetchCategoryId'), array($cat));
         Session::set('blog_category', $cat_id);
+
         $this->stash->store('blog_category', $cat_id);
         $this->assign('blog_category', $cat_id);
     }
@@ -513,6 +515,7 @@ class BlogFrontControllerNew extends EController
         $bc = $this->stash->get('blog_category');
         $tags = $this->cache->cachedCallback('tags_'.$bc, array($this, 'getAvailableTagsFetch'));
         //shuffle($tags);
+
         $this->assign('tags', $tags);
     }
 
@@ -534,6 +537,7 @@ class BlogFrontControllerNew extends EController
             $oldMax = 100;
             $tags[$index]['size'] = ((($tags[$index]['share'] - $oldMin) * ($newMax - $newMin)) / ($oldMax - $oldMin)) + $newMin;
         }
+
         return $tags;       
     }
 
@@ -573,6 +577,7 @@ class BlogFrontControllerNew extends EController
                     }
             }
         }
+
         return $cats;
     }
 
@@ -698,7 +703,8 @@ class BlogFrontControllerNew extends EController
 
     private function getActiveTags()
     {
-        $active_tags = $_GET['active_tags'];
+        $active_tags = $_GET['active_tags'] ?? [];
+
         $active_tags_string = implode('+', $active_tags);
 
         $key = implode('_', $active_tags);
@@ -709,8 +715,9 @@ class BlogFrontControllerNew extends EController
         }
         
         $this->setTagsTitle();
-        
+
         $this->assign('active_tags', $active_tags);
+
         $this->assign('active_tags_string', $active_tags_string);
         $this->assign('multi_tags', strpos($active_tags_string, '+') !== false);
 

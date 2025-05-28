@@ -8,7 +8,7 @@
 <h2>Archive for {$year}</h2>
 
 
-{if sizeof($months) > 0}
+{if count($months) > 0}
 <ul>
 {foreach from=$months item=m key=slug}
 <li><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/{$year}/{$slug}">{$m.month}</a> - {$m.count} item{if $m.count > 1}s{/if}</li>
