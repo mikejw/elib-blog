@@ -11,7 +11,11 @@
     {if isset($about)}
     <div class="sidebar-module sidebar-module-inset">
         <h4>About</h4>
-        {$about|truncate:300:"..."} <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/about">more</a></p>
+        {assign var="about_trunc" value=$about|truncate:500:"...":false:false:true}
+        {$about_trunc}
+        {if $about|strip_tags|count_characters:true > 500}
+            <p><a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/about">more</a></p>
+        {/if}
     </div>
     {/if}
 

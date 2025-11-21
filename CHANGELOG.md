@@ -2,6 +2,13 @@
 # Changelog
 
 
+## [4.0.1] - 2025-11-21
+
+### Fixed
+
+- Improve truncate
+
+
 ## [4.0.0] - 2025-05-28
 
 ### Changed
