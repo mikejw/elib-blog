@@ -11,10 +11,10 @@
         {foreach from=$categories item=c}
             <li>
                 {if $c.id eq $blog_category}
-                    <i class="mr-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
+                    <i class="me-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
                 {else}
                     <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c.label|lower}/">
-                        <i class="mr-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
+                        <i class="me-1 fa fa-{$c.label_icon}" aria-hidden="true"></i> {$c.label}
                     </a>
                 {/if}
             </li>
