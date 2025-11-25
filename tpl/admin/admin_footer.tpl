@@ -7,7 +7,8 @@
 
 <script type="text/javascript" src="http://{$WEB_ROOT}{$PUBLIC_DIR}/js/common.js"></script>
 <script type="text/javascript" src="http://{$WEB_ROOT}{$PUBLIC_DIR}/vendor/js/main.min.js?version={$dev_rand}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bs5-lightbox@1.8.5/dist/index.bundle.min.js"></script>
+
 
 <style type="text/css">
 
@@ -39,12 +40,19 @@
 <script type="application/javascript">
 
     $(document).ready(function() {
-        $(document).delegate('*[data-toggle="lightbox"]', 'click', function (event) {
+        $(document).delegate('*[data-bs-toggle="lightbox"]', 'click', function (event) {
+
+            alert('lightbox!');
+
             event.preventDefault();
-            $(this).ekkoLightbox({
-                alwaysShowClose: true,
-                showArrows: false
+            const lightbox = new Lightbox(this, {
+                size: 'fullscreen',       // or 'lg', 'fullscreen', etc.
+                keyboard: true,
+                constrain: false,
+                ratio: false // may not need this for videos (use '16x9')
             });
+
+            lightbox.show();
         });
 
       $('.revision-select select').on('change', function() {

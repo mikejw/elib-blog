@@ -595,7 +595,10 @@ trait ControllerTrait
     {
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
         $this->buildNav();
-        if (isset($_POST['save'])) {
+        
+        if (isset($_POST['cancel'])) {
+            $this->redirect('admin/blog/category/'.$_POST['id']);
+        } elseif (isset($_POST['save'])) {
             $b = Model::load(BlogCategory::class);
             $b->load($_POST['id']);
             $b->label = $_POST['label'];
@@ -681,9 +684,9 @@ trait ControllerTrait
 
     public function edit_cat_meta()
     {
-
+        $this->assign('class', 'blog_cat');
         DI::getContainer()->get('CurrentUser')->denyNotAdmin();
-        $this->setTemplate('elib:admin/blog/blog_cat_meta.tpl');
+        $this->setTemplate('elib:admin/blog/blog_cat.tpl');
         $ui_array = ['id'];
         $this->loadUIVars('ui_blog_cats_meta', $ui_array);
         if (!isset($_GET['id']) || $_GET['id'] == '') {
