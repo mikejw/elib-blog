@@ -1,25 +1,25 @@
 {
-    "name": "mikejw/elib-blog",
-    "type": "library",
-    "description": "Blogginglibrary for Empathy PHP Framework",
-    "keywords": [
-        "lib"
-    ],
-    "homepage": "https://empathy.sh",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Michael J. Whiting",
-            "email": "mail@mikejw.co.uk"
-        }
-    ],
-    "require": {
-        "mikejw/elib-base": "^4",
-        "mikejw/elib-siteinfo": "^4"
-    },
-    "autoload": {
-        "psr-0": {
-            "Empathy": "src/"
-        }
+  "name": "mikejw/elib-blog",
+  "type": "library",
+  "description": "ELib Blog",
+  "keywords": [
+    "lib"
+  ],
+  "homepage": "https://empathy.sh",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael J. Whiting",
+      "email": "mail@mikejw.co.uk"
     }
+  ],
+  "require": {
+    "mikejw/elib-base": "^4",
+    "mikejw/elib-siteinfo": "^4"
+  },
+  "autoload": {
+    "psr-0": {
+      "Empathy": "src/"
+    }
+  }
 }
