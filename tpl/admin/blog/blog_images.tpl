@@ -8,13 +8,13 @@
     <link href="http://{$WEB_ROOT}{$PUBLIC_DIR}/vendor/css/style.min.css" rel="stylesheet">
   </head>
   <body>
-    <div class="container">
+    <div class="container mb-4 mt-4">
 
       {if count($images) === 0}
       <p>No images associated with this blog post.</p>
       {else}
       <form method="post" action="">
-        <div class="form-group">
+        <div class="mb-3">
           {foreach from=$images item=image}
           <div class="form-check">
             <input class="form-check-input" type="radio" name="image" id="image{$image.id}" value="{$image.id}" data-payload="{json_encode($image)|base64_encode}">
@@ -24,7 +24,7 @@
           </div>
           {/foreach}
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <p>Size</p>
           <div class="form-check">
             <input class="form-check-input" type="radio" name="size" id="size-original" value="" checked>
@@ -51,7 +51,7 @@
             </label>
           </div>
         </div>
-        <div class="form-group">
+        <div class="mb-3">
         <p>Properties</p>
           <div class="form-check">
             <input type="checkbox" name="fluid" class="form-check-input" value="img-fluid" id="fluid">
@@ -62,11 +62,11 @@
             <label class="form-check-label" for="centered">Enable Centered</label>
           </div>
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="caption">Caption</label>
           <input name="caption" type="text" class="form-control" placeholder="Enter image caption" value="">
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
       </form>
       {/if}
     </div>

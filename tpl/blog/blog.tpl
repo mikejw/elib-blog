@@ -55,10 +55,10 @@
 
                     {if isset($blog_item.cats) && count($blog_item.cats)}
                         <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                        Categories:
+                        <span class="me-2">Categories:</span>
                         {foreach from=$blog_item.cats key=i item=c}
                             <span class="tag">
-                                 <span class="badge badge-{if $i eq $blog_category}success{else}secondary{/if}">
+                                 <span class="badge bg-{if $i eq $blog_category}success{else}secondary{/if}">
                                     <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/category/{$c|lower}">
                                         {$c}
                                     </a>
@@ -69,10 +69,10 @@
 
                     {if isset($blog_item.tags) and count($blog_item.tags)}
                         <span class="sep">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                        Tags:
+                        <span class="me-2">Tags:</span>
                         {foreach from=$blog_item.tags item=t}
                             <span class="tag">
-                                <span class="badge badge-{if isset($active_tags) and count($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
+                                <span class="badge bg-{if isset($active_tags) and count($active_tags) and in_array($t, $active_tags)}info{else}secondary{/if}">
                                     <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/tags/{$t}">
                                         {$t}
                                     </a>

@@ -1,6 +1,6 @@
 {include file="elib:admin/admin_header.tpl"}
 
-<div class="form-group cms-actions">
+<div class="mb-4 mt-4 form-group cms-actions">
 
         {if $blog->status eq 2 || $blog->status eq 3}
             <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/redraft/{$blog->id}" class="confirm btn btn-sm btn-primary">
@@ -14,7 +14,7 @@
         {/if}
 
         {if $blog->status eq 1}
-            <a data-toggle="lightbox" data-disable-external-check="true" data-type="url" data-remote="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/preview/{$blog->id}" class="btn btn-sm btn-primary">
+            <a data-bs-toggle="lightbox" data-disable-external-check="true" data-type="url" data-remote="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/preview/{$blog->id}" class="btn btn-sm btn-primary">
                 Preview
             </a>
         {/if}
@@ -26,8 +26,8 @@
             <form class="confirm d-inline" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/publish/{$blog->id}" method="get">
                 <button class="btn btn-sm btn-primary" type="submit" name="edit">Publish</button>
                 <div class="form-check d-inline">
-                    <input class="form-check-input" type="checkbox" name="stamp" value="1" />
                     <label class="form-check-label" for="stamp">
+                        <input class="form-check-input" type="checkbox" name="stamp" value="1" />
                         Update Timestamp?
                     </label>
                 </div>
@@ -38,41 +38,51 @@
 
 
 <div class="entry">
-<h2>{$blog->heading} <span>|</span> {$blog->stamp|date_format:"%A %e %B %Y"} <span>|</span> {$author}</h2>
-{$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR}
+    <h2 class="mb-4 mt-4">{$blog->heading} <span>|</span> {$blog->stamp|date_format:"%A %e %B %Y"} <span>|</span> {$author}</h2>
+    {$blog->body|blog_images:$WEB_ROOT:$PUBLIC_DIR}
+
 </div>
 
 
 
-<h2>Images</h2>
+<h2 class="mb-4 mt-5">Images</h2>
 
 {if $blog->status eq 1}
 
-    {if $error neq ''}
-        <p>&nbsp;</p>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error!</strong>
+    {if $errors neq ''}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Error</strong>
                 <p>{$error}</p>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {/if}
 
     <form method="post" enctype="multipart/form-data">
-        <div class="form-group custom-file">
-            <input type="file" class="custom-file-input" id="file" name="file">
-            <label class="custom-file-label" for="file">Choose file</label>
+        <div class="mb-4">
+            <label for="file" class="form-label">Choose file</label>
+            <input
+                type="file"
+                class="form-control"
+                id="file"
+                name="file"
+            >
         </div>
         <input type="hidden" name="id" value="{$blog->id}" />
-        <button type="submit" class="btn mb-4 btn-primary" name="upload_image" value="1">Upload</button>
+        <button
+            type="submit"
+            class="btn btn-primary mb-4"
+            name="upload_image"
+            value="1"
+        >
+            Upload
+        </button>
     </form>
 
 {/if}
 
 {if count($images) > 0}
     {foreach from=$images item=image}
-        <p><img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/uploads/tn_{$image.filename}" alt="" /></p>
+        <p class="mt-4"><img src="http://{$WEB_ROOT}{$PUBLIC_DIR}/uploads/tn_{$image.filename}" alt="" /></p>
         <p><a class="confirm" href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/remove_image/{$image.id}">Delete</a></p>
     {/foreach}
 {/if}
