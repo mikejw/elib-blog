@@ -1,6 +1,12 @@
 
 # Changelog
 
+## [4.1.1] - 2025-12-05
+
+### Fixed
+
+- Improve blog item markup structure
+
 
 ## [4.1.0] - 2025-11-29
 
