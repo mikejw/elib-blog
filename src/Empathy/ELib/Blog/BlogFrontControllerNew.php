@@ -177,7 +177,7 @@ class BlogFrontControllerNew extends EController
         
         $this->assign('author', $blog_page->getAuthor());
         $this->assign('blog', $blog_page->getBlogItem());
-        //$this->assign('custom_title', $blog_page->getTitle());
+        $this->assign('custom_title', $blog_page->getTitle());
         $this->assign('custom_description', $blog_page->getBody());
         $this->assign('comments', $blog_page->getComments());
 

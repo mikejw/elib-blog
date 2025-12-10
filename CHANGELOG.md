@@ -1,6 +1,14 @@
 
 # Changelog
 
+
+## [4.1.2] - 2025-12-10
+
+### Fixed
+
+- Get blog item title
+
+
 ## [4.1.1] - 2025-12-05
 
 ### Fixed
