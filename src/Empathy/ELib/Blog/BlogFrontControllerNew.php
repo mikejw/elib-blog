@@ -472,7 +472,7 @@ class BlogFrontControllerNew extends EController
 
     private function getTags()
     {      
-        return explode('+', urlencode($_GET['active_tags']));
+        return explode('%2B', urlencode($_GET['active_tags']));
     }
 
     private function setTagsTitle()
@@ -694,6 +694,7 @@ class BlogFrontControllerNew extends EController
         $t = Model::load(TagItem::class);
         $bt = Model::load(BlogTag::class);
         $tags = $t->getIds($active_tags, true);
+
         if(sizeof($tags) != sizeof($active_tags)) {
             return false; // contains invalid tags
         } else {
@@ -710,7 +711,7 @@ class BlogFrontControllerNew extends EController
         $key = implode('_', $active_tags);
         $found_items = $this->cache->cachedCallback('blogs_by_tag_'.$key, array($this, 'findBlogsByTags'), array($active_tags));
 
-        if ($found_items == '(0)' || $found_items == false) {
+        if (count($found_items[1]) === 1 || $found_items === false) {
             throw new RequestException('Not found.', RequestException::NOT_FOUND);
         }
         

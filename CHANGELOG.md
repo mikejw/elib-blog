@@ -2,6 +2,13 @@
 # Changelog
 
 
+## [4.1.3] - 2025-12-15
+
+### Fixed
+
+- Resolve blogs by multiple tags correctly
+
+
 ## [4.1.2] - 2025-12-10
 
 ### Fixed
