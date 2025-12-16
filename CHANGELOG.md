@@ -2,6 +2,13 @@
 # Changelog
 
 
+## [4.1.4] - 2025-12-16
+
+### Fixed
+
+- Add missing classes (layout)
+
+
 ## [4.1.3] - 2025-12-15
 
 ### Fixed

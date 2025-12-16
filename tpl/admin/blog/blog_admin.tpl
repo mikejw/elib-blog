@@ -1,7 +1,7 @@
 {include file="elib:admin/admin_header.tpl"}
 
 
-<div class="mb-4 mt-4">
+<div class="mb-4 mt-4 cms-actions">
 
     <a href="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/category" class="btn btn-sm btn-primary">
         Edit Categories

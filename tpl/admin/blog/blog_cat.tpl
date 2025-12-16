@@ -1,7 +1,7 @@
 {include file="elib:admin/admin_header.tpl"}
 
 
-<div class="mb-4 mt-4">
+<div class="mb-4 mt-4 cms-actions">
     <form class="d-inline" action="http://{$WEB_ROOT}{$PUBLIC_DIR}/admin/blog/add_cat/{$blog_cat_id}"
           method="get">
         <button class="btn btn-sm btn-primary" type="submit" name="add_cat" value="1"
