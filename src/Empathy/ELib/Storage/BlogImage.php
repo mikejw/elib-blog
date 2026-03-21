@@ -10,7 +10,7 @@ class BlogImage extends Entity
 {
     const TABLE = 'blog_image';
 
-    public $id;
+    public int $id;
     public $blog_id;
     public $filename;
     public $image_width;

@@ -2,6 +2,13 @@
 # Changelog
 
 
+## [4.1.5] - 2026-03-21
+
+### Fixed
+
+- Add id int types
+
+
 ## [4.1.4] - 2025-12-16
 
 ### Fixed

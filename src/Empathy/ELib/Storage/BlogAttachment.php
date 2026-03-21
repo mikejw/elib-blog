@@ -5,7 +5,7 @@ use Empathy\MVC\Entity as Entity;
 
 class BlogAttachment extends Entity
 {
-    public $id;
+    public int $id;
     public $blog_id;
     public $filename;
     public $url;

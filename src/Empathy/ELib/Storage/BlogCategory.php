@@ -22,7 +22,7 @@ class BlogCategory extends Entity
 {
     const TABLE = 'blog_category';
 
-    public $id;
+    public int $id;
     public $blog_category_id;
     public $label;
     public $meta;

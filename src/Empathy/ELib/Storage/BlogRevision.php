@@ -9,7 +9,7 @@ class BlogRevision extends Entity
 {
     const TABLE = 'blog_revision';
 
-    public $id;
+    public int $id;
     public $blog_id;
     public $body;
     public $meta;

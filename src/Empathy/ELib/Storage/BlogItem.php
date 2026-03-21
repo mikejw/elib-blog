@@ -15,7 +15,7 @@ class BlogItem extends Entity
     const TABLE = 'blog';
     const DEF_BLOG_PER_PAGE = 2;
 
-    public $id;
+    public int $id;
     public $status;
     public $user_id;
     public $stamp;

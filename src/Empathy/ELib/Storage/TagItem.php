@@ -13,7 +13,7 @@ class TagItem extends Entity
 {
     const TABLE = 'tag';
 
-    public $id;
+    public int $id;
     public $tag;
 
     public function getTagsForBlogItem($blog_id)

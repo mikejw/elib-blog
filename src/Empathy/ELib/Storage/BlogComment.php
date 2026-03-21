@@ -8,7 +8,7 @@ class BlogComment extends Entity
 {
     const TABLE = 'blog_comment';
 
-    public $id;
+    public int $id;
     public $blog_id;
     public $user_id;
     public $status;
