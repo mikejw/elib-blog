@@ -2,11 +2,12 @@
 # Changelog
 
 
-## [4.1.5] - 2026-03-21
+## [4.1.5] - 2026-03-22
 
 ### Fixed
 
 - Add id int types
+- Add module gen types
 
 
 ## [4.1.4] - 2025-12-16
