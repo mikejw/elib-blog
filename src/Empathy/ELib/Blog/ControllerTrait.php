@@ -67,7 +67,7 @@ trait ControllerTrait
         }
     }
 
-    public function default_event()
+    public function default_event(): void
     {
         $ui_array = ['page', 'status'];
         $this->loadUIVars('ui_blog', $ui_array);

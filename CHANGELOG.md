@@ -2,6 +2,13 @@
 # Changelog
 
 
+## [4.1.6] - 2026-03-31
+
+### Fixed
+
+- Return types
+
+
 ## [4.1.5] - 2026-03-22
 
 ### Fixed

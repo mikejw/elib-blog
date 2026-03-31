@@ -75,7 +75,7 @@ class BlogFrontControllerNew extends EController
         }
     }
 
-    public function default_event()
+    public function default_event(): void
     {
         $b = Model::load(BlogItem::class);
         
