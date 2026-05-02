@@ -57,7 +57,7 @@ class TagItem extends Entity
         return $ids;
     }
 
-    public function getAllTags($category_id, $authorId = null)
+    public function getAllTags($category_id, $authorId = null, mixed $foundBlogIds = [])
     {
         $queryParams = array();
         $category_id = (int) $category_id;
@@ -81,6 +81,11 @@ class TagItem extends Entity
         if (!is_null($authorId)) {
             $sql .= ' AND c.user_id = ?';
             array_push($queryParams, $authorId);
+        }
+
+        if (count($foundBlogIds[1])) {
+            $sql .= ' and c.id in ' . $foundBlogIds[0];
+            $queryParams = array_merge($queryParams, $foundBlogIds[1]);
         }
 
         $error = 'Could not get total number of tagging instances';
@@ -108,6 +113,11 @@ class TagItem extends Entity
         if (!is_null($authorId)) {
             $sql .= ' AND c.user_id = ?';
             array_push($queryParams, $authorId);
+        }
+
+         if (count($foundBlogIds[1])) {
+            $sql .= ' and c.id in ' . $foundBlogIds[0];
+            $queryParams = array_merge($queryParams, $foundBlogIds[1]);
         }
 
         $sql .= ' GROUP BY t.id';

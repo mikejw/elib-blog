@@ -2,6 +2,14 @@
 # Changelog
 
 
+## [4.1.7] - 2026-05-02
+
+### Fixed
+
+- Limit available tags in tag cloud to those that will return blog items based on
+  any currently active tags
+
+
 ## [4.1.6] - 2026-03-31
 
 ### Fixed

@@ -84,6 +84,8 @@ class BlogFrontControllerNew extends EController
 
         if (isset($_GET['active_tags'])) {
             $found_items = $this->getActiveTags();
+        } else {
+            $_GET['active_tags'] = [];
         }
 
         if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -97,7 +99,7 @@ class BlogFrontControllerNew extends EController
         $this->assign('pages', $b->getPages());
         $this->assign('total_pages', sizeof($b->getPages()));
     
-        $this->getAvailableTags();
+        $this->getAvailableTags($found_items, $_GET['active_tags']);
         $this->getArchive();
 
         $this->assign('blogs', $blogs);
@@ -510,23 +512,26 @@ class BlogFrontControllerNew extends EController
     }
     */
 
-    private function getAvailableTags()
+    private function getAvailableTags(mixed $foundBlogIds = ['', []], array $active = [])
     {
         $bc = $this->stash->get('blog_category');
-        $tags = $this->cache->cachedCallback('tags_'.$bc, array($this, 'getAvailableTagsFetch'));
+
+        $activeStr = 'active_' . implode('_', $active);
+
+        $tags = $this->cache->cachedCallback('tags_'.$bc.'_'.$activeStr, [$this, 'getAvailableTagsFetch'], [$foundBlogIds]);
         //shuffle($tags);
 
         $this->assign('tags', $tags);
     }
 
-    public function getAvailableTagsFetch()
+    public function getAvailableTagsFetch(mixed $foundBlogIds)
     {
         $t = Model::load(TagItem::class);
         $bc = $this->stash->get('blog_category');
         
         $authorId = $this->stash->get('authorId');
         
-        $tags = $t->getAllTags($bc, $authorId);
+        $tags = $t->getAllTags($bc, $authorId, $foundBlogIds);
 
         foreach ($tags as $index => $item) {
             $tags[$index]['tag_esc_1'] = '/\+'.$tags[$index]['tag'].'/';
