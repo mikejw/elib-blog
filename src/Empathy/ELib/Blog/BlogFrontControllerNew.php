@@ -715,8 +715,8 @@ class BlogFrontControllerNew extends EController
 
         $key = implode('_', $active_tags);
         $found_items = $this->cache->cachedCallback('blogs_by_tag_'.$key, array($this, 'findBlogsByTags'), array($active_tags));
-
-        if ($found_items === false || count($found_items[1]) === 0) {
+        
+        if ($found_items === false || count($found_items[1]) === 1) {
             throw new RequestException('Not found.', RequestException::NOT_FOUND);
         }
         
